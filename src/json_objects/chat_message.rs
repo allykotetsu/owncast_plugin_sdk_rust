@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use crate::objects::user::User;
+use crate::json_objects::user::User;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
