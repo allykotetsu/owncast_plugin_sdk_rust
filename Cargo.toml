@@ -1,7 +1,9 @@
 [package]
-name = "owncast-plugin-sdk-rust"
+name = "owncast_plugin_sdk_rust"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/allykotetsu/owncast_plugin_sdk_rust"
+description = " A Rust crate for the Owncast Plugin SDK."
 
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }

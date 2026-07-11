@@ -5,6 +5,6 @@ use crate::json_objects::subscriptions::Subscriptions;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Manifest {
-    pub subscriptions: Subscriptions,
-    pub commands: Vec<Command>
+    pub(crate) subscriptions: Subscriptions,
+    pub(crate) commands: Vec<Command>
 }

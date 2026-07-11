@@ -5,12 +5,12 @@ use crate::json_objects::user::User;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IncomingHttpRequest {
-    pub method: String,
-    pub path: String,
-    pub query: HashMap<String, String>,
-    pub headers: HashMap<String, String>,
-    pub body: String,
-    pub remote_addr: String,
-    pub authenticated: bool,
-    pub user: Option<User>
+    pub(crate) method: String,
+    pub(crate) path: String,
+    pub(crate) query: HashMap<String, String>,
+    pub(crate) headers: HashMap<String, String>,
+    pub(crate) body: String,
+    pub(crate) remote_addr: String,
+    pub(crate) authenticated: bool,
+    pub(crate) user: Option<User>
 }

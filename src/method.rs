@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
 #[derive(Eq, Hash, PartialEq, Clone)]
-pub enum Method {
+pub(crate) enum Method {
     CONNECT,
     DELETE,
     GET,

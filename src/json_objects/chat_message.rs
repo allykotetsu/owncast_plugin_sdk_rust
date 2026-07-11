@@ -4,9 +4,9 @@ use crate::json_objects::user::User;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ChatMessage {
-    id: String,
-    user: Option<User>,
-    client_id: Option<u32>,
-    body: String,
-    timestamp: String
+    pub(crate) id: String,
+    pub(crate) user: Option<User>,
+    pub(crate) client_id: Option<u32>,
+    pub(crate) body: String,
+    pub(crate) timestamp: String
 }

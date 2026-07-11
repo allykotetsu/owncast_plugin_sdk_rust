@@ -1,6 +1,6 @@
 pub(crate) mod manifest;
 pub(crate) mod envelope;
-pub(crate) mod filter_results;
+pub(crate) mod filter_result;
 pub(crate) mod incoming_http_request;
 pub(crate) mod outgoing_http_response;
 pub(crate) mod content_request;
@@ -10,3 +10,6 @@ pub(crate) mod user;
 pub(crate) mod chat_message;
 pub(crate) mod subscriptions;
 pub(crate) mod command;
+pub(crate) mod notify;
+pub(crate) mod event;
+pub(crate) mod filter;

@@ -1,10 +1,14 @@
+/// Macro for defining one Owncast plugin. Only call this once for your project.<br/>
+/// define_plugin! expects a parameter that is a "Fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>>" closure<br/>
+/// Within the body of the function, call functions onto the builder for adding functionality to the plugin.
 #[macro_export] macro_rules! define_plugin {
     ($func:expr) => {
         use std::cell::LazyCell;
-        use std::collections::HashMap;
         use wasm_bindgen::prelude::wasm_bindgen;
         use crate::json::Json;
-        use crate::json_objects::command::Command;
+        use crate::json_objects::envelope::Envelope;
+        use crate::json_objects::event::Event;
+        use crate::json_objects::filter_result::FilterResult;
         use crate::json_objects::incoming_http_request::IncomingHttpRequest;
         use crate::json_objects::manifest::Manifest;
         use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
@@ -17,43 +21,26 @@
         // Exported functions.
         #[wasm_bindgen]
         pub fn register() -> Json<Manifest> {
-            let commands: Vec<Command> = PLUGIN.commands.values().map(|(_, _, _, command)| *command).collect();
-
-            Json(Manifest {
-                subscriptions: (),
-                commands
-            })
-        }
-
-        /*#[wasm_bindgen]
-        pub fn on_event(_: Json<Envelope>) {
-
+            Json(PLUGIN.get_manifest())
         }
 
         #[wasm_bindgen]
-        pub fn on_filter(_: Json<Envelope>) -> Json<FilterResult> {
+        pub fn on_event(Json(Envelope { event_type, payload }): Json<Envelope<String>>) {
+            PLUGIN.on_event(event_type, payload);
+        }
 
-        }*/
+        #[wasm_bindgen]
+        pub fn on_filter(Json(Envelope { event_type, payload }): Json<Envelope<&str>>) -> Json<FilterResult> {
+            if let Event::ChatMessageReceived = event_type {
+                Json(PLUGIN.on_filter(payload.to_string()))
+            } else {
+                Json(FilterResult::Pass)
+            }
+        }
 
         #[wasm_bindgen]
         pub fn on_http_request(Json(incoming_http_request): Json<IncomingHttpRequest>) -> Json<OutgoingHttpResponse> {
-            if let Ok(method) = Method::try_from(&incoming_http_request.method) {
-                if let Some(func) = PLUGIN.on_http_request.get(&(method, incoming_http_request.path.clone())) {
-                    Json(func(incoming_http_request))
-                } else {
-                    Json(OutgoingHttpResponse {
-                        status: None,
-                        headers: None,
-                        body: None
-                    })
-                }
-            } else {
-                Json(OutgoingHttpResponse {
-                    status: Some(500),
-                    headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
-                    body: Some(format!("Unable to parse request method {}.", incoming_http_request.method))
-                })
-            }
+            Json(PLUGIN.on_http_request(incoming_http_request))
         }
 
         /*#[wasm_bindgen]

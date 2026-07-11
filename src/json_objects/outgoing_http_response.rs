@@ -4,7 +4,7 @@ use serde::Serialize;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutgoingHttpResponse {
-    pub status: Option<u16>,
-    pub headers: Option<HashMap<String, String>>,
-    pub body: Option<String>
+    pub(crate) status: Option<u16>,
+    pub(crate) headers: Option<HashMap<String, String>>,
+    pub(crate) body: Option<String>
 }
