@@ -12,3 +12,4 @@ impl<'de> Deserialize<'de> for Envelope {
 }
 
 // TODO custom deserialize logic. Take "payload" and move data to event_type parameter
+// Refer to https://serde.rs/impl-deserialize.html for documentation.

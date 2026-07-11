@@ -97,8 +97,8 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn on_filter(&self, mut msg: ChatMessage) -> FilterResult {
-        let mut modified = false;
+    pub(crate) fn on_filter(&self, msg: ChatMessage) -> FilterResult {
+        let mut body = String::new();
 
         for (_, filter_chat_message) in &self.filter_chat_message {
             match filter_chat_message(msg.clone()) {
@@ -106,8 +106,7 @@ impl<'a> Plugin<'a> {
                     continue;
                 }
                 FilterResult::Modify(new) => {
-                    msg = new;
-                    modified = true;
+                    body = new;
                 }
                 FilterResult::Drop(reason) => {
                     return FilterResult::Drop(reason)
@@ -115,10 +114,10 @@ impl<'a> Plugin<'a> {
             }
         }
 
-        if modified {
-            FilterResult::Modify(msg)
-        } else {
+        if body.is_empty() {
             FilterResult::Pass
+        } else {
+            FilterResult::Modify(body)
         }
     }
 

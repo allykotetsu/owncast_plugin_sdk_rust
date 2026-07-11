@@ -22,7 +22,8 @@
     ($func:expr) => {
         use std::cell::LazyCell;
         use wasm_bindgen::prelude::wasm_bindgen;
-        use crate::json::Json;
+        use crate::input_json::InputJson;
+        use crate::output_json::OutputJson;
         use crate::json_objects::envelope::Envelope;
         use crate::json_objects::event::Event;
         use crate::json_objects::filter_result::FilterResult;
@@ -37,36 +38,57 @@
 
         // Exported functions.
         #[wasm_bindgen]
-        pub fn register() -> Json<Manifest> {
-            Json(PLUGIN.get_manifest())
+        pub fn register() -> OutputJson<Manifest> {
+            OutputJson(PLUGIN.get_manifest())
         }
 
         #[wasm_bindgen]
-        pub fn on_event(Json(Envelope { event_type }): Json<Envelope>) {
-            PLUGIN.on_event(event_type);
-        }
-
-        #[wasm_bindgen]
-        pub fn on_filter(Json(Envelope { event_type }): Json<Envelope>) -> Json<FilterResult> {
-            if let Event::ChatMessageReceived(Some(payload)) = event_type {
-                Json(PLUGIN.on_filter(payload))
-            } else {
-                Json(FilterResult::Pass)
+        pub fn on_event(InputJson(envelope): InputJson<Envelope>) {
+            match envelope {
+                Ok(Envelope { event_type }) => PLUGIN.on_event(event_type),
+                Err(err) => println!("{err}")
             }
         }
 
         #[wasm_bindgen]
-        pub fn on_http_request(Json(incoming_http_request): Json<IncomingHttpRequest>) -> Json<OutgoingHttpResponse> {
-            Json(PLUGIN.on_http_request(incoming_http_request))
+        pub fn on_filter(InputJson(envelope): InputJson<Envelope>) -> OutputJson<FilterResult> {
+            match envelope {
+                Ok(Envelope { event_type }) => {
+                    if let Event::ChatMessageReceived(Some(payload)) = event_type {
+                        OutputJson(PLUGIN.on_filter(payload))
+                    } else {
+                        OutputJson(FilterResult::Pass)
+                    }
+                }
+                Err(err) => {
+                    println!("{err}");
+                    OutputJson(FilterResult::Pass)
+                }
+            }
+        }
+
+        #[wasm_bindgen]
+        pub fn on_http_request(InputJson(incoming_http_request): InputJson<IncomingHttpRequest>) -> OutputJson<OutgoingHttpResponse> {
+            match incoming_http_request {
+                Ok(incoming_http_request) => OutputJson(PLUGIN.on_http_request(incoming_http_request)),
+                Err(err) => {
+                    println!("{err}");
+                    OutputJson(OutgoingHttpResponse {
+                        status: Some(400),
+                        headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
+                        body: Some("Couldn't deserialize incoming HTTP request.".to_string())
+                    })
+                }
+            }
         }
 
         /*#[wasm_bindgen]
-        pub fn on_tab_content(_: Json<ContentRequest>) -> String {
+        pub fn on_tab_content(_: InputJson<ContentRequest>) -> String {
 
         }
 
         #[wasm_bindgen]
-        pub fn on_page_content(_: Json<ContentRequest>) -> String {
+        pub fn on_page_content(_: InputJson<ContentRequest>) -> String {
 
         }
 
@@ -84,7 +106,7 @@
 
         // Optional. Only export if exists.
         #[wasm_bindgen]
-        pub fn on_auth_check(_: Json<AuthCheckRequest>) -> Json<AuthCheckResult> {
+        pub fn on_auth_check(_: InputJson<AuthCheckRequest>) -> OutputJson<AuthCheckResult> {
 
         }*/
     };

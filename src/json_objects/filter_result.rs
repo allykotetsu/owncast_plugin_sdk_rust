@@ -1,15 +1,33 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
-use crate::json_objects::chat_message::ChatMessage;
-use crate::json_objects::envelope::Envelope;
+use serde::{Serialize, Serializer};
+use serde::ser::SerializeStruct;
 
 pub enum FilterResult {
     Pass,
-    Modify(ChatMessage),
+    Modify(String),
     Drop(String)
 }
 
 impl Serialize for FilterResult {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
-        todo!()
+        let mut state;
+        match self {
+            FilterResult::Pass => {
+                state = serializer.serialize_struct("", 1)?;
+                state.serialize_field("action", "pass")?;
+            }
+            FilterResult::Modify(body) => {
+                state = serializer.serialize_struct("", 2)?;
+                state.serialize_field("action", "modify")?;
+                state.serialize_field("body", body)?;
+            }
+            FilterResult::Drop(reason) => {
+                state = serializer.serialize_struct("", 2)?;
+                state.serialize_field("action", "drop")?;
+                state.serialize_field("reason", reason)?;
+            }
+        }
+        state.end()
     }
 }
+
+// Refer to https://serde.rs/impl-serialize.html for documentation.

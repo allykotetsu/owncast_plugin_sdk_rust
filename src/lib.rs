@@ -1,12 +1,13 @@
 mod json_objects;
 mod permissions;
-mod json;
+mod input_json;
 mod plugin_builder;
 mod plugin;
 mod define_plugin;
 mod imports;
 mod method;
 mod command;
+mod output_json;
 
 #[cfg(test)]
 mod tests {
