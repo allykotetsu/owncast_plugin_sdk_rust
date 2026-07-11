@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use crate::command::command_data::CommandData;
+use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::command::Command;
 use crate::json_objects::event::Event;
 use crate::json_objects::filter::Filter;
@@ -11,13 +12,14 @@ use crate::json_objects::notify::Notify;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
 use crate::json_objects::subscriptions::Subscriptions;
 
+/// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
 pub(crate) struct Plugin<'a> {
     // Events
-    pub(crate) on_chat_message: Vec<Box<dyn Fn(&str)>>,
-    pub(crate) on: HashMap<String, Box<dyn Fn(&str)>>,
+    pub(crate) on_chat_message: Vec<Box<dyn Fn(ChatMessage)>>,
+    pub(crate) on: Vec<(String, Box<dyn Fn(&str)>)>,
 
     // Filter
-    pub(crate) filter_chat_message: Vec<(u8, Box<dyn Fn(&str) -> FilterResult>)>,
+    pub(crate) filter_chat_message: Vec<(u8, Box<dyn Fn(ChatMessage) -> FilterResult>)>,
 
     // HTTP
     pub(crate) on_http_request: HashMap<(Method, String), Box<&'a dyn Fn(IncomingHttpRequest) -> OutgoingHttpResponse>>,
@@ -31,9 +33,7 @@ impl<'a> Plugin<'a> {
         // Construct notifications.
         let mut notify = vec![];
         if !self.on_chat_message.is_empty() {
-            notify.push(Notify {
-                event: Event::ChatMessageReceived
-            });
+            notify.push(Notify { event: Event::ChatMessageReceived });
         }
 
         // Construct filter.
@@ -55,14 +55,15 @@ impl<'a> Plugin<'a> {
         self.commands.values().map(|CommandData { command, .. }| command.clone()).collect()
     }
 
-    pub fn get_manifest(&self) -> Manifest {
+    // TODO
+    pub(crate) fn get_manifest(&self) -> Manifest {
         let subscriptions = self.get_subscriptions();
         let commands = self.get_commands();
         Manifest { subscriptions, commands }
     }
 
     // TODO
-    pub fn on_event<T>(&self, event: Event, _payload: T) {
+    pub(crate) fn on_event<T>(&self, event: Event, _payload: T) {
         match event {
             Event::ChatMessageReceived => {
                 for _on_chat_message in &self.on_chat_message {
@@ -83,15 +84,22 @@ impl<'a> Plugin<'a> {
             Event::FediverseLike => {}
             Event::FediverseRepost => {}
             Event::FediverseMention => {}
-            Event::FediverseReply => {}
+            Event::FediverseReply => {},
+            Event::Custom(name) => {
+                for (other_name, _func) in &self.on {
+                    if name == *other_name {
+                        // _func
+                    }
+                }
+            }
         }
     }
 
-    pub fn on_filter(&self, mut msg: String) -> FilterResult {
+    pub(crate) fn on_filter(&self, mut msg: ChatMessage) -> FilterResult {
         let mut modified = false;
 
         for (_, filter_chat_message) in &self.filter_chat_message {
-            match filter_chat_message(msg.as_str()) {
+            match filter_chat_message(msg.clone()) {
                 FilterResult::Pass => {
                     continue;
                 }
@@ -106,13 +114,13 @@ impl<'a> Plugin<'a> {
         }
 
         if modified {
-            FilterResult::Modify(msg.to_string())
+            FilterResult::Modify(msg)
         } else {
             FilterResult::Pass
         }
     }
 
-    pub fn on_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
+    pub(crate) fn on_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             OutgoingHttpResponse {
                 status: Some(404),
@@ -138,7 +146,7 @@ impl<'a> Plugin<'a> {
                 }
             } else {
                 OutgoingHttpResponse {
-                    status: Some(500),
+                    status: Some(400),
                     headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
                     body: Some(format!("Unable to parse request method {}.", incoming_http_request.method))
                 }

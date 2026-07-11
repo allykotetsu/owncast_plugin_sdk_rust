@@ -1,6 +1,23 @@
-/// Macro for defining one Owncast plugin. Only call this once for your project.<br/>
-/// define_plugin! expects a parameter that is a "Fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>>" closure<br/>
-/// Within the body of the function, call functions onto the builder for adding functionality to the plugin.
+/// Macro for defining one Owncast plugin. Only call this once for your project, and call it outside of function scope.
+///
+/// define_plugin! expects a parameter that is a `Fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>>` closure
+///
+/// Within the body of the function, call functions onto the builder for adding functionality to the plugin, and then return an Ok() wrapping the plugin builder object.
+///
+/// # Panics
+///
+/// Panics if a function called onto PluginBuilder panics.
+///
+/// # Examples
+///
+/// ```
+/// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+///         owncast_send_chat(format!("echo ${body}").as_str());
+///     });
+///     Ok(plugin_builder)
+/// });
+/// ```
 #[macro_export] macro_rules! define_plugin {
     ($func:expr) => {
         use std::cell::LazyCell;
@@ -30,9 +47,9 @@
         }
 
         #[wasm_bindgen]
-        pub fn on_filter(Json(Envelope { event_type, payload }): Json<Envelope<&str>>) -> Json<FilterResult> {
+        pub fn on_filter(Json(Envelope { event_type, payload }): Json<Envelope<ChatMessage>>) -> Json<FilterResult> {
             if let Event::ChatMessageReceived = event_type {
-                Json(PLUGIN.on_filter(payload.to_string()))
+                Json(PLUGIN.on_filter(payload))
             } else {
                 Json(FilterResult::Pass)
             }
