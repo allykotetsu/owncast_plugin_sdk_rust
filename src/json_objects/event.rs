@@ -1,14 +1,16 @@
 use serde::{Deserialize, Serialize};
+use crate::json_objects::chat_message::ChatMessage;
+use crate::json_objects::user::User;
 
 #[derive(Serialize, Deserialize)]
 pub(crate) enum Event {
     // Chat events
     #[serde(rename(serialize = "chat.message.received"))]
-    ChatMessageReceived,
+    ChatMessageReceived(Option<ChatMessage>),
     #[serde(rename(serialize = "chat.user.joined"))]
-    ChatUserJoined,
+    ChatUserJoined(User),
     #[serde(rename(serialize = "chat.user.parted"))]
-    ChatUserParted,
+    ChatUserParted(User),
     #[serde(rename(serialize = "chat.user.renamed"))]
     ChatUserRenamed,
     #[serde(rename(serialize = "chat.message.moderated"))]
@@ -33,12 +35,16 @@ pub(crate) enum Event {
     Tick,
 
     // Fediverse, engagement (metadata only) + inbound posts (with content)
+    #[serde(rename(serialize = "fediverse.activity"))]
+    FediverseActivity,
     #[serde(rename(serialize = "fediverse.follow"))]
     FediverseFollow,
     #[serde(rename(serialize = "fediverse.like"))]
     FediverseLike,
     #[serde(rename(serialize = "fediverse.repost"))]
     FediverseRepost,
+    #[serde(rename(serialize = "fediverse.quote"))]
+    FediverseQuote,
     #[serde(rename(serialize = "fediverse.mention"))]
     FediverseMention,
     #[serde(rename(serialize = "fediverse.reply"))]

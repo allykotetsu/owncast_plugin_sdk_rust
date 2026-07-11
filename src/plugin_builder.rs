@@ -8,7 +8,6 @@ use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
 use crate::plugin::Plugin;
 
-
 pub struct PluginBuilder<'a> {
     // Events
     on_chat_message_: Vec<Box<dyn Fn(ChatMessage)>>,
@@ -53,7 +52,7 @@ impl<'a> PluginBuilder<'a> {
     ///
     /// # Panics
     ///
-    /// Panics if priority is less than 0 or greater than or equal to 101.
+    /// Panics if priority is greater than or equal to 101.
     ///
     /// # Examples
     ///
@@ -69,7 +68,7 @@ impl<'a> PluginBuilder<'a> {
     pub fn filter_chat_message<F: Fn(ChatMessage) -> FilterResult + 'static>(&mut self, priority: Option<u8>, f: F) -> Result<(), String> {
         // TODO if possible then put a compile-time restraint on priority.
         let priority = priority.unwrap_or(100);
-        if priority < 0 || priority >= 101 {
+        if priority >= 101 {
             Err("Filter priority must be between 0 (inclusive) and 101 (exclusive).".to_string())
         } else {
             self.filter_chat_message_.push((priority, Box::new(f)));

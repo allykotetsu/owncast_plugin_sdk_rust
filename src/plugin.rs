@@ -33,14 +33,14 @@ impl<'a> Plugin<'a> {
         // Construct notifications.
         let mut notify = vec![];
         if !self.on_chat_message.is_empty() {
-            notify.push(Notify { event: Event::ChatMessageReceived });
+            notify.push(Notify { event: Event::ChatMessageReceived(None) });
         }
 
         // Construct filter.
         let mut filter = vec![];
         if let Some(&(priority, _)) = self.filter_chat_message.first() {
             filter.push(Filter {
-                event: Event::ChatMessageReceived,
+                event: Event::ChatMessageReceived(None),
                 priority
             })
         }
@@ -63,15 +63,16 @@ impl<'a> Plugin<'a> {
     }
 
     // TODO
-    pub(crate) fn on_event<T>(&self, event: Event, _payload: T) {
+    pub(crate) fn on_event(&self, event: Event) {
         match event {
-            Event::ChatMessageReceived => {
-                for _on_chat_message in &self.on_chat_message {
-                    // on_chat_message(payload);
+            Event::ChatMessageReceived(Some(payload)) => {
+                for on_chat_message in &self.on_chat_message {
+                    on_chat_message(payload.clone());
                 }
             }
-            Event::ChatUserJoined => {}
-            Event::ChatUserParted => {}
+
+            Event::ChatUserJoined(_) => {}
+            Event::ChatUserParted(_) => {}
             Event::ChatUserRenamed => {}
             Event::ChatMessageModerated => {}
             Event::StreamStarted => {}
@@ -92,6 +93,7 @@ impl<'a> Plugin<'a> {
                     }
                 }
             }
+            _ => {}
         }
     }
 

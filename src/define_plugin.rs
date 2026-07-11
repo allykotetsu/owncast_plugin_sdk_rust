@@ -42,13 +42,13 @@
         }
 
         #[wasm_bindgen]
-        pub fn on_event(Json(Envelope { event_type, payload }): Json<Envelope<String>>) {
-            PLUGIN.on_event(event_type, payload);
+        pub fn on_event(Json(Envelope { event_type }): Json<Envelope>) {
+            PLUGIN.on_event(event_type);
         }
 
         #[wasm_bindgen]
-        pub fn on_filter(Json(Envelope { event_type, payload }): Json<Envelope<ChatMessage>>) -> Json<FilterResult> {
-            if let Event::ChatMessageReceived = event_type {
+        pub fn on_filter(Json(Envelope { event_type }): Json<Envelope>) -> Json<FilterResult> {
+            if let Event::ChatMessageReceived(Some(payload)) = event_type {
                 Json(PLUGIN.on_filter(payload))
             } else {
                 Json(FilterResult::Pass)

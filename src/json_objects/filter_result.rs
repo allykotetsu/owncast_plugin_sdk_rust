@@ -1,11 +1,15 @@
-use serde::Serialize;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use crate::json_objects::chat_message::ChatMessage;
-// TODO make sure it serializes correctly
+use crate::json_objects::envelope::Envelope;
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
 pub enum FilterResult {
     Pass,
     Modify(ChatMessage),
     Drop(String)
+}
+
+impl Serialize for FilterResult {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        todo!()
+    }
 }
