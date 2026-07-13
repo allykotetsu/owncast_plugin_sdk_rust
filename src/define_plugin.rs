@@ -54,9 +54,12 @@
         pub fn on_filter(InputJson(envelope): InputJson<Envelope>) -> OutputJson<FilterResult> {
             match envelope {
                 Ok(Envelope { event_type }) => {
-                    if let Event::ChatMessageReceived(Some(payload)) = event_type {
+                    if let Event::ChatMessageReceived(payload) = event_type {
                         OutputJson(PLUGIN.on_filter(payload))
                     } else {
+                        // TODO
+                        let name = "";
+                        println!("Expected filter for \"chat.message.received\", got {name}");
                         OutputJson(FilterResult::Pass)
                     }
                 }

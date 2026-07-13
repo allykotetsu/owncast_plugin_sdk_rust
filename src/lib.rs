@@ -14,7 +14,7 @@ mod tests {
     use std::collections::HashMap;
     use std::error::Error;
     use crate::command::command_builder::CommandBuilder;
-    use crate::command::ctx::Ctx;
+    use crate::command::ctx::CommandContext;
     use crate::define_plugin;
     use crate::plugin_builder::PluginBuilder;
     use crate::imports::owncast_send_chat;
@@ -34,20 +34,16 @@ mod tests {
             }
         })?;
 
-        plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }: IncomingHttpRequest| {
+        plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }: &IncomingHttpRequest| {
             OutgoingHttpResponse {
                 status: Some(200),
                 headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
-                body: Some(body)
+                body: Some(body.clone())
             }
         })?;
 
-        plugin_builder.on("another-plugin.something", |_payload| {
-            // idk
-        });
-
-        plugin_builder.commands("!", vec![
-            CommandBuilder::new("update", &|ctx: Ctx| {
+        plugin_builder.commands("!", false, vec![
+            CommandBuilder::new("update", &|ctx: &CommandContext| {
                 ctx.reply("we've been live a while!");
             })
             .with_aliases(&["time", "livetime"])

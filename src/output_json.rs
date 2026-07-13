@@ -23,5 +23,3 @@ impl<T: Serialize> WasmDescribe for OutputJson<T> {
 }
 
 // TODO implement FromResidual
-
-// TODO work on this. call serde deser functions on T for to and from abi

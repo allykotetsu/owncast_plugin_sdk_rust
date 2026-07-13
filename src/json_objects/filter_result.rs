@@ -16,6 +16,8 @@ impl Serialize for FilterResult {
                 state.serialize_field("action", "pass")?;
             }
             FilterResult::Modify(body) => {
+                // TODO build entire chat message object from body.
+                // So that the plugin author is encouraged to only edit the message body but they can find a way around that if they really need to edit more.
                 state = serializer.serialize_struct("", 2)?;
                 state.serialize_field("action", "modify")?;
                 state.serialize_field("body", body)?;

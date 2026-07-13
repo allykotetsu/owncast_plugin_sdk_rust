@@ -1,55 +1,47 @@
-use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use serde::Deserialize;
 use crate::json_objects::chat_message::ChatMessage;
+use crate::json_objects::chat_message_moderation::ChatMessageModeration;
+use crate::json_objects::chat_user_rename::ChatUserRename;
+use crate::json_objects::fediverse_engagement::FediverseEngagement;
+use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
+use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
+use crate::json_objects::sse_connection_event::SSEConnectionEvent;
+use crate::json_objects::stream_started::StreamStarted;
+use crate::json_objects::stream_stopped::StreamStopped;
+use crate::json_objects::stream_title_change::StreamTitleChange;
+use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub(crate) enum Event {
     // Chat events
-    #[serde(rename(serialize = "chat.message.received"))]
-    ChatMessageReceived(Option<ChatMessage>),
-    #[serde(rename(serialize = "chat.user.joined"))]
+    ChatMessageReceived(ChatMessage),
     ChatUserJoined(User),
-    #[serde(rename(serialize = "chat.user.parted"))]
     ChatUserParted(User),
-    #[serde(rename(serialize = "chat.user.renamed"))]
-    ChatUserRenamed,
-    #[serde(rename(serialize = "chat.message.moderated"))]
-    ChatMessageModerated,
+    ChatUserRenamed(ChatUserRename),
+    ChatMessageModerated(ChatMessageModeration),
 
     // Stream lifecycle
-    #[serde(rename(serialize = "stream.started"))]
-    StreamStarted,
-    #[serde(rename(serialize = "stream.stopped"))]
-    StreamStopped,
-    #[serde(rename(serialize = "stream.title.changed"))]
-    StreamTitleChanged,
+    StreamStarted(StreamStarted),
+    StreamStopped(StreamStopped),
+    StreamTitleChanged(StreamTitleChange),
 
     // SSE connection lifecycle (who connected to / left a plugin's stream)
-    #[serde(rename(serialize = "sse.connect"))]
-    SseConnect,
-    #[serde(rename(serialize = "sse.disconnect"))]
-    SseDisconnect,
+    SseConnect(SSEConnectionEvent),
+    SseDisconnect(SSEConnectionEvent),
 
     // Once-a-second tick for periodic work (opt in by defining onTick)
-    #[serde(rename(serialize = "tick"))]
-    Tick,
+    Tick(TickEvent),
 
     // Fediverse, engagement (metadata only) + inbound posts (with content)
-    #[serde(rename(serialize = "fediverse.activity"))]
-    FediverseActivity,
-    #[serde(rename(serialize = "fediverse.follow"))]
-    FediverseFollow,
-    #[serde(rename(serialize = "fediverse.like"))]
-    FediverseLike,
-    #[serde(rename(serialize = "fediverse.repost"))]
-    FediverseRepost,
-    #[serde(rename(serialize = "fediverse.quote"))]
-    FediverseQuote,
-    #[serde(rename(serialize = "fediverse.mention"))]
-    FediverseMention,
-    #[serde(rename(serialize = "fediverse.reply"))]
-    FediverseReply,
+    FediverseActivity(HashMap<String, String>),
+    FediverseFollow(FediverseEngagement),
+    FediverseLike(FediverseTargetedEngagement),
+    FediverseRepost(FediverseTargetedEngagement),
+    FediverseQuote(FediverseTargetedEngagement),
+    FediverseMention(FediverseInboundPost),
+    FediverseReply(FediverseInboundPost),
 
-    // TODO serialize and deserialize unmatched names as Custom
-    Custom(String)
+    Custom(String, String)
 }

@@ -6,7 +6,7 @@ pub struct Envelope {
 }
 
 impl<'de> Deserialize<'de> for Envelope {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+    fn deserialize<D>(_deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
         todo!()
     }
 }
