@@ -165,13 +165,13 @@ impl<'a> Plugin<'a> {
                 }
             }
 
-            Event::SseConnect(payload) => {
+            Event::SSEConnect(payload) => {
                 for func in &self.on_sse_connect {
                     func(&payload);
                 }
             }
 
-            Event::SseDisconnect(payload) => {
+            Event::SSEDisconnect(payload) => {
                 for func in &self.on_sse_disconnect {
                     func(&payload);
                 }

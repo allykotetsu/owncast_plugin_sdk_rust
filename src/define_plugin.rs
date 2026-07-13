@@ -24,7 +24,6 @@
         use wasm_bindgen::prelude::wasm_bindgen;
         use crate::input_json::InputJson;
         use crate::json_objects::content_request::ContentRequest;
-        use crate::json_objects::envelope::Envelope;
         use crate::json_objects::event::Event;
         use crate::json_objects::filter_result::FilterResult;
         use crate::json_objects::incoming_http_request::IncomingHttpRequest;
@@ -44,18 +43,18 @@
         }
 
         #[wasm_bindgen]
-        pub fn on_event(InputJson(envelope): InputJson<Envelope>) {
-            match envelope {
-                Ok(Envelope { event_type }) => PLUGIN.dispatch_event(event_type),
+        pub fn on_event(InputJson(event): InputJson<Event>) {
+            match event {
+                Ok(event) => PLUGIN.dispatch_event(event),
                 Err(err) => println!("{err}")
             }
         }
 
         #[wasm_bindgen]
-        pub fn on_filter(InputJson(envelope): InputJson<Envelope>) -> OutputJson<FilterResult> {
-            match envelope {
-                Ok(Envelope { event_type }) => {
-                    if let Event::ChatMessageReceived(payload) = event_type {
+        pub fn on_filter(InputJson(event): InputJson<Event>) -> OutputJson<FilterResult> {
+            match event {
+                Ok(event) => {
+                    if let Event::ChatMessageReceived(payload) = event {
                         OutputJson(PLUGIN.dispatch_filter(payload))
                     } else {
                         // TODO

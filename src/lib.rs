@@ -14,11 +14,11 @@ mod tests {
     use std::collections::HashMap;
     use std::error::Error;
     use crate::command::command_builder::CommandBuilder;
-    use crate::command::ctx::CommandContext;
     use crate::define_plugin;
     use crate::plugin_builder::PluginBuilder;
     use crate::imports::owncast_send_chat;
     use crate::json_objects::chat_message::ChatMessage;
+    use crate::json_objects::stream_title_change::StreamTitleChange;
     use crate::method::Method;
 
     define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
@@ -34,7 +34,11 @@ mod tests {
             }
         })?;
 
-        plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }: &IncomingHttpRequest| {
+        plugin_builder.on_stream_title_changed(|StreamTitleChange { from, to }| {
+            println!("Stream name changed from {from} to {to}.");
+        });
+
+        plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }| {
             OutgoingHttpResponse {
                 status: Some(200),
                 headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
@@ -43,7 +47,7 @@ mod tests {
         })?;
 
         plugin_builder.commands("!", false, vec![
-            CommandBuilder::new("update", &|ctx: &CommandContext| {
+            CommandBuilder::new("update", &|ctx| {
                 ctx.reply("we've been live a while!");
             })
             .with_aliases(&["time", "livetime"])
@@ -55,6 +59,9 @@ mod tests {
 
     #[test]
     fn test() {
-        println!("test");
+        PLUGIN.dispatch_event(Event::StreamTitleChanged(StreamTitleChange {
+            from: "Old name".to_string(),
+            to: "New name".to_string(),
+        }));
     }
 }
