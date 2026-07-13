@@ -1,31 +1,41 @@
 use std::collections::HashMap;
+use std::fs::read_to_string;
 use serde::de::DeserializeOwned;
 use serde_json::Error;
 use crate::command::command_builder::CommandBuilder;
-use crate::command::command_data::CommandDefinition;
+use crate::command::command_definition::CommandDefinition;
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
+use crate::json_objects::command::Command;
 use crate::json_objects::content_request::ContentRequest;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
+use crate::json_objects::filter::Filter;
 use crate::json_objects::filter_result::FilterResult;
 use crate::method::Method;
 use crate::json_objects::incoming_http_request::IncomingHttpRequest;
+use crate::json_objects::manifest::Manifest;
+use crate::json_objects::notify::Notify;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
 use crate::json_objects::sse_connection_event::SSEConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
+use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
+use crate::partial_manifest::PartialManifest;
 use crate::plugin::Plugin;
 
+/// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder<'a> {
     // Events
+    partial_manifest: PartialManifest,
+
     on_chat_message_: Vec<Box<dyn Fn(&ChatMessage)>>,
     on_chat_user_joined_: Vec<Box<dyn Fn(&User)>>,
     on_chat_user_parted_: Vec<Box<dyn Fn(&User)>>,
@@ -77,8 +87,10 @@ pub struct PluginBuilder<'a> {
 }
 
 impl<'a> PluginBuilder<'a> {
-    pub(crate) fn new() -> Self {
-        Self {
+    pub(crate) fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        Ok(Self {
+            partial_manifest: serde_json::from_str(&read_to_string("./plugin.manifest.json")?)?,
+
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
             on_chat_user_parted_: vec![],
@@ -114,7 +126,7 @@ impl<'a> PluginBuilder<'a> {
             on_page_scripts_: vec![],
 
             commands_: HashMap::new()
-        }
+        })
     }
 
     /// Creates an event hook for when a chat message is sent.
@@ -508,11 +520,8 @@ impl<'a> PluginBuilder<'a> {
     pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder<'a>>) -> Result<(), String> {
         for command_builder in command_builders {
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
-
-            // TODO iterate through aliases and insert a command for each alias.
-
-            if let Some(_) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
-                return Err(format!("Command already exists."));
+            if let Some(CommandDefinition { command: Command { name, prefix, .. }, .. }) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
+                return Err(format!("Command {prefix}{name} already exists."));
             }
         }
         Ok(())
@@ -526,7 +535,28 @@ impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
             b.cmp(&a)
         });
 
+        // TODO
+        // Construct notifications.
+        let mut notify = vec![];
+        if !self.on_chat_message_.is_empty() {
+            notify.push(Notify { event: "".to_string() });
+        }
+
+        // Construct filter.
+        let mut filter = vec![];
+        if let Some(&(priority, _)) = filter_chat_message_.first() {
+            filter.push(Filter {
+                event: "".to_string(),
+                priority
+            });
+        }
+
+        let subscriptions = Subscriptions { notify, filter };
+        let commands: Vec<Command> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
+
         Plugin {
+            manifest: Manifest::from((self.partial_manifest, subscriptions, commands)),
+
             on_chat_message: self.on_chat_message_,
             on_chat_user_joined: self.on_chat_user_joined_,
             on_chat_user_parted: self.on_chat_user_parted_,

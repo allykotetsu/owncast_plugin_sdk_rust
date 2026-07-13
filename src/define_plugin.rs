@@ -6,7 +6,7 @@
 ///
 /// # Panics
 ///
-/// Panics if a function called onto PluginBuilder panics.
+/// Panics if a function called onto PluginBuilder results in an error.
 ///
 /// # Examples
 ///
@@ -33,7 +33,7 @@
         use crate::plugin::Plugin;
 
         const PLUGIN: LazyCell<Plugin> = LazyCell::new(|| {
-            $func(PluginBuilder::new()).unwrap().into()
+            $func(PluginBuilder::new().unwrap()).unwrap().into()
         });
 
         // Exported functions.

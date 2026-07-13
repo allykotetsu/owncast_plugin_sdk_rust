@@ -8,5 +8,7 @@ pub(crate) struct Command {
     pub(crate) description: Option<String>,
     pub(crate) usage: Option<String>,
     pub(crate) aliases: Option<Vec<String>>,
-    pub(crate) mod_only: Option<bool>
+    pub(crate) mod_only: Option<bool>,
+    pub(crate) case_sensitive: Option<bool>,
+    pub(crate) cooldown_ms: Option<u128>
 }

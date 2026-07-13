@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use crate::json_objects::user::User;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct ChatMessage {
     pub(crate) id: String,

@@ -12,19 +12,19 @@ The development of this crate also depends on how the plugin system for Owncast 
 # Usage
 To create a plugin, use the define_plugin! macro. It takes a closure as a parameter. The closure returns a Result<PluginBuilder, Box<dyn Error>>, and it takes a PluginBuilder<'static> as a parameter.
 
-To add functionality to your plugin, call the PluginBuilder's functions. The following example is a simple chat echo bot. (Use statement are not shown.)
+To add functionality to your plugin, call the PluginBuilder's functions. The following example is a simple chat echo bot. (Use statements are not shown.)
 
 You must use define_plugin! outside of function scope, as the macro expands to create a const PLUGIN variable, and global functions. The functions are WASM exports that return data through the PLUGIN variable.
 ```rust
 define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
     // When a message is sent in the Owncast chat, echo it back.
     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-        owncast_send_chat(format!("echo ${body}").as_str());
+        owncast_send_chat(&format!("echo ${body}"));
     });
     
     // When a user types "!update", "!time", or "!livetime", tell them that the stream has been live for a while.
-    plugin_builder.commands("!", vec![
-        CommandBuilder::new("update", &|ctx: Ctx| {
+    plugin_builder.commands("!", false, vec![
+        CommandBuilder::new("update", &|ctx| {
             ctx.reply("we've been live a while!");
         })
         .with_aliases(&["time", "livetime"])

@@ -1,0 +1,13 @@
+{
+  "api": "1",
+  "name": "Human readable display name",
+  "slug": "unique-url-slug",
+  "version": "0.3.1",
+  "description": "Echoes chat messages back with a prefix. This example was written in JavaScript.",
+  "permissions": [
+    "chat.send"
+  ],
+  "bot": {
+    "displayName": "Example Echo"
+  }
+}

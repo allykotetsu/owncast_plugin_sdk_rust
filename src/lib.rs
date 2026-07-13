@@ -8,6 +8,7 @@ mod imports;
 mod method;
 mod command;
 mod output_json;
+mod partial_manifest;
 
 #[cfg(test)]
 mod tests {
@@ -65,3 +66,10 @@ mod tests {
         }));
     }
 }
+
+/*
+Feedback:
+
+FediverseQuote should be an FediverseInboundPost
+Owncast should have behavior for commands that share a name
+ */

@@ -5,6 +5,7 @@ use serde_json::Error as JsonError;
 use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
+use crate::json_objects::command_event::CommandEvent;
 use crate::json_objects::event::Event::Custom;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
@@ -44,6 +45,10 @@ pub(crate) enum Event {
     FediverseQuote(FediverseTargetedEngagement),
     FediverseMention(FediverseInboundPost),
     FediverseReply(FediverseInboundPost),
+
+    // Internal events
+    ChatCommand(CommandEvent),
+    TimerFire(),
 
     Custom(String, String)
 }
@@ -128,6 +133,9 @@ impl TryFrom<(&str, &str)> for Event {
             "fediverse.quote" => Ok(Event::FediverseQuote(serde_json::from_str(payload)?)),
             "fediverse.mention" => Ok(Event::FediverseMention(serde_json::from_str(payload)?)),
             "fediverse.reply" => Ok(Event::FediverseReply(serde_json::from_str(payload)?)),
+
+            "chat.command" => Ok(Event::ChatCommand(serde_json::from_str(payload)?)),
+            "timer.fire" => Ok(Event::TimerFire(/*serde_json::from_str(payload)?*/)),
 
             _ => Ok(Custom(event_type.to_string(), payload.to_string()))
         }

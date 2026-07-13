@@ -1,5 +1,5 @@
-use crate::command::command_data::CommandDefinition;
-use crate::command::ctx::CommandContext;
+use crate::command::command_definition::CommandDefinition;
+use crate::command::command_context::CommandContext;
 use crate::json_objects::command::Command;
 
 /// A struct for building a chat command.
@@ -50,10 +50,8 @@ impl<'a> CommandBuilder<'a> {
     pub(crate) fn build(self, prefix: String, case_sensitive: bool) -> CommandDefinition<'a> {
         CommandDefinition {
             run: self.run_,
-            cooldown_ms: self.cooldown_ms_,
             on_denied: self.on_denied_,
             on_cooldown: self.on_cooldown_,
-            case_sensitive,
             command: Command {
                 name: self.name_,
                 prefix,
@@ -61,6 +59,8 @@ impl<'a> CommandBuilder<'a> {
                 usage: self.usage_,
                 aliases: self.aliases_,
                 mod_only: self.mod_only_,
+                case_sensitive: Some(case_sensitive),
+                cooldown_ms: self.cooldown_ms_
             }
         }
     }
