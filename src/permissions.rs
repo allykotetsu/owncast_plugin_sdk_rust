@@ -30,3 +30,5 @@ pub(crate) const NOTIFICATIONS_SEND: &str = "notifications.send";
 pub(crate) const FEDIVERSE_POST: &str = "fediverse.post";
 
 pub(crate) const UI_MODIFY: &str = "ui.modify";
+
+// TODO actually implement permissions

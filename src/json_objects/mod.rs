@@ -24,3 +24,6 @@ pub(crate) mod fediverse_targeted_engagement;
 pub(crate) mod fediverse_inbound_post;
 pub(crate) mod fediverse_actor;
 pub(crate) mod attachment;
+pub(crate) mod chat_client;
+pub(crate) mod user_register_request;
+pub(crate) mod user_register_result;

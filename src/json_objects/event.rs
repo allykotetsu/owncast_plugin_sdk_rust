@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use serde::{de, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer};
 use serde::de::{Error, MapAccess, SeqAccess, Visitor};
 use serde_json::Error as JsonError;
 use crate::json_objects::chat_message::ChatMessage;
@@ -64,9 +64,9 @@ impl<'de> Deserialize<'de> for Event {
 
             fn visit_seq<V: SeqAccess<'de2>>(self, mut seq: V) -> Result<Event, V::Error> {
                 let event_type = seq.next_element()?
-                    .ok_or_else(|| de::Error::invalid_length(0, &self))?;
+                    .ok_or_else(|| Error::invalid_length(0, &self))?;
                 let payload = seq.next_element()?
-                    .ok_or_else(|| de::Error::invalid_length(1, &self))?;
+                    .ok_or_else(|| Error::invalid_length(1, &self))?;
                 TryFrom::<(&str, &str)>::try_from((event_type, payload)).map_err(Error::custom)
             }
 
