@@ -65,10 +65,10 @@ pub(crate) struct Plugin<'a> {
     pub(crate) on_auth_check: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    pub(crate) on_tab_content: Vec<Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_tab_content: Option<Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Content
-    pub(crate) on_page_content: Vec<Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_page_content: Option<Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Styles
     pub(crate) on_page_styles: Vec<Box<dyn Fn() -> String>>,
@@ -115,7 +115,7 @@ impl<'a> Plugin<'a> {
     }
 
     // TODO
-    pub(crate) fn on_event(&self, event: Event) {
+    pub(crate) fn dispatch_event(&self, event: Event) {
         match event {
             Event::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message {
@@ -237,7 +237,7 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn on_filter(&self, msg: ChatMessage) -> FilterResult {
+    pub(crate) fn dispatch_filter(&self, msg: ChatMessage) -> FilterResult {
         let mut body = String::new();
 
         for (_, filter_chat_message) in &self.filter_chat_message {
@@ -261,7 +261,7 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn on_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
+    pub(crate) fn dispatch_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             OutgoingHttpResponse {
                 status: Some(404),
@@ -295,7 +295,23 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn has_page_styles(&self) -> bool {
+    pub(crate) fn dispatch_tab_content(&self, content_request: ContentRequest) -> Option<String> {
+        if let Some(on_tab_content) = &self.on_tab_content {
+            Some(on_tab_content(&content_request))
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
+        if let Some(on_page_content) = &self.on_page_content {
+            Some(on_page_content(&content_request))
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn page_styles(&self) -> bool {
         false
     }
 

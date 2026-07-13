@@ -11,5 +11,5 @@ impl<'de> Deserialize<'de> for Envelope {
     }
 }
 
-// TODO custom deserialize logic. Take "payload" and move data to event_type parameter
+// TODO custom deserialize logic. Take JSON field "payload" and move data to Event parameter
 // Refer to https://serde.rs/impl-deserialize.html for documentation.

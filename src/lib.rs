@@ -23,7 +23,7 @@ mod tests {
 
     define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
         plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-            owncast_send_chat(format!("echo ${body}").as_str());
+            owncast_send_chat(&format!("echo ${body}"));
         });
 
         plugin_builder.filter_chat_message(None, |ChatMessage { body, .. }| {

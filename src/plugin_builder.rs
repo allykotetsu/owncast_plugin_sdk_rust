@@ -61,10 +61,10 @@ pub struct PluginBuilder<'a> {
     on_auth_check_: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    on_tab_content_: Vec<Box<dyn Fn(&ContentRequest) -> String>>,
+    on_tab_content_: Option<Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Content
-    on_page_content_: Vec<Box<dyn Fn(&ContentRequest) -> String>>,
+    on_page_content_: Option<Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Styles
     on_page_styles_: Vec<Box<dyn Fn() -> String>>,
@@ -105,9 +105,9 @@ impl<'a> PluginBuilder<'a> {
 
             on_auth_check_: vec![],
 
-            on_tab_content_: vec![],
+            on_tab_content_: None,
 
-            on_page_content_: vec![],
+            on_page_content_: None,
 
             on_page_styles_: vec![],
 
@@ -117,18 +117,294 @@ impl<'a> PluginBuilder<'a> {
         }
     }
 
-    // TODO replace with generic "on_event" function? Or maybe do that internally? idk
     /// Creates an event hook for when a chat message is sent.
     ///
     /// # Examples
     ///
     /// ```
-    /// plugin_builder.on_chat_message(|&ChatMessage { body, .. }| {
-    ///     owncast_send_chat(format!("echo ${body}").as_str());
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+    ///         owncast_send_chat(&format!("echo {body}"));
+    ///     });
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn on_chat_message<F: Fn(&ChatMessage) -> () + 'static>(&mut self, f: F) {
         self.on_chat_message_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when a user joins stream chat.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_chat_user_joined(|ChatUser { display_name, .. }| {
+    ///         owncast_send_chat(&format!("Welcome, {display_name}!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_chat_user_joined<F: Fn(&User) -> () + 'static>(&mut self, f: F) {
+        self.on_chat_user_joined_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when a user leaves stream chat.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_chat_user_parted(|ChatUser { display_name, .. }| {
+    ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_chat_user_parted<F: Fn(&User) -> () + 'static>(&mut self, f: F) {
+        self.on_chat_user_parted_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when a user leaves stream chat.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_chat_user_renamed(|ChatUserRename { display_name, .. }| {
+    ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_chat_user_renamed<F: Fn(&ChatUserRename) -> () + 'static>(&mut self, f: F) {
+        self.on_chat_user_renamed_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when a moderator moderates a message.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_message_moderated(|ChatMessageModeration { message_id, visible, .. }| {
+    ///         owncast_send_chat(&format!("A moderator changed {message_id} to {visible}!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_message_moderated<F: Fn(&ChatMessageModeration) -> () + 'static>(&mut self, f: F) {
+        self.on_message_moderated_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when stream starts.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_stream_started(|StreamStarted { title, .. }| {
+    ///         owncast_send_chat(&format!("Stream {title} is starting!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_stream_started<F: Fn(&StreamStarted) -> () + 'static>(&mut self, f: F) {
+        self.on_stream_started_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when stream stops.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_stream_stopped(|StreamStopped { stopped_at }| {
+    ///         owncast_send_chat(&format!("Stream stopped at {stopped_at}!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_stream_stopped<F: Fn(&StreamStopped) -> () + 'static>(&mut self, f: F) {
+        self.on_stream_stopped_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when the title of stream changes.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_stream_title_changed(|StreamTitleChange { from, to }| {
+    ///         owncast_send_chat(&format!("Stream title changed from {from} to {to}."));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_stream_title_changed<F: Fn(&StreamTitleChange) -> () + 'static>(&mut self, f: F) {
+        self.on_stream_title_changed_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when an SSE connection is made.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_sse_connect(|SSEConnectionEvent { connection_id, .. }| {
+    ///         owncast_send_chat(&format!("Connected to {connection_id}."));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_sse_connect<F: Fn(&SSEConnectionEvent) -> () + 'static>(&mut self, f: F) {
+        self.on_sse_connect_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when an SSE connection is ceased.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_sse_disconnect(|SSEConnectionEvent { connection_id, .. }| {
+    ///         owncast_send_chat(&format!("Disconnected from {connection_id}."));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_sse_disconnect<F: Fn(&SSEConnectionEvent) -> () + 'static>(&mut self, f: F) {
+        self.on_sse_disconnect_.push(Box::new(f));
+    }
+
+    /// Creates an event hook that is fired once a second.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_tick(|TickEvent { now }| {
+    ///         owncast_send_chat(&format!("The time is now {now}"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_tick<F: Fn(&TickEvent) -> () + 'static>(&mut self, f: F) {
+        self.on_tick_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when any incoming ActivityPub object is received.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse(|hash_map| {
+    ///             TODO
+    ///         owncast_send_chat(&format!("The time is now {now}"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse<F: Fn(&HashMap<String, String>) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone follows the stream through the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_follow(|FediverseEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///         owncast_send_chat(&format!("{name} followed stream!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_follow<F: Fn(&FediverseEngagement) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_follow_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone likes a stream post made through the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_like(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///         owncast_send_chat(&format!("{name} liked that stream went live!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_like<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_like_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone reposts a stream post made through the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///         owncast_send_chat(&format!("{name} reposted that stream went live!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_repost<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_repost_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone quotes a stream post made through the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
+    /// TODO include said quote
+    ///         owncast_send_chat(&format!("{name} quoted that stream went live!"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_quote<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_quote_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone mentions stream's handle on the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
+    ///         owncast_send_chat(&format!("Someone had this to say about stream: {content_text}"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_mention<F: Fn(&FediverseInboundPost) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_mention_.push(Box::new(f));
+    }
+
+    /// Creates an event hook for when someone replies to a stream post made through the ActivityPub protocol.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
+    ///         owncast_send_chat(&format!("Someone had this to say in reply to stream: {content_text}"));
+    ///     });
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_fediverse_reply<F: Fn(&FediverseInboundPost) -> () + 'static>(&mut self, f: F) {
+        self.on_fediverse_reply_.push(Box::new(f));
     }
 
     /// Creates a chat filter. Priority must be between 0 (inclusive) and 101 (exclusive). Defaults to 100.
@@ -140,13 +416,15 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// plugin_builder.filter_chat_message(None, |&ChatMessage { body, .. }| {
-    ///     if body.contains("bad word") {
-    ///         FilterResult::Drop("No bad words allowed!".to_string())
-    ///     } else {
-    ///         FilterResult::Pass
-    ///     }
-    /// })?;
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.filter_chat_message(None, |ChatMessage { body, .. }| {
+    ///         if body.contains("bad word") {
+    ///             FilterResult::Drop("No bad words allowed!".to_string())
+    ///         } else {
+    ///             FilterResult::Pass
+    ///         }
+    ///     })?;
+    /// });
     /// ```
     pub fn filter_chat_message<F: Fn(&ChatMessage) -> FilterResult + 'static>(&mut self, priority: Option<u8>, f: F) -> Result<(), String> {
         // TODO if possible then put a compile-time restraint on priority.
@@ -159,7 +437,7 @@ impl<'a> PluginBuilder<'a> {
         }
     }
 
-    /// Creates an event hook for when an http request is made to a given path with a given method.
+    /// Creates an event hook for when an http request is made to a given path with a given method. The callback function is a reference since multiple HTTP methods can run the same callback.
     ///
     /// # Panics
     ///
@@ -168,13 +446,15 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// plugin_builder.on_http_request(&[Method::GET], "/echo", &|&IncomingHttpRequest { body, .. }: IncomingHttpRequest| {
-    ///     OutgoingHttpResponse {
-    ///         status: Some(200),
-    ///         headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
-    ///         body: Some(body)
-    ///     }
-    /// })?;
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }| {
+    ///         OutgoingHttpResponse {
+    ///             status: Some(200),
+    ///             headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
+    ///             body: Some(body)
+    ///         }
+    ///     })?;
+    /// });
     /// ```
     pub fn on_http_request<F: Fn(&IncomingHttpRequest) -> OutgoingHttpResponse + 'static>(&mut self, method: &[Method], path: &str, f: &'a F) -> Result<(), String> {
         for method in method {
@@ -182,11 +462,9 @@ impl<'a> PluginBuilder<'a> {
                 return Err(format!("An HTTP request handler already exists for {method} {path}."));
             }
         }
-
         Ok(())
     }
 
-    // TODO replace with a macro that can handle any type (and not just &str)?
     /// Creates an event hook for a custom event.
     ///
     /// # Examples
@@ -197,8 +475,10 @@ impl<'a> PluginBuilder<'a> {
     ///     pub(crate) data: String
     /// }
     ///
-    /// plugin_builder.on("another-plugin.something", |CustomEventPayload { data }: &CustomEventPayload| {
-    ///     owncast_send_chat(format!("Received {data}."));
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on("another-plugin.something", |CustomEventPayload { data }| {
+    ///         owncast_send_chat(format!("Received {data}."));
+    ///     });
     /// });
     /// ```
     pub fn on<T: DeserializeOwned, F: Fn(&T) -> () + 'static>(&mut self, event: &str, f: F) {
@@ -208,7 +488,7 @@ impl<'a> PluginBuilder<'a> {
         })));
     }
 
-    /// Registers commands.
+    /// Registers commands. The callback function is a reference since aliased commands run the same callback.
     ///
     /// # Panics
     ///
@@ -217,8 +497,8 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// plugin_builder.commands("!", vec![
-    ///     CommandBuilder::new("update", &|ctx: &Ctx| {
+    /// plugin_builder.commands("!", false, vec![
+    ///     CommandBuilder::new("update", &|ctx| {
     ///         ctx.reply("we've been live a while!");
     ///     })
     ///     .with_aliases(&["time", "livetime"])

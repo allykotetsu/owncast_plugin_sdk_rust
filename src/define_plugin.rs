@@ -13,7 +13,7 @@
 /// ```
 /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
 ///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-///         owncast_send_chat(format!("echo ${body}").as_str());
+///         owncast_send_chat(format!("echo {body}").as_str());
 ///     });
 ///     Ok(plugin_builder)
 /// });
@@ -23,13 +23,14 @@
         use std::cell::LazyCell;
         use wasm_bindgen::prelude::wasm_bindgen;
         use crate::input_json::InputJson;
-        use crate::output_json::OutputJson;
+        use crate::json_objects::content_request::ContentRequest;
         use crate::json_objects::envelope::Envelope;
         use crate::json_objects::event::Event;
         use crate::json_objects::filter_result::FilterResult;
         use crate::json_objects::incoming_http_request::IncomingHttpRequest;
         use crate::json_objects::manifest::Manifest;
         use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
+        use crate::output_json::OutputJson;
         use crate::plugin::Plugin;
 
         const PLUGIN: LazyCell<Plugin> = LazyCell::new(|| {
@@ -45,7 +46,7 @@
         #[wasm_bindgen]
         pub fn on_event(InputJson(envelope): InputJson<Envelope>) {
             match envelope {
-                Ok(Envelope { event_type }) => PLUGIN.on_event(event_type),
+                Ok(Envelope { event_type }) => PLUGIN.dispatch_event(event_type),
                 Err(err) => println!("{err}")
             }
         }
@@ -55,7 +56,7 @@
             match envelope {
                 Ok(Envelope { event_type }) => {
                     if let Event::ChatMessageReceived(payload) = event_type {
-                        OutputJson(PLUGIN.on_filter(payload))
+                        OutputJson(PLUGIN.dispatch_filter(payload))
                     } else {
                         // TODO
                         let name = "";
@@ -73,7 +74,7 @@
         #[wasm_bindgen]
         pub fn on_http_request(InputJson(incoming_http_request): InputJson<IncomingHttpRequest>) -> OutputJson<OutgoingHttpResponse> {
             match incoming_http_request {
-                Ok(incoming_http_request) => OutputJson(PLUGIN.on_http_request(incoming_http_request)),
+                Ok(incoming_http_request) => OutputJson(PLUGIN.dispatch_http_request(incoming_http_request)),
                 Err(err) => {
                     println!("{err}");
                     OutputJson(OutgoingHttpResponse {
@@ -85,30 +86,42 @@
             }
         }
 
-        /*#[wasm_bindgen]
-        pub fn on_tab_content(_: InputJson<ContentRequest>) -> String {
-
+        #[wasm_bindgen]
+        pub fn on_tab_content(InputJson(content_request): InputJson<ContentRequest>) -> String {
+            match content_request {
+                Ok(content_request) => PLUGIN.dispatch_tab_content(content_request).unwrap_or("".to_string()),
+                Err(err) => {
+                    println!("{err}");
+                    err.to_string()
+                }
+            }
         }
 
         #[wasm_bindgen]
-        pub fn on_page_content(_: InputJson<ContentRequest>) -> String {
-
+        pub fn on_page_content(InputJson(content_request): InputJson<ContentRequest>) -> String {
+            match content_request {
+                Ok(content_request) => PLUGIN.dispatch_page_content(content_request).unwrap_or("".to_string()),
+                Err(err) => {
+                    println!("{err}");
+                    err.to_string()
+                }
+            }
         }
 
         // Optional. Only export if exists.
-        #[wasm_bindgen]
+        /*#[wasm_bindgen]
         pub fn on_page_styles() -> String {
 
-        }
+        }*/
 
         // Optional. Only export if exists.
-        #[wasm_bindgen]
+        /*#[wasm_bindgen]
         pub fn on_page_scripts() -> String {
 
-        }
+        }*/
 
         // Optional. Only export if exists.
-        #[wasm_bindgen]
+        /*#[wasm_bindgen]
         pub fn on_auth_check(_: InputJson<AuthCheckRequest>) -> OutputJson<AuthCheckResult> {
 
         }*/
