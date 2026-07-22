@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct User {
+pub struct User {
     pub(crate) id: String,
     pub(crate) display_name: String,
     pub(crate) display_color: u16,

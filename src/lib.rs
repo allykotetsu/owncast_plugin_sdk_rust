@@ -1,3 +1,8 @@
+use std::error::Error;
+use crate::json_objects::chat_message::ChatMessage;
+use crate::plugin_builder::PluginBuilder;
+use crate::imports::owncast_send_chat;
+
 mod json_objects;
 mod permissions;
 mod input_json;
@@ -10,7 +15,15 @@ mod command;
 mod output_json;
 mod partial_manifest;
 
-#[cfg(test)]
+define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+        owncast_send_chat(&format!("echo ${body}"));
+    });
+
+    Ok(plugin_builder)
+});
+
+/*#[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use std::error::Error;
@@ -65,11 +78,4 @@ mod tests {
             to: "New name".to_string(),
         }));
     }
-}
-
-/*
-Feedback:
-
-FediverseQuote should be an FediverseInboundPost
-Owncast should have behavior for commands that share a name
- */
+}*/

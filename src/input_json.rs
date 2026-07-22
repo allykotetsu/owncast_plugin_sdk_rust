@@ -25,6 +25,6 @@ impl<T: for<'de> Deserialize<'de>> FromWasmAbi for InputJson<T> {
 
 impl<T: for<'de> Deserialize<'de>> WasmDescribe for InputJson<T> {
     fn describe() {
-        todo!()
+        String::describe()
     }
 }

@@ -4,7 +4,7 @@ use crate::json_objects::fediverse_actor::FediverseActor;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct FediverseInboundPost {
+pub struct FediverseInboundPost {
     actor: FediverseActor,
     content: String,
     content_text: String,

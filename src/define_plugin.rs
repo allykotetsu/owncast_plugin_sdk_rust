@@ -18,9 +18,11 @@
 ///     Ok(plugin_builder)
 /// });
 /// ```
-#[macro_export] macro_rules! define_plugin {
+#[macro_export]
+macro_rules! define_plugin {
     ($func:expr) => {
-        use std::cell::LazyCell;
+        use std::collections::HashMap;
+        use std::sync::LazyLock;
         use wasm_bindgen::prelude::wasm_bindgen;
         use crate::input_json::InputJson;
         use crate::json_objects::content_request::ContentRequest;
@@ -32,7 +34,7 @@
         use crate::output_json::OutputJson;
         use crate::plugin::Plugin;
 
-        const PLUGIN: LazyCell<Plugin> = LazyCell::new(|| {
+        const PLUGIN: LazyLock<Plugin> = LazyLock::new(|| {
             $func(PluginBuilder::new().unwrap()).unwrap().into()
         });
 
@@ -107,13 +109,13 @@
             }
         }
 
-        // Optional. Only export if exists.
+        // Optional. Only export if exists and if permissions are correct.
         /*#[wasm_bindgen]
         pub fn on_page_styles() -> String {
 
         }*/
 
-        // Optional. Only export if exists.
+        // Optional. Only export if exists and if permissions are correct.
         /*#[wasm_bindgen]
         pub fn on_page_scripts() -> String {
 

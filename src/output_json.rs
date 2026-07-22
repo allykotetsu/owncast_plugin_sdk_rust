@@ -18,7 +18,7 @@ impl<T: Serialize> IntoWasmAbi for OutputJson<T> {
 
 impl<T: Serialize> WasmDescribe for OutputJson<T> {
     fn describe() {
-        todo!()
+        String::describe()
     }
 }
 

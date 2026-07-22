@@ -5,6 +5,9 @@ edition = "2024"
 repository = "https://github.com/allykotetsu/owncast_plugin_sdk_rust"
 description = " A Rust crate for the Owncast Plugin SDK."
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"

@@ -11,6 +11,7 @@ use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
 use crate::json_objects::command::Command;
 use crate::json_objects::content_request::ContentRequest;
+use crate::json_objects::event::{CHAT_MESSAGE_MODERATED, CHAT_MESSAGE_RECEIVED, CHAT_USER_JOINED, CHAT_USER_PARTED, CHAT_USER_RENAMED, FEDIVERSE_ACTIVITY, FEDIVERSE_FOLLOW, FEDIVERSE_LIKE, FEDIVERSE_MENTION, FEDIVERSE_QUOTE, FEDIVERSE_REPLY, FEDIVERSE_REPOST, SSE_CONNECT, SSE_DISCONNECT, STREAM_STARTED, STREAM_STOPPED, STREAM_TITLE_CHANGED, TICK};
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
@@ -535,12 +536,31 @@ impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
             b.cmp(&a)
         });
 
-        // TODO
         // Construct notifications.
         let mut notify = vec![];
-        if !self.on_chat_message_.is_empty() {
-            notify.push(Notify { event: "".to_string() });
-        }
+
+        if !self.on_chat_message_.is_empty() { notify.push(Notify { event: CHAT_MESSAGE_RECEIVED.to_string() }); }
+        if !self.on_chat_user_joined_.is_empty() { notify.push(Notify { event: CHAT_USER_JOINED.to_string() }); }
+        if !self.on_chat_user_parted_.is_empty() { notify.push(Notify { event: CHAT_USER_PARTED.to_string() }); }
+        if !self.on_chat_user_renamed_.is_empty() { notify.push(Notify { event: CHAT_USER_RENAMED.to_string() }); }
+        if !self.on_message_moderated_.is_empty() { notify.push(Notify { event: CHAT_MESSAGE_MODERATED.to_string() }); }
+
+        if !self.on_stream_started_.is_empty() { notify.push(Notify { event: STREAM_STARTED.to_string() }); }
+        if !self.on_stream_stopped_.is_empty() { notify.push(Notify { event: STREAM_STOPPED.to_string() }); }
+        if !self.on_stream_title_changed_.is_empty() { notify.push(Notify { event: STREAM_TITLE_CHANGED.to_string() }); }
+
+        if !self.on_sse_connect_.is_empty() { notify.push(Notify { event: SSE_CONNECT.to_string() }); }
+        if !self.on_sse_disconnect_.is_empty() { notify.push(Notify { event: SSE_DISCONNECT.to_string() }); }
+
+        if !self.on_tick_.is_empty() { notify.push(Notify { event: TICK.to_string() }); }
+
+        if !self.on_fediverse_.is_empty() { notify.push(Notify { event: FEDIVERSE_ACTIVITY.to_string() }); }
+        if !self.on_fediverse_follow_.is_empty() { notify.push(Notify { event: FEDIVERSE_FOLLOW.to_string() }); }
+        if !self.on_fediverse_like_.is_empty() { notify.push(Notify { event: FEDIVERSE_LIKE.to_string() }); }
+        if !self.on_fediverse_repost_.is_empty() { notify.push(Notify { event: FEDIVERSE_REPOST.to_string() }); }
+        if !self.on_fediverse_quote_.is_empty() { notify.push(Notify { event: FEDIVERSE_QUOTE.to_string() }); }
+        if !self.on_fediverse_mention_.is_empty() { notify.push(Notify { event: FEDIVERSE_MENTION.to_string() }); }
+        if !self.on_fediverse_reply_.is_empty() { notify.push(Notify { event: FEDIVERSE_REPLY.to_string() }); }
 
         // Construct filter.
         let mut filter = vec![];
@@ -591,7 +611,7 @@ impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
 
             on_page_scripts: self.on_page_scripts_,
 
-            commands: self.commands_,
+            commands: self.commands_
         }
     }
 }

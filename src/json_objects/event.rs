@@ -17,7 +17,33 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 
-pub(crate) enum Event {
+pub(crate) const CHAT_MESSAGE_RECEIVED: &str = "chat.message.received";
+pub(crate) const CHAT_USER_JOINED: &str = "chat.user.joined";
+pub(crate) const CHAT_USER_PARTED: &str = "chat.user.parted";
+pub(crate) const CHAT_USER_RENAMED: &str = "chat.user.renamed";
+pub(crate) const CHAT_MESSAGE_MODERATED: &str = "chat.message.moderated";
+
+pub(crate) const STREAM_STARTED: &str = "stream.started";
+pub(crate) const STREAM_STOPPED: &str = "stream.stopped";
+pub(crate) const STREAM_TITLE_CHANGED: &str = "stream.title.changed";
+
+pub(crate) const SSE_CONNECT: &str = "sse.connect";
+pub(crate) const SSE_DISCONNECT: &str = "sse.disconnect";
+
+pub(crate) const TICK: &str = "tick";
+
+pub(crate) const FEDIVERSE_ACTIVITY: &str = "fediverse.activity";
+pub(crate) const FEDIVERSE_FOLLOW: &str = "fediverse.follow";
+pub(crate) const FEDIVERSE_LIKE: &str = "fediverse.like";
+pub(crate) const FEDIVERSE_REPOST: &str = "fediverse.repost";
+pub(crate) const FEDIVERSE_QUOTE: &str = "fediverse.quote";
+pub(crate) const FEDIVERSE_MENTION: &str = "fediverse.mention";
+pub(crate) const FEDIVERSE_REPLY: &str = "fediverse.reply";
+
+pub(crate) const CHAT_COMMAND: &str = "chat.command";
+pub(crate) const TIMER_FIRE: &str = "timer.fire";
+
+pub enum Event {
     // Chat events
     ChatMessageReceived(ChatMessage),
     ChatUserJoined(User),
@@ -111,31 +137,31 @@ impl TryFrom<(&str, &str)> for Event {
 
     fn try_from((event_type, payload): (&str, &str)) -> Result<Self, Self::Error> {
         match event_type {
-            "chat.message.received" => Ok(Event::ChatMessageReceived(serde_json::from_str(payload)?)),
-            "chat.user.joined" => Ok(Event::ChatUserJoined(serde_json::from_str(payload)?)),
-            "chat.user.parted" => Ok(Event::ChatUserParted(serde_json::from_str(payload)?)),
-            "chat.user.renamed" => Ok(Event::ChatUserRenamed(serde_json::from_str(payload)?)),
-            "chat.message.moderated" => Ok(Event::ChatMessageModerated(serde_json::from_str(payload)?)),
+            CHAT_MESSAGE_RECEIVED => Ok(Event::ChatMessageReceived(serde_json::from_str(payload)?)),
+            CHAT_USER_JOINED => Ok(Event::ChatUserJoined(serde_json::from_str(payload)?)),
+            CHAT_USER_PARTED => Ok(Event::ChatUserParted(serde_json::from_str(payload)?)),
+            CHAT_USER_RENAMED => Ok(Event::ChatUserRenamed(serde_json::from_str(payload)?)),
+            CHAT_MESSAGE_MODERATED => Ok(Event::ChatMessageModerated(serde_json::from_str(payload)?)),
 
-            "stream.started" => Ok(Event::StreamStarted(serde_json::from_str(payload)?)),
-            "stream.stopped" => Ok(Event::StreamStopped(serde_json::from_str(payload)?)),
-            "stream.title.changed" => Ok(Event::StreamTitleChanged(serde_json::from_str(payload)?)),
+            STREAM_STARTED => Ok(Event::StreamStarted(serde_json::from_str(payload)?)),
+            STREAM_STOPPED => Ok(Event::StreamStopped(serde_json::from_str(payload)?)),
+            STREAM_TITLE_CHANGED => Ok(Event::StreamTitleChanged(serde_json::from_str(payload)?)),
 
-            "sse.connect" => Ok(Event::SSEConnect(serde_json::from_str(payload)?)),
-            "sse.disconnect" => Ok(Event::SSEDisconnect(serde_json::from_str(payload)?)),
+            SSE_CONNECT => Ok(Event::SSEConnect(serde_json::from_str(payload)?)),
+            SSE_DISCONNECT => Ok(Event::SSEDisconnect(serde_json::from_str(payload)?)),
 
-            "tick" => Ok(Event::Tick(serde_json::from_str(payload)?)),
+            TICK => Ok(Event::Tick(serde_json::from_str(payload)?)),
 
-            "fediverse.activity" => Ok(Event::FediverseActivity(serde_json::from_str(payload)?)),
-            "fediverse.follow" => Ok(Event::FediverseFollow(serde_json::from_str(payload)?)),
-            "fediverse.like" => Ok(Event::FediverseLike(serde_json::from_str(payload)?)),
-            "fediverse.repost" => Ok(Event::FediverseRepost(serde_json::from_str(payload)?)),
-            "fediverse.quote" => Ok(Event::FediverseQuote(serde_json::from_str(payload)?)),
-            "fediverse.mention" => Ok(Event::FediverseMention(serde_json::from_str(payload)?)),
-            "fediverse.reply" => Ok(Event::FediverseReply(serde_json::from_str(payload)?)),
+            FEDIVERSE_ACTIVITY => Ok(Event::FediverseActivity(serde_json::from_str(payload)?)),
+            FEDIVERSE_FOLLOW => Ok(Event::FediverseFollow(serde_json::from_str(payload)?)),
+            FEDIVERSE_LIKE => Ok(Event::FediverseLike(serde_json::from_str(payload)?)),
+            FEDIVERSE_REPOST => Ok(Event::FediverseRepost(serde_json::from_str(payload)?)),
+            FEDIVERSE_QUOTE => Ok(Event::FediverseQuote(serde_json::from_str(payload)?)),
+            FEDIVERSE_MENTION => Ok(Event::FediverseMention(serde_json::from_str(payload)?)),
+            FEDIVERSE_REPLY => Ok(Event::FediverseReply(serde_json::from_str(payload)?)),
 
-            "chat.command" => Ok(Event::ChatCommand(serde_json::from_str(payload)?)),
-            "timer.fire" => Ok(Event::TimerFire(/*serde_json::from_str(payload)?*/)),
+            CHAT_COMMAND => Ok(Event::ChatCommand(serde_json::from_str(payload)?)),
+            TIMER_FIRE => Ok(Event::TimerFire(/*serde_json::from_str(payload)?*/)),
 
             _ => Ok(Custom(event_type.to_string(), payload.to_string()))
         }

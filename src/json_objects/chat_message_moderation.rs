@@ -3,7 +3,7 @@ use crate::json_objects::user::User;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct ChatMessageModeration {
+pub struct ChatMessageModeration {
     message_id: String,
     visible: bool,
     moderator: Option<User>

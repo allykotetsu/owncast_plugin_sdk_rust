@@ -3,7 +3,7 @@ use crate::json_objects::fediverse_actor::FediverseActor;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct FediverseTargetedEngagement {
+pub struct FediverseTargetedEngagement {
     actor: FediverseActor,
     target: String,
 }
