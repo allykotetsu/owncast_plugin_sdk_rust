@@ -3,6 +3,7 @@ use serde::Deserialize;
 use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::admin::Admin;
 use crate::json_objects::bot::Bot;
+use crate::json_objects::category::Category;
 use crate::json_objects::config::Config;
 use crate::json_objects::extra_page_content::ExtraPageContent;
 use crate::json_objects::network::Network;
@@ -26,4 +27,5 @@ pub(crate) struct PartialManifest {
     pub(crate) scripts: Option<Vec<String>>,
     pub(crate) extra_page_content: Option<ExtraPageContent>,
     pub(crate) tabs: Option<Tab>,
+    pub(crate) category: Category
 }

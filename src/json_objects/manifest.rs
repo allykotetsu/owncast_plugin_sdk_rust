@@ -3,6 +3,7 @@ use serde::Serialize;
 use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::admin::Admin;
 use crate::json_objects::bot::Bot;
+use crate::json_objects::category::Category;
 use crate::json_objects::command::Command;
 use crate::json_objects::config::Config;
 use crate::json_objects::extra_page_content::ExtraPageContent;
@@ -29,6 +30,7 @@ pub struct Manifest {
     pub(crate) scripts: Option<Vec<String>>,
     pub(crate) extra_page_content: Option<ExtraPageContent>,
     pub(crate) tabs: Option<Tab>,
+    pub(crate) category: Category,
 
     pub(crate) subscriptions: Subscriptions,
     pub(crate) commands: Vec<Command>
@@ -52,6 +54,7 @@ impl From<(PartialManifest, Subscriptions, Vec<Command>)> for Manifest {
             scripts: partial_manifest.scripts,
             extra_page_content: partial_manifest.extra_page_content,
             tabs: partial_manifest.tabs,
+            category: partial_manifest.category,
             subscriptions,
             commands,
         }

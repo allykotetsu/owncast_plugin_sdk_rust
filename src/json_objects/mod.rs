@@ -37,3 +37,4 @@ pub(crate) mod admin_page;
 pub(crate) mod action_button;
 pub(crate) mod tab;
 pub(crate) mod network;
+pub(crate) mod category;
