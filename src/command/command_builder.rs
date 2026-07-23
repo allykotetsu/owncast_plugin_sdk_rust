@@ -5,14 +5,14 @@ use crate::json_objects::command::Command;
 /// A struct for building a chat command.
 pub struct CommandBuilder<'a> {
     name_: String,
-    run_: Box<&'a dyn Fn(&CommandContext)>,
+    run_: Box<&'a fn(&CommandContext)>,
     cooldown_ms_: Option<u128>,
-    on_denied_: Option<Box<&'a dyn Fn(&CommandContext)>>,
+    on_denied_: Option<Box<&'a fn(&CommandContext)>>,
     description_: Option<String>,
     usage_: Option<String>,
     aliases_: Option<Vec<String>>,
     mod_only_: Option<bool>,
-    on_cooldown_: Option<Box<&'a dyn Fn(&CommandContext)>>
+    on_cooldown_: Option<Box<&'a fn(&CommandContext)>>
 }
 
 impl<'a> CommandBuilder<'a> {
