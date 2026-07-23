@@ -1,6 +1,9 @@
+use extism_pdk::{ToBytes, Json};
 use serde::{Serialize, Serializer};
 use serde::ser::SerializeStruct;
 
+#[derive(ToBytes)]
+#[encoding(Json)]
 pub enum FilterResult {
     Pass,
     Modify(String),

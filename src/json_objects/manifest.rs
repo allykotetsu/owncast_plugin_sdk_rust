@@ -1,3 +1,4 @@
+use extism_pdk::{ToBytes, Json};
 use std::collections::HashMap;
 use serde::Serialize;
 use crate::json_objects::action_button::ActionButton;
@@ -13,8 +14,9 @@ use crate::json_objects::tab::Tab;
 use crate::partial_manifest::PartialManifest;
 use crate::permission::Permission;
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, ToBytes)]
 #[serde(rename_all = "camelCase")]
+#[encoding(Json)]
 pub struct Manifest {
     pub(crate) api: String,
     pub(crate) name: String,

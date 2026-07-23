@@ -1,3 +1,4 @@
+use extism_pdk::{FromBytes, Json};
 use std::collections::HashMap;
 use serde::{Deserialize, Deserializer};
 use serde::de::{Error, MapAccess, SeqAccess, Visitor};
@@ -43,6 +44,8 @@ pub(crate) const FEDIVERSE_REPLY: &str = "fediverse.reply";
 pub(crate) const CHAT_COMMAND: &str = "chat.command";
 pub(crate) const TIMER_FIRE: &str = "timer.fire";
 
+#[derive(FromBytes)]
+#[encoding(Json)]
 pub enum Event {
     // Chat events
     ChatMessageReceived(ChatMessage),

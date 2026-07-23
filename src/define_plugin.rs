@@ -27,17 +27,17 @@ macro_rules! define_plugin {
 
         // Exported functions.
         #[plugin_fn]
-        pub fn register() -> FnResult<OutputJson<Manifest>> {
-            Ok(OutputJson(PLUGIN.get_manifest()))
+        pub fn register() -> FnResult<Manifest> {
+            Ok(PLUGIN.get_manifest())
         }
 
         #[plugin_fn]
-        pub fn on_event(InputJson(event): InputJson<Event>) -> FnResult<()> {
+        pub fn on_event(event: Event) -> FnResult<()> {
             Ok(PLUGIN.dispatch_event(event))
         }
 
         #[plugin_fn]
-        pub fn on_filter(InputJson(event): InputJson<Event>) -> FnResult<OutputJson<FilterResult>> {
+        pub fn on_filter(event: Event) -> FnResult<FilterResult> {
             let payload = if let Event::ChatMessageReceived(payload) = event {
                 Ok(payload)
             } else {
@@ -45,21 +45,21 @@ macro_rules! define_plugin {
                 Err(BadEventType(format!("Expected filter for \"chat.message.received\", got {event}")))
             }?;
 
-            Ok(OutputJson(PLUGIN.dispatch_filter(payload)))
+            Ok(PLUGIN.dispatch_filter(payload))
         }
 
         #[plugin_fn]
-        pub fn on_http_request(InputJson(incoming_http_request): InputJson<IncomingHttpRequest>) -> FnResult<OutputJson<OutgoingHttpResponse>> {
-            Ok(OutputJson(PLUGIN.dispatch_http_request(incoming_http_request)))
+        pub fn on_http_request(incoming_http_request: IncomingHttpRequest) -> FnResult<OutgoingHttpResponse> {
+            Ok(PLUGIN.dispatch_http_request(incoming_http_request))
         }
 
         #[plugin_fn]
-        pub fn on_tab_content(InputJson(content_request): InputJson<ContentRequest>) -> FnResult<String> {
+        pub fn on_tab_content(content_request: ContentRequest) -> FnResult<String> {
             Ok(PLUGIN.dispatch_tab_content(content_request).unwrap_or(String::new()))
         }
 
         #[plugin_fn]
-        pub fn on_page_content(InputJson(content_request): InputJson<ContentRequest>) -> FnResult<String> {
+        pub fn on_page_content(content_request: ContentRequest) -> FnResult<String> {
             Ok(PLUGIN.dispatch_page_content(content_request).unwrap_or(String::new()))
         }
 
@@ -75,8 +75,8 @@ macro_rules! define_plugin {
         }
 
         #[plugin_fn]
-        pub fn on_auth_check(InputJson(auth_check_request): InputJson<AuthCheckRequest>) -> FnResult<OutputJson<AuthCheckResult>> {
-            Ok(OutputJson(PLUGIN.dispatch_auth_check(auth_check_request).unwrap_or(AuthCheckResult::Ok)))
+        pub fn on_auth_check(auth_check_request: AuthCheckRequest) -> FnResult<AuthCheckResult> {
+            Ok(PLUGIN.dispatch_auth_check(auth_check_request).unwrap_or(AuthCheckResult::Ok))
         }
     };
 }
