@@ -437,6 +437,7 @@ impl<'a> PluginBuilder<'a> {
     ///             FilterResult::Pass
     ///         }
     ///     })?;
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn filter_chat_message<F: Fn(&ChatMessage) -> FilterResult + 'static>(&mut self, priority: Option<u8>, f: F) -> Result<(), String> {
@@ -467,6 +468,7 @@ impl<'a> PluginBuilder<'a> {
     ///             body: Some(body)
     ///         }
     ///     })?;
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn on_http_request<F: Fn(&IncomingHttpRequest) -> OutgoingHttpResponse + 'static>(&mut self, method: &[Method], path: &str, f: &'a F) -> Result<(), String> {
@@ -492,6 +494,7 @@ impl<'a> PluginBuilder<'a> {
     ///     plugin_builder.on("another-plugin.something", |CustomEventPayload { data }| {
     ///         owncast_send_chat(format!("Received {data}."));
     ///     });
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn on<T: DeserializeOwned, F: Fn(&T) -> () + 'static>(&mut self, event: &str, f: F) {
@@ -518,6 +521,7 @@ impl<'a> PluginBuilder<'a> {
     ///         .with_aliases(&["time", "livetime"])
     ///         .with_cooldown(1000)
     ///     ])?;
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder<'a>>) -> Result<(), String> {
@@ -543,6 +547,7 @@ impl<'a> PluginBuilder<'a> {
     ///     plugin_builder.on_tab_content("store", |ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn on_tab_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, tab: &str, f: F) -> Result<(), String> {
@@ -566,6 +571,7 @@ impl<'a> PluginBuilder<'a> {
     ///     plugin_builder.on_page_content("store", |ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
+    ///     Ok(plugin_builder)
     /// });
     /// ```
     pub fn on_page_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, page: &str, f: F) -> Result<(), String> {
