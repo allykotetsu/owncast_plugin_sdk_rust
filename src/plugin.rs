@@ -65,10 +65,10 @@ pub(crate) struct Plugin<'a> {
     pub(crate) on_auth_check: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    pub(crate) on_tab_content: Option<Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_tab_content: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Content
-    pub(crate) on_page_content: Option<Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_page_content: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Styles
     pub(crate) on_page_styles: Vec<Box<dyn Fn() -> String>>,
@@ -236,7 +236,7 @@ impl<'a> Plugin<'a> {
     }
 
     pub(crate) fn dispatch_tab_content(&self, content_request: ContentRequest) -> Option<String> {
-        if let Some(on_tab_content) = &self.on_tab_content {
+        if let Some(on_tab_content) = self.on_tab_content.get(&content_request.slug) {
             Some(on_tab_content(&content_request))
         } else {
             None
@@ -244,7 +244,7 @@ impl<'a> Plugin<'a> {
     }
 
     pub(crate) fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
-        if let Some(on_page_content) = &self.on_page_content {
+        if let Some(on_page_content) = self.on_page_content.get(&content_request.slug) {
             Some(on_page_content(&content_request))
         } else {
             None

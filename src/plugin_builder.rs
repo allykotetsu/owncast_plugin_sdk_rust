@@ -72,10 +72,10 @@ pub struct PluginBuilder<'a> {
     on_auth_check_: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    on_tab_content_: Option<Box<dyn Fn(&ContentRequest) -> String>>,
+    on_tab_content_: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Content
-    on_page_content_: Option<Box<dyn Fn(&ContentRequest) -> String>>,
+    on_page_content_: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
 
     // Page Styles
     on_page_styles_: Vec<Box<dyn Fn() -> String>>,
@@ -118,9 +118,9 @@ impl<'a> PluginBuilder<'a> {
 
             on_auth_check_: vec![],
 
-            on_tab_content_: None,
+            on_tab_content_: HashMap::new(),
 
-            on_page_content_: None,
+            on_page_content_: HashMap::new(),
 
             on_page_styles_: vec![],
 
@@ -510,13 +510,15 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// plugin_builder.commands("!", false, vec![
-    ///     CommandBuilder::new("update", &|ctx| {
-    ///         ctx.reply("we've been live a while!");
-    ///     })
-    ///     .with_aliases(&["time", "livetime"])
-    ///     .with_cooldown(1000)
-    /// ])?;
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.commands("!", false, vec![
+    ///         CommandBuilder::new("update", &|ctx| {
+    ///             ctx.reply("we've been live a while!");
+    ///         })
+    ///         .with_aliases(&["time", "livetime"])
+    ///         .with_cooldown(1000)
+    ///     ])?;
+    /// });
     /// ```
     pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder<'a>>) -> Result<(), String> {
         for command_builder in command_builders {
@@ -528,20 +530,48 @@ impl<'a> PluginBuilder<'a> {
         Ok(())
     }
 
-    pub fn on_tab_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, f: F) -> Result<(), String> {
-        if self.on_tab_content_.is_some() {
-            Err("You can only call on_tab_content once.".to_string())
+    /// Registers content for when a specific tab is being viewed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a duplicate slug is registered.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_tab_content("store", |ContentRequest { user, .. }| {
+    ///         format!("<p>Hello {user}!</p>")
+    ///     })?;
+    /// });
+    /// ```
+    pub fn on_tab_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, tab: &str, f: F) -> Result<(), String> {
+        if let Some(_) = self.on_tab_content_.insert(tab.to_string(), Box::new(f)) {
+            Err(format!("A tab content handler already exists for {tab}."))
         } else {
-            self.on_tab_content_ = Some(Box::new(f));
             Ok(())
         }
     }
 
-    pub fn on_page_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, f: F) -> Result<(), String> {
-        if self.on_page_content_.is_some() {
-            Err("You can only call on_tab_content once.".to_string())
+    /// Registers content for when a specific page is being viewed.
+    ///
+    /// # Panics
+    ///
+    /// Panics if a duplicate slug is registered.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_page_content("store", |ContentRequest { user, .. }| {
+    ///         format!("<p>Hello {user}!</p>")
+    ///     })?;
+    /// });
+    /// ```
+    pub fn on_page_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, page: &str, f: F) -> Result<(), String> {
+        if let Some(_) = self.on_page_content_.insert(page.to_string(), Box::new(f)) {
+            Err(format!("A page content handler already exists for {page}."))
         } else {
-            self.on_page_content_ = Some(Box::new(f));
             Ok(())
         }
     }
