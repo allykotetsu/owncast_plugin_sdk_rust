@@ -1,4 +1,4 @@
-use wasm_bindgen::prelude::wasm_bindgen;
+/*use wasm_bindgen::prelude::wasm_bindgen;
 use crate::errors::Forbidden;
 use crate::input_json::InputJson;
 use crate::json_objects::chat_client::ChatClient;
@@ -8,7 +8,7 @@ use crate::json_objects::user_register_request::UserRegisterRequest;
 use crate::json_objects::user_register_result::UserRegisterResult;
 use crate::output_json::OutputJson;
 use crate::permission::Permission;
-use crate::PLUGIN;
+// use crate::PLUGIN;
 
 // TODO import other owncast functions
 
@@ -176,18 +176,20 @@ videoConfig: {
  */
 
 pub fn owncast_send_chat(s: &str) -> Result<(), Forbidden> {
-    if PLUGIN.is_permitted(Permission::ChatSend) {
+    /*if PLUGIN.is_permitted(Permission::ChatSend) {
         owncast_send_chat(s)?;
         Ok(())
     } else {
         Err(Forbidden("You are not permitted to use owncast.chat.send".to_string()))
-    }
+    }*/
+    Ok(())
 }
 
 pub fn owncast_send_chat_reply(r: OutputJson<ChatMessage>,s: &str) -> Result<bool, Forbidden> {
-    if PLUGIN.is_permitted(Permission::ChatSend) {
+    /*if PLUGIN.is_permitted(Permission::ChatSend) {
         Ok(owncast_send_chat_reply_(r, s))
     } else {
         Err(Forbidden("You are not permitted to use owncast.chat.replyTo".to_string()))
-    }
-}
+    }*/
+    Ok(true)
+}*/

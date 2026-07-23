@@ -1,25 +1,12 @@
+use extism_pdk::{Error, Memory, ToMemory};
 use serde::Serialize;
-use wasm_bindgen::convert::{FromWasmAbi, IntoWasmAbi};
-use wasm_bindgen::describe::WasmDescribe;
 
-pub struct OutputJson<T: Serialize>(pub(crate) T);
+pub struct OutputJson<T: Serialize>(pub T);
 
-impl<T: Serialize> IntoWasmAbi for OutputJson<T> {
-    type Abi = <Vec<u8> as FromWasmAbi>::Abi;
-
-    fn into_abi(self) -> Self::Abi {
+impl<T: Serialize> ToMemory for &OutputJson<T> {
+    fn to_memory(&self) -> Result<Memory, Error> {
         let OutputJson(value) = self;
-        match serde_json::to_string(&value) {
-            Ok(string) => string.into_abi(),
-            Err(error) => error.to_string().into_abi()
-        }
+        let value = serde_json::to_string(&value)?;
+        value.to_memory()
     }
 }
-
-impl<T: Serialize> WasmDescribe for OutputJson<T> {
-    fn describe() {
-        String::describe()
-    }
-}
-
-// TODO implement FromResidual

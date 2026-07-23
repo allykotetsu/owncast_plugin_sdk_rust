@@ -6,7 +6,7 @@ pub(crate) mod content_request;
 pub(crate) mod auth_check_request;
 pub(crate) mod auth_check_result;
 pub(crate) mod user;
-pub(crate) mod chat_message;
+pub mod chat_message;
 pub(crate) mod subscriptions;
 pub(crate) mod command;
 pub(crate) mod notify;

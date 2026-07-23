@@ -89,7 +89,7 @@ pub struct PluginBuilder<'a> {
 }
 
 impl<'a> PluginBuilder<'a> {
-    pub(crate) fn new() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         Ok(Self {
             partial_manifest: serde_json::from_str(&read_to_string("./plugin.manifest.json")?)?,
 

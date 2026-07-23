@@ -1,12 +1,7 @@
-use std::error::Error;
-use crate::json_objects::chat_message::ChatMessage;
-use crate::plugin_builder::PluginBuilder;
-use crate::imports::owncast_send_chat;
-
-mod json_objects;
+pub mod json_objects;
 mod permission;
 mod input_json;
-mod plugin_builder;
+pub mod plugin_builder;
 mod plugin;
 mod define_plugin;
 mod imports;
@@ -16,9 +11,32 @@ mod output_json;
 mod partial_manifest;
 mod errors;
 
-define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
-    plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-        owncast_send_chat(&format!("echo ${body}"));
+pub mod prelude {
+    pub use std::error::Error;
+    pub use std::sync::LazyLock;
+    pub use extism_pdk::FnResult;
+    pub use extism_pdk::plugin_fn;
+    pub use crate::define_plugin;
+    pub use crate::plugin_builder::PluginBuilder;
+    pub use crate::errors::BadEventType;
+    pub use crate::input_json::InputJson;
+    pub use crate::json_objects::auth_check_request::AuthCheckRequest;
+    pub use crate::json_objects::auth_check_result::AuthCheckResult;
+    pub use crate::json_objects::content_request::ContentRequest;
+    pub use crate::json_objects::event::Event;
+    pub use crate::json_objects::filter_result::FilterResult;
+    pub use crate::json_objects::incoming_http_request::IncomingHttpRequest;
+    pub use crate::json_objects::manifest::Manifest;
+    pub use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
+    pub use crate::output_json::OutputJson;
+    pub use crate::plugin::Plugin;
+}
+
+use crate::prelude::*;
+
+define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn std::error::Error>> {
+    plugin_builder.on_chat_message(|_| {
+        // owncast_send_chat(&format!("echo ${body}"));
     });
     Ok(plugin_builder)
 });

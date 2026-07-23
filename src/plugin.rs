@@ -26,7 +26,7 @@ use crate::json_objects::user::User;
 use crate::permission::Permission;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
-pub(crate) struct Plugin<'a> {
+pub struct Plugin<'a> {
     // Manifest
     pub(crate) manifest: Manifest,
 
@@ -86,11 +86,11 @@ impl<'a> Plugin<'a> {
         self.manifest.permissions.contains(&permission)
     }
 
-    pub(crate) fn get_manifest(&self) -> Manifest {
+    pub fn get_manifest(&self) -> Manifest {
         self.manifest.clone()
     }
 
-    pub(crate) fn dispatch_event(&self, event: Event) {
+    pub fn dispatch_event(&self, event: Event) {
         match event {
             Event::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message { func(&payload); }
@@ -180,7 +180,7 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn dispatch_filter(&self, msg: ChatMessage) -> FilterResult {
+    pub fn dispatch_filter(&self, msg: ChatMessage) -> FilterResult {
         let mut body = String::new();
 
         for (_, filter_chat_message) in &self.filter_chat_message {
@@ -204,7 +204,7 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn dispatch_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
+    pub fn dispatch_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             // If plugin does not listen for HTTP requests, then return 404.
             OutgoingHttpResponse {
@@ -240,23 +240,23 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub(crate) fn dispatch_tab_content(&self, content_request: ContentRequest) -> Option<String> {
+    pub fn dispatch_tab_content(&self, content_request: ContentRequest) -> Option<String> {
         Some(self.on_tab_content.get(&content_request.slug)?(&content_request))
     }
 
-    pub(crate) fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
+    pub fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
         Some(self.on_page_content.get(&content_request.slug)?(&content_request))
     }
 
-    pub(crate) fn dispatch_page_styles(&self) -> Option<String> {
+    pub fn dispatch_page_styles(&self) -> Option<String> {
         Some(self.on_page_styles.clone()?())
     }
 
-    pub(crate) fn dispatch_page_scripts(&self) -> Option<String> {
+    pub fn dispatch_page_scripts(&self) -> Option<String> {
         Some(self.on_page_scripts.clone()?())
     }
 
-    pub(crate) fn dispatch_auth_check(&self, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
+    pub fn dispatch_auth_check(&self, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
         Some(self.on_auth_check?(&auth_check_request))
     }
 }
