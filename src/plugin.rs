@@ -63,7 +63,7 @@ pub(crate) struct Plugin<'a> {
     pub(crate) on_http_request: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
-    pub(crate) on_auth_check: Vec<fn(&AuthCheckRequest) -> AuthCheckResult>,
+    pub(crate) on_auth_check: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
 
     // Tab Content
     pub(crate) on_tab_content: HashMap<String, fn(&ContentRequest) -> String>,
@@ -256,18 +256,7 @@ impl<'a> Plugin<'a> {
         Some(self.on_page_scripts.clone()?())
     }
 
-    // TODO
-    pub(crate) fn page_styles(&self) -> bool {
-        false
-    }
-
-    // TODO
-    pub(crate) fn has_page_scripts(&self) -> bool {
-        false
-    }
-
-    // TODO
-    pub(crate) fn has_auth_check(&self) -> bool {
-        false
+    pub(crate) fn dispatch_auth_check(&self, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
+        Some(self.on_auth_check?(&auth_check_request))
     }
 }

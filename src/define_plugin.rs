@@ -25,6 +25,8 @@ macro_rules! define_plugin {
         use std::sync::LazyLock;
         use wasm_bindgen::prelude::wasm_bindgen;
         use crate::input_json::InputJson;
+        use crate::json_objects::auth_check_request::AuthCheckRequest;
+        use crate::json_objects::auth_check_result::AuthCheckResult;
         use crate::json_objects::content_request::ContentRequest;
         use crate::json_objects::event::Event;
         use crate::json_objects::filter_result::FilterResult;
@@ -108,22 +110,26 @@ macro_rules! define_plugin {
             }
         }
 
-        // Optional. Only export if exists and if permissions are correct.
+        // TODO is it possible to only export these functions if the plugin has the correct permissions?
         #[wasm_bindgen]
         pub fn on_page_styles() -> String {
             PLUGIN.dispatch_page_styles().unwrap_or(String::new())
         }
 
-        // Optional. Only export if exists and if permissions are correct.
         #[wasm_bindgen]
         pub fn on_page_scripts() -> String {
             PLUGIN.dispatch_page_scripts().unwrap_or(String::new())
         }
 
-        // Optional. Only export if exists.
-        /*#[wasm_bindgen]
-        pub fn on_auth_check(_: InputJson<AuthCheckRequest>) -> OutputJson<AuthCheckResult> {
-
-        }*/
+        #[wasm_bindgen]
+        pub fn on_auth_check(InputJson(auth_check_request): InputJson<AuthCheckRequest>) -> OutputJson<AuthCheckResult> {
+            match auth_check_request {
+                Ok(auth_check_request) => OutputJson(PLUGIN.dispatch_auth_check(auth_check_request).unwrap_or(AuthCheckResult::Ok)),
+                Err(err) => {
+                    println!("{err}");
+                    OutputJson(AuthCheckResult::Ok)
+                }
+            }
+        }
     };
 }

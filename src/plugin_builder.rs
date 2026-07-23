@@ -69,7 +69,7 @@ pub struct PluginBuilder<'a> {
     on_http_request_: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
-    on_auth_check_: Vec<fn(&AuthCheckRequest) -> AuthCheckResult>,
+    on_auth_check_: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
 
     // Tab Content
     on_tab_content_: HashMap<String, fn(&ContentRequest) -> String>,
@@ -116,7 +116,7 @@ impl<'a> PluginBuilder<'a> {
 
             on_http_request_: HashMap::new(),
 
-            on_auth_check_: vec![],
+            on_auth_check_: None,
 
             on_tab_content_: HashMap::new(),
 
@@ -628,6 +628,35 @@ impl<'a> PluginBuilder<'a> {
             Err("Can only set on_page_scripts once.".to_string())
         } else {
             self.on_page_scripts_ = Some(f);
+            Ok(())
+        }
+    }
+
+    /// Registers a function that implements an authentication gate.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this function is called more than once.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_auth_check(|AuthCheckRequest { user: User { display_name, .. } }| {
+    ///         if display_name.as_str() == "Authorized user" {
+    ///             AuthCheckResult::Ok()
+    ///         } else {
+    ///             AuthCheckResult::Deny("You are not authorized!".to_string())
+    ///         }
+    ///     })?;
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_auth_check(&mut self, f: fn(&AuthCheckRequest) -> AuthCheckResult) -> Result<(), String> {
+        if self.on_auth_check_.is_some() {
+            Err("Can only set on_page_scripts once.".to_string())
+        } else {
+            self.on_auth_check_ = Some(f);
             Ok(())
         }
     }

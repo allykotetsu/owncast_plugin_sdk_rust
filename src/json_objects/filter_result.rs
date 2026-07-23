@@ -4,7 +4,7 @@ use serde::ser::SerializeStruct;
 pub enum FilterResult {
     Pass,
     Modify(String),
-    Drop(String)
+    Drop(Option<String>)
 }
 
 impl Serialize for FilterResult {
@@ -20,16 +20,14 @@ impl Serialize for FilterResult {
                 // So that the plugin author is encouraged to only edit the message body but they can find a way around that if they really need to edit more.
                 state = serializer.serialize_struct("", 2)?;
                 state.serialize_field("action", "modify")?;
-                state.serialize_field("body", body)?;
+                state.serialize_field("payload", body)?;
             }
             FilterResult::Drop(reason) => {
                 state = serializer.serialize_struct("", 2)?;
                 state.serialize_field("action", "drop")?;
-                state.serialize_field("reason", reason)?;
+                state.serialize_field("reason", &reason.clone().unwrap_or(String::new()))?;
             }
         }
         state.end()
     }
 }
-
-// Refer to https://serde.rs/impl-serialize.html for documentation.
