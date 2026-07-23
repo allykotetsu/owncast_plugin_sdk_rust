@@ -249,11 +249,7 @@ impl<'a> Plugin<'a> {
     }
 
     pub(crate) fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
-        if let Some(on_page_content) = self.on_page_content.get(&content_request.slug) {
-            Some(on_page_content(&content_request))
-        } else {
-            None
-        }
+        Some((self.on_page_content.get(&content_request.slug)?)(&content_request))
     }
 
     // TODO
