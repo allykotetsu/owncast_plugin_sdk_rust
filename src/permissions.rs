@@ -1,34 +1,60 @@
-pub(crate) const CHAT_SEND: &str = "chat.send";
-pub(crate) const CHAT_HISTORY: &str = "chat.history";
-pub(crate) const CHAT_MODERATE: &str = "chat.moderate";
-pub(crate) const CHAT_FILTER: &str = "chat.filter";
+use serde::Serialize;
 
-pub(crate) const USERS_READ: &str = "users.read";
-pub(crate) const USERS_MODERATE: &str = "users.moderate";
-pub(crate) const USERS_REGISTER: &str = "users.register";
+#[derive(Serialize)]
+pub(crate) enum Permissions {
+    #[serde(rename = "chat.send")]
+    ChatSend,
+    #[serde(rename = "chat.history")]
+    ChatHistory,
+    #[serde(rename = "chat.moderate")]
+    ChatModerate,
+    #[serde(rename = "chat.filter")]
+    ChatFilter,
 
-pub(crate) const AUTH_GATE: &str = "auth.gate";
+    #[serde(rename = "users.read")]
+    UsersRead,
+    #[serde(rename = "users.moderate")]
+    UsersModerate,
+    #[serde(rename = "users.register")]
+    UsersRegister,
 
-pub(crate) const STORAGE_KV: &str = "storage.kv";
-pub(crate) const STORAGE_UPLOAD: &str = "storage.upload";
-pub(crate) const STORAGE_FS: &str = "storage.fs";
+    #[serde(rename = "auth.gate")]
+    AuthGate,
 
-pub(crate) const NETWORK_FETCH: &str = "network.fetch";
+    #[serde(rename = "storage.kv")]
+    StorageKV,
+    #[serde(rename = "storage.upload")]
+    StorageUpload,
+    #[serde(rename = "storage.fs")]
+    StorageFS,
 
-pub(crate) const EVENTS_EMIT: &str = "events.emit";
+    #[serde(rename = "network.fetch")]
+    NetworkFetch,
 
-pub(crate) const HTTP_SERVE: &str = "http.serve";
-pub(crate) const HTTP_SSE: &str = "http.sse";
+    #[serde(rename = "events.emit")]
+    EventsEmit,
 
-pub(crate) const SERVER_READ: &str = "server.read";
+    #[serde(rename = "http.serve")]
+    HttpServe,
+    #[serde(rename = "http.sse")]
+    HttpSse,
 
-pub(crate) const VIDEOCONFIG_READ: &str = "videoconfig.read";
-pub(crate) const VIDEOCONFIG_WRITE: &str = "videoconfig.write";
+    #[serde(rename = "server.read")]
+    ServerRead,
 
-pub(crate) const NOTIFICATIONS_SEND: &str = "notifications.send";
+    #[serde(rename = "videoconfig.read")]
+    VideoConfigRead,
+    #[serde(rename = "videoconfig.write")]
+    VideoConfigWrite,
 
-pub(crate) const FEDIVERSE_POST: &str = "fediverse.post";
+    #[serde(rename = "notifications.send")]
+    NotificationsSend,
 
-pub(crate) const UI_MODIFY: &str = "ui.modify";
+    #[serde(rename = "fediverse.post")]
+    FediversePost,
+
+    #[serde(rename = "ui.modify")]
+    UiModify
+}
 
 // TODO actually implement permissions
