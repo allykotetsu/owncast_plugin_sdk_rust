@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use std::fs::read_to_string;
+use extism_pdk::config;
 use serde::de::DeserializeOwned;
 use serde_json::Error;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
-use crate::errors::{Duplicate, OutOfBounds};
+use crate::errors::{Duplicate, MissingManifest, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -90,45 +90,49 @@ pub struct PluginBuilder<'a> {
 
 impl<'a> PluginBuilder<'a> {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        Ok(Self {
-            partial_manifest: serde_json::from_str(&read_to_string("./plugin.manifest.json")?)?,
+        if let Some(manifest) =  config::get("manifest")? {
+            Ok(Self {
+                partial_manifest: serde_json::from_str(&manifest)?,
 
-            on_chat_message_: vec![],
-            on_chat_user_joined_: vec![],
-            on_chat_user_parted_: vec![],
-            on_chat_user_renamed_: vec![],
-            on_message_moderated_: vec![],
-            on_stream_started_: vec![],
-            on_stream_stopped_: vec![],
-            on_stream_title_changed_: vec![],
-            on_sse_connect_: vec![],
-            on_sse_disconnect_: vec![],
-            on_tick_: vec![],
-            on_fediverse_: vec![],
-            on_fediverse_follow_: vec![],
-            on_fediverse_like_: vec![],
-            on_fediverse_repost_: vec![],
-            on_fediverse_quote_: vec![],
-            on_fediverse_mention_: vec![],
-            on_fediverse_reply_: vec![],
-            on_: vec![],
+                on_chat_message_: vec![],
+                on_chat_user_joined_: vec![],
+                on_chat_user_parted_: vec![],
+                on_chat_user_renamed_: vec![],
+                on_message_moderated_: vec![],
+                on_stream_started_: vec![],
+                on_stream_stopped_: vec![],
+                on_stream_title_changed_: vec![],
+                on_sse_connect_: vec![],
+                on_sse_disconnect_: vec![],
+                on_tick_: vec![],
+                on_fediverse_: vec![],
+                on_fediverse_follow_: vec![],
+                on_fediverse_like_: vec![],
+                on_fediverse_repost_: vec![],
+                on_fediverse_quote_: vec![],
+                on_fediverse_mention_: vec![],
+                on_fediverse_reply_: vec![],
+                on_: vec![],
 
-            filter_chat_message_: vec![],
+                filter_chat_message_: vec![],
 
-            on_http_request_: HashMap::new(),
+                on_http_request_: HashMap::new(),
 
-            on_auth_check_: None,
+                on_auth_check_: None,
 
-            on_tab_content_: HashMap::new(),
+                on_tab_content_: HashMap::new(),
 
-            on_page_content_: HashMap::new(),
+                on_page_content_: HashMap::new(),
 
-            on_page_styles_: None,
+                on_page_styles_: None,
 
-            on_page_scripts_: None,
+                on_page_scripts_: None,
 
-            commands_: HashMap::new()
-        })
+                commands_: HashMap::new()
+            })
+        } else {
+            Err(Box::new(MissingManifest("Manifest could not be found.".to_string())))
+        }
     }
 
     /// Creates an event hook for when a chat message is sent.
