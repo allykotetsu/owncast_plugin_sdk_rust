@@ -23,7 +23,7 @@ use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
-use crate::permission::Permission;
+use crate::json_objects::permission::Permission;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
 pub struct Plugin<'a> {
@@ -92,67 +92,67 @@ impl<'a> Plugin<'a> {
 
     pub fn dispatch_event(&self, event: Event) {
         match event {
-            Event::ChatMessageReceived(payload) => {
+            Event::ChatMessageReceived { payload } => {
                 for func in &self.on_chat_message { func(&payload); }
             }
-            Event::ChatUserJoined(payload) => {
+            Event::ChatUserJoined { payload } => {
                 for func in &self.on_chat_user_joined { func(&payload); }
             }
-            Event::ChatUserParted(payload) => {
+            Event::ChatUserParted { payload } => {
                 for func in &self.on_chat_user_parted { func(&payload); }
             }
-            Event::ChatUserRenamed(payload) => {
+            Event::ChatUserRenamed { payload } => {
                 for func in &self.on_chat_user_renamed { func(&payload); }
             }
-            Event::ChatMessageModerated(payload) => {
+            Event::ChatMessageModerated { payload } => {
                 for func in &self.on_message_moderated { func(&payload); }
             }
 
-            Event::StreamStarted(payload) => {
+            Event::StreamStarted { payload } => {
                 for func in &self.on_stream_started { func(&payload); }
             }
-            Event::StreamStopped(payload) => {
+            Event::StreamStopped { payload } => {
                 for func in &self.on_stream_stopped { func(&payload); }
             }
-            Event::StreamTitleChanged(payload) => {
+            Event::StreamTitleChanged { payload } => {
                 for func in &self.on_stream_title_changed { func(&payload); }
             }
 
-            Event::SSEConnect(payload) => {
+            Event::SseConnect { payload } => {
                 for func in &self.on_sse_connect { func(&payload); }
             }
-            Event::SSEDisconnect(payload) => {
+            Event::SseDisconnect { payload } => {
                 for func in &self.on_sse_disconnect { func(&payload);}
             }
 
-            Event::Tick(payload) => {
+            Event::Tick { payload } => {
                 for func in &self.on_tick { func(&payload); }
             }
 
-            Event::FediverseActivity(payload) => {
+            Event::FediverseActivity { payload } => {
                 for func in &self.on_fediverse { func(&payload); }
             }
-            Event::FediverseFollow(payload) => {
+            Event::FediverseFollow { payload } => {
                 for func in &self.on_fediverse_follow { func(&payload); }
             }
-            Event::FediverseLike(payload) => {
+            Event::FediverseLike { payload } => {
                 for func in &self.on_fediverse_like { func(&payload); }
             }
-            Event::FediverseRepost(payload) => {
+            Event::FediverseRepost { payload } => {
                 for func in &self.on_fediverse_repost { func(&payload); }
             }
-            Event::FediverseQuote(payload) => {
+            Event::FediverseQuote { payload } => {
                 for func in &self.on_fediverse_quote { func(&payload); }
             }
 
-            Event::FediverseMention(payload) => {
+            Event::FediverseMention { payload } => {
                 for func in &self.on_fediverse_mention { func(&payload); }
             }
-            Event::FediverseReply(payload) => {
+            Event::FediverseReply { payload } => {
                 for func in &self.on_fediverse_reply { func(&payload); }
             }
 
-            Event::ChatCommand(payload) => {
+            Event::ChatCommand { payload } => {
                 if let Some(command_definition) = self.commands.get(&payload.command) {
                     (command_definition.run)(&CommandContext {
                         user: payload.message.user.clone(),
@@ -164,13 +164,13 @@ impl<'a> Plugin<'a> {
                     })
                 }
             }
-            Event::TimerFire() => {
+            Event::TimerFire { .. } => {
                 // TODO
             }
 
-            Event::Custom(name, payload) => {
+            Event::Custom { event_type, payload } => {
                 for (other_name, func) in &self.on {
-                    if name == *other_name {
+                    if event_type == *other_name {
                         if let Err(err) = func(payload.as_str()) {
                             println!("{err}");
                         }
@@ -188,11 +188,11 @@ impl<'a> Plugin<'a> {
                 FilterResult::Pass => {
                     continue;
                 }
-                FilterResult::Modify(new) => {
-                    body = new;
+                FilterResult::Modify { payload } => {
+                    body = payload;
                 }
-                FilterResult::Drop(reason) => {
-                    return FilterResult::Drop(reason)
+                FilterResult::Drop { reason } => {
+                    return FilterResult::Drop { reason }
                 }
             }
         }
@@ -200,7 +200,7 @@ impl<'a> Plugin<'a> {
         if body.is_empty() {
             FilterResult::Pass
         } else {
-            FilterResult::Modify(body)
+            FilterResult::Modify { payload: body }
         }
     }
 
@@ -213,28 +213,19 @@ impl<'a> Plugin<'a> {
                 body: None
             }
         } else {
-            if let Ok(method) = Method::try_from(&incoming_http_request.method) {
-                if let Some(func) = self.on_http_request.get(&(method, incoming_http_request.path.clone())) {
-                    let outgoing_http_response = func(&incoming_http_request);
+            if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
+                let outgoing_http_response = func(&incoming_http_request);
 
-                    OutgoingHttpResponse {
-                        status: Some(outgoing_http_response.status.unwrap_or(200)),
-                        headers: outgoing_http_response.headers,
-                        body: outgoing_http_response.body
-                    }
-                } else {
-                    OutgoingHttpResponse {
-                        status: Some(200),
-                        headers: None,
-                        body: None
-                    }
+                OutgoingHttpResponse {
+                    status: Some(outgoing_http_response.status.unwrap_or(200)),
+                    headers: outgoing_http_response.headers,
+                    body: outgoing_http_response.body
                 }
             } else {
-                // If HTTP request method is not a valid type, then return a bad request.
                 OutgoingHttpResponse {
-                    status: Some(400),
-                    headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
-                    body: Some(format!("Unable to parse request method {}.", incoming_http_request.method))
+                    status: Some(200),
+                    headers: None,
+                    body: None
                 }
             }
         }

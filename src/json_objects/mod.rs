@@ -38,3 +38,5 @@ pub(crate) mod action_button;
 pub(crate) mod tab;
 pub(crate) mod network;
 pub(crate) mod category;
+pub(crate) mod event_type;
+pub mod permission;

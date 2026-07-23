@@ -8,7 +8,7 @@ use crate::json_objects::config::Config;
 use crate::json_objects::extra_page_content::ExtraPageContent;
 use crate::json_objects::network::Network;
 use crate::json_objects::tab::Tab;
-use crate::permission::Permission;
+use crate::json_objects::permission::Permission;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]

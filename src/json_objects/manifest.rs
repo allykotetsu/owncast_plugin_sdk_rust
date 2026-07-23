@@ -12,7 +12,7 @@ use crate::json_objects::network::Network;
 use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tab::Tab;
 use crate::partial_manifest::PartialManifest;
-use crate::permission::Permission;
+use crate::json_objects::permission::Permission;
 
 #[derive(Serialize, Clone, ToBytes)]
 #[serde(rename_all = "camelCase")]

@@ -1,5 +1,4 @@
 pub mod json_objects;
-mod permission;
 pub mod plugin_builder;
 mod plugin;
 mod define_plugin;
@@ -21,6 +20,7 @@ pub mod prelude {
     pub use crate::json_objects::auth_check_result::AuthCheckResult;
     pub use crate::json_objects::content_request::ContentRequest;
     pub use crate::json_objects::event::Event;
+    pub use crate::json_objects::event_type::EventType;
     pub use crate::json_objects::filter_result::FilterResult;
     pub use crate::json_objects::incoming_http_request::IncomingHttpRequest;
     pub use crate::json_objects::manifest::Manifest;

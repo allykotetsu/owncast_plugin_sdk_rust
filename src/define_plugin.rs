@@ -38,11 +38,10 @@ macro_rules! define_plugin {
 
         #[plugin_fn]
         pub fn on_filter(event: Event) -> FnResult<FilterResult> {
-            let payload = if let Event::ChatMessageReceived(payload) = event {
+            let payload = if let Event::ChatMessageReceived { payload } = event {
                 Ok(payload)
             } else {
-                let event: String = event.into();
-                Err(BadEventType(format!("Expected filter for \"chat.message.received\", got {event}")))
+                Err(BadEventType(EventType::ChatMessageReceived, event.into()))
             }?;
 
             Ok(PLUGIN.dispatch_filter(payload))
