@@ -132,6 +132,40 @@ impl<'de> Deserialize<'de> for Event {
     }
 }
 
+impl Into<String> for Event {
+    fn into(self) -> String {
+        match self {
+            Event::ChatMessageReceived(_) => CHAT_MESSAGE_RECEIVED.to_string(),
+            Event::ChatUserJoined(_) => CHAT_USER_JOINED.to_string(),
+            Event::ChatUserParted(_) => CHAT_USER_PARTED.to_string(),
+            Event::ChatUserRenamed(_) => CHAT_USER_RENAMED.to_string(),
+            Event::ChatMessageModerated(_) => CHAT_MESSAGE_MODERATED.to_string(),
+
+            Event::StreamStarted(_) => STREAM_STARTED.to_string(),
+            Event::StreamStopped(_) => STREAM_STOPPED.to_string(),
+            Event::StreamTitleChanged(_) => STREAM_TITLE_CHANGED.to_string(),
+
+            Event::SSEConnect(_) => SSE_CONNECT.to_string(),
+            Event::SSEDisconnect(_) => SSE_DISCONNECT.to_string(),
+
+            Event::Tick(_) => TICK.to_string(),
+
+            Event::FediverseActivity(_) => FEDIVERSE_ACTIVITY.to_string(),
+            Event::FediverseFollow(_) => FEDIVERSE_FOLLOW.to_string(),
+            Event::FediverseLike(_) => FEDIVERSE_LIKE.to_string(),
+            Event::FediverseRepost(_) => FEDIVERSE_REPOST.to_string(),
+            Event::FediverseQuote(_) => FEDIVERSE_QUOTE.to_string(),
+            Event::FediverseMention(_) => FEDIVERSE_MENTION.to_string(),
+            Event::FediverseReply(_) => FEDIVERSE_REPLY.to_string(),
+
+            Event::ChatCommand(_) => CHAT_COMMAND.to_string(),
+            Event::TimerFire() => TIMER_FIRE.to_string(),
+
+            Custom(name, _) => name
+        }
+    }
+}
+
 impl TryFrom<(&str, &str)> for Event {
     type Error = JsonError;
 

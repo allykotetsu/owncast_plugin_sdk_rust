@@ -59,9 +59,8 @@ macro_rules! define_plugin {
                     if let Event::ChatMessageReceived(payload) = event {
                         OutputJson(PLUGIN.dispatch_filter(payload))
                     } else {
-                        // TODO
-                        let name = "";
-                        println!("Expected filter for \"chat.message.received\", got {name}");
+                        let event: String = event.into();
+                        println!("Expected filter for \"chat.message.received\", got {event}");
                         OutputJson(FilterResult::Pass)
                     }
                 }
@@ -90,10 +89,10 @@ macro_rules! define_plugin {
         #[wasm_bindgen]
         pub fn on_tab_content(InputJson(content_request): InputJson<ContentRequest>) -> String {
             match content_request {
-                Ok(content_request) => PLUGIN.dispatch_tab_content(content_request).unwrap_or("".to_string()),
+                Ok(content_request) => PLUGIN.dispatch_tab_content(content_request).unwrap_or(String::new()),
                 Err(err) => {
                     println!("{err}");
-                    err.to_string()
+                    String::new()
                 }
             }
         }
@@ -101,10 +100,10 @@ macro_rules! define_plugin {
         #[wasm_bindgen]
         pub fn on_page_content(InputJson(content_request): InputJson<ContentRequest>) -> String {
             match content_request {
-                Ok(content_request) => PLUGIN.dispatch_page_content(content_request).unwrap_or("".to_string()),
+                Ok(content_request) => PLUGIN.dispatch_page_content(content_request).unwrap_or(String::new()),
                 Err(err) => {
                     println!("{err}");
-                    err.to_string()
+                    String::new()
                 }
             }
         }
