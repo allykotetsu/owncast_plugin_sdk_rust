@@ -37,54 +37,54 @@ pub struct PluginBuilder<'a> {
     // Events
     partial_manifest: PartialManifest,
 
-    on_chat_message_: Vec<Box<fn(&ChatMessage)>>,
-    on_chat_user_joined_: Vec<Box<fn(&User)>>,
-    on_chat_user_parted_: Vec<Box<fn(&User)>>,
-    on_chat_user_renamed_: Vec<Box<fn(&ChatUserRename)>>,
-    on_message_moderated_: Vec<Box<fn(&ChatMessageModeration)>>,
+    on_chat_message_: Vec<fn(&ChatMessage)>,
+    on_chat_user_joined_: Vec<fn(&User)>,
+    on_chat_user_parted_: Vec<fn(&User)>,
+    on_chat_user_renamed_: Vec<fn(&ChatUserRename)>,
+    on_message_moderated_: Vec<fn(&ChatMessageModeration)>,
 
-    on_stream_started_: Vec<Box<fn(&StreamStarted)>>,
-    on_stream_stopped_: Vec<Box<fn(&StreamStopped)>>,
-    on_stream_title_changed_: Vec<Box<fn(&StreamTitleChange)>>,
+    on_stream_started_: Vec<fn(&StreamStarted)>,
+    on_stream_stopped_: Vec<fn(&StreamStopped)>,
+    on_stream_title_changed_: Vec<fn(&StreamTitleChange)>,
 
-    on_sse_connect_: Vec<Box<fn(&SSEConnectionEvent)>>,
-    on_sse_disconnect_: Vec<Box<fn(&SSEConnectionEvent)>>,
+    on_sse_connect_: Vec<fn(&SSEConnectionEvent)>,
+    on_sse_disconnect_: Vec<fn(&SSEConnectionEvent)>,
 
-    on_tick_: Vec<Box<fn(&TickEvent)>>,
+    on_tick_: Vec<fn(&TickEvent)>,
 
-    on_fediverse_: Vec<Box<fn(&HashMap<String, String>)>>,
-    on_fediverse_follow_: Vec<Box<fn(&FediverseEngagement)>>,
-    on_fediverse_like_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_repost_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_quote_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_mention_: Vec<Box<fn(&FediverseInboundPost)>>,
-    on_fediverse_reply_: Vec<Box<fn(&FediverseInboundPost)>>,
+    on_fediverse_: Vec<fn(&HashMap<String, String>)>,
+    on_fediverse_follow_: Vec<fn(&FediverseEngagement)>,
+    on_fediverse_like_: Vec<fn(&FediverseTargetedEngagement)>,
+    on_fediverse_repost_: Vec<fn(&FediverseTargetedEngagement)>,
+    on_fediverse_quote_: Vec<fn(&FediverseTargetedEngagement)>,
+    on_fediverse_mention_: Vec<fn(&FediverseInboundPost)>,
+    on_fediverse_reply_: Vec<fn(&FediverseInboundPost)>,
 
     on_: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
 
     // Filter
-    filter_chat_message_: Vec<(u8, Box<fn(&ChatMessage) -> FilterResult>)>,
+    filter_chat_message_: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
 
     // HTTP
-    on_http_request_: HashMap<(Method, String), Box<&'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
+    on_http_request_: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
-    on_auth_check_: Vec<Box<fn(&AuthCheckRequest) -> AuthCheckResult>>,
+    on_auth_check_: Vec<fn(&AuthCheckRequest) -> AuthCheckResult>,
 
     // Tab Content
-    on_tab_content_: HashMap<String, Box<fn(&ContentRequest) -> String>>,
+    on_tab_content_: HashMap<String, fn(&ContentRequest) -> String>,
 
     // Page Content
-    on_page_content_: HashMap<String, Box<fn(&ContentRequest) -> String>>,
+    on_page_content_: HashMap<String, fn(&ContentRequest) -> String>,
 
     // Page Styles
-    on_page_styles_: Option<Box<fn() -> String>>,
+    on_page_styles_: Option<fn() -> String>,
 
     // Page Scripts
-    on_page_scripts_: Option<Box<fn() -> String>>,
+    on_page_scripts_: Option<fn() -> String>,
 
     // Commands
-    commands_: HashMap<String, CommandDefinition<'a>>
+    commands_: HashMap<String, CommandDefinition>
 }
 
 impl<'a> PluginBuilder<'a> {
@@ -143,7 +143,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_chat_message(&mut self, f: fn(&ChatMessage) -> ()) {
-        self.on_chat_message_.push(Box::new(f));
+        self.on_chat_message_.push(f);
     }
 
     /// Creates an event hook for when a user joins stream chat.
@@ -159,7 +159,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_chat_user_joined(&mut self, f: fn(&User) -> ()) {
-        self.on_chat_user_joined_.push(Box::new(f));
+        self.on_chat_user_joined_.push(f);
     }
 
     /// Creates an event hook for when a user leaves stream chat.
@@ -175,7 +175,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_chat_user_parted(&mut self, f: fn(&User) -> ()) {
-        self.on_chat_user_parted_.push(Box::new(f));
+        self.on_chat_user_parted_.push(f);
     }
 
     /// Creates an event hook for when a user leaves stream chat.
@@ -191,7 +191,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_chat_user_renamed(&mut self, f: fn(&ChatUserRename) -> ()) {
-        self.on_chat_user_renamed_.push(Box::new(f));
+        self.on_chat_user_renamed_.push(f);
     }
 
     /// Creates an event hook for when a moderator moderates a message.
@@ -207,7 +207,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_message_moderated(&mut self, f: fn(&ChatMessageModeration) -> ()) {
-        self.on_message_moderated_.push(Box::new(f));
+        self.on_message_moderated_.push(f);
     }
 
     /// Creates an event hook for when stream starts.
@@ -223,7 +223,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_stream_started(&mut self, f: fn(&StreamStarted) -> ()) {
-        self.on_stream_started_.push(Box::new(f));
+        self.on_stream_started_.push(f);
     }
 
     /// Creates an event hook for when stream stops.
@@ -239,7 +239,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_stream_stopped(&mut self, f: fn(&StreamStopped) -> ()) {
-        self.on_stream_stopped_.push(Box::new(f));
+        self.on_stream_stopped_.push(f);
     }
 
     /// Creates an event hook for when the title of stream changes.
@@ -255,7 +255,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_stream_title_changed(&mut self, f: fn(&StreamTitleChange) -> ()) {
-        self.on_stream_title_changed_.push(Box::new(f));
+        self.on_stream_title_changed_.push(f);
     }
 
     /// Creates an event hook for when an SSE connection is made.
@@ -271,7 +271,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_sse_connect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
-        self.on_sse_connect_.push(Box::new(f));
+        self.on_sse_connect_.push(f);
     }
 
     /// Creates an event hook for when an SSE connection is ceased.
@@ -287,7 +287,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_sse_disconnect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
-        self.on_sse_disconnect_.push(Box::new(f));
+        self.on_sse_disconnect_.push(f);
     }
 
     /// Creates an event hook that is fired once a second.
@@ -303,7 +303,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_tick(&mut self, f: fn(&TickEvent) -> ()) {
-        self.on_tick_.push(Box::new(f));
+        self.on_tick_.push(f);
     }
 
     /// Creates an event hook for when any incoming ActivityPub object is received.
@@ -320,7 +320,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fedivers(&mut self, f: fn(&HashMap<String, String>) -> ()) {
-        self.on_fediverse_.push(Box::new(f));
+        self.on_fediverse_.push(f);
     }
 
     /// Creates an event hook for when someone follows the stream through the ActivityPub protocol.
@@ -336,7 +336,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_follow(&mut self, f: fn(&FediverseEngagement) -> ()) {
-        self.on_fediverse_follow_.push(Box::new(f));
+        self.on_fediverse_follow_.push(f);
     }
 
     /// Creates an event hook for when someone likes a stream post made through the ActivityPub protocol.
@@ -352,7 +352,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_like(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
-        self.on_fediverse_like_.push(Box::new(f));
+        self.on_fediverse_like_.push(f);
     }
 
     /// Creates an event hook for when someone reposts a stream post made through the ActivityPub protocol.
@@ -368,7 +368,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_repost(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
-        self.on_fediverse_repost_.push(Box::new(f));
+        self.on_fediverse_repost_.push(f);
     }
 
     /// Creates an event hook for when someone quotes a stream post made through the ActivityPub protocol.
@@ -385,7 +385,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_quote(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
-        self.on_fediverse_quote_.push(Box::new(f));
+        self.on_fediverse_quote_.push(f);
     }
 
     /// Creates an event hook for when someone mentions stream's handle on the ActivityPub protocol.
@@ -401,7 +401,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_mention(&mut self, f: fn(&FediverseInboundPost) -> ()) {
-        self.on_fediverse_mention_.push(Box::new(f));
+        self.on_fediverse_mention_.push(f);
     }
 
     /// Creates an event hook for when someone replies to a stream post made through the ActivityPub protocol.
@@ -417,7 +417,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_fediverse_reply(&mut self, f: fn(&FediverseInboundPost) -> ()) {
-        self.on_fediverse_reply_.push(Box::new(f));
+        self.on_fediverse_reply_.push(f);
     }
 
     /// Creates a chat filter. Priority must be between 0 (inclusive) and 101 (exclusive). Defaults to 100.
@@ -446,7 +446,7 @@ impl<'a> PluginBuilder<'a> {
         if priority >= 101 {
             Err("Filter priority must be between 0 (inclusive) and 101 (exclusive).".to_string())
         } else {
-            self.filter_chat_message_.push((priority, Box::new(f)));
+            self.filter_chat_message_.push((priority, f));
             Ok(())
         }
     }
@@ -473,7 +473,7 @@ impl<'a> PluginBuilder<'a> {
     /// ```
     pub fn on_http_request(&mut self, method: &[Method], path: &str, f: &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), String> {
         for method in method {
-            if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), Box::new(f)) {
+            if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
                 return Err(format!("An HTTP request handler already exists for {method} {path}."));
             }
         }
@@ -515,7 +515,7 @@ impl<'a> PluginBuilder<'a> {
     /// ```
     /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
     ///     plugin_builder.commands("!", false, vec![
-    ///         CommandBuilder::new("update", &|ctx| {
+    ///         CommandBuilder::new("update", |ctx| {
     ///             ctx.reply("we've been live a while!");
     ///         })
     ///         .with_aliases(&["time", "livetime"])
@@ -524,7 +524,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder<'a>>) -> Result<(), String> {
+    pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder>) -> Result<(), String> {
         for command_builder in command_builders {
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
             if let Some(CommandDefinition { command: Command { name, prefix, .. }, .. }) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
@@ -551,7 +551,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_tab_content(&mut self, tab: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
-        if let Some(_) = self.on_tab_content_.insert(tab.to_string(), Box::new(f)) {
+        if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
             Err(format!("A tab content handler already exists for {tab}."))
         } else {
             Ok(())
@@ -575,7 +575,7 @@ impl<'a> PluginBuilder<'a> {
     /// });
     /// ```
     pub fn on_page_content(&mut self, page: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
-        if let Some(_) = self.on_page_content_.insert(page.to_string(), Box::new(f)) {
+        if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
             Err(format!("A page content handler already exists for {page}."))
         } else {
             Ok(())
@@ -602,7 +602,7 @@ impl<'a> PluginBuilder<'a> {
         if self.on_page_styles_.is_some() {
             Err("Can only set on_page_styles once.".to_string())
         } else {
-            self.on_page_styles_ = Some(Box::new(f));
+            self.on_page_styles_ = Some(f);
             Ok(())
         }
     }
@@ -627,7 +627,7 @@ impl<'a> PluginBuilder<'a> {
         if self.on_page_scripts_.is_some() {
             Err("Can only set on_page_scripts once.".to_string())
         } else {
-            self.on_page_scripts_ = Some(Box::new(f));
+            self.on_page_scripts_ = Some(f);
             Ok(())
         }
     }

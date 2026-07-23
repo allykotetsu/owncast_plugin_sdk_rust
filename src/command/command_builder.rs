@@ -3,24 +3,24 @@ use crate::command::command_context::CommandContext;
 use crate::json_objects::command::Command;
 
 /// A struct for building a chat command.
-pub struct CommandBuilder<'a> {
+pub struct CommandBuilder {
     name_: String,
-    run_: Box<&'a fn(&CommandContext)>,
+    run_: fn(&CommandContext),
     cooldown_ms_: Option<u128>,
-    on_denied_: Option<Box<&'a fn(&CommandContext)>>,
+    on_denied_: Option<fn(&CommandContext)>,
     description_: Option<String>,
     usage_: Option<String>,
     aliases_: Option<Vec<String>>,
     mod_only_: Option<bool>,
-    on_cooldown_: Option<Box<&'a fn(&CommandContext)>>
+    on_cooldown_: Option<fn(&CommandContext)>
 }
 
-impl<'a> CommandBuilder<'a> {
+impl CommandBuilder {
     /// Create a new Command, must have a name and a function for what happens when the command is run.
-    pub fn new(name: &str, run: &'a fn(&CommandContext) -> ()) -> Self {
+    pub fn new(name: &str, run: fn(&CommandContext) -> ()) -> Self {
         Self {
             name_: name.to_string(),
-            run_: Box::new(run),
+            run_: run,
             cooldown_ms_: None,
             on_denied_: None,
             description_: None,
@@ -47,7 +47,7 @@ impl<'a> CommandBuilder<'a> {
         self
     }
 
-    pub(crate) fn build(self, prefix: String, case_sensitive: bool) -> CommandDefinition<'a> {
+    pub(crate) fn build(self, prefix: String, case_sensitive: bool) -> CommandDefinition {
         CommandDefinition {
             run: self.run_,
             on_denied: self.on_denied_,

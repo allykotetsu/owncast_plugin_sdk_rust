@@ -31,54 +31,54 @@ pub(crate) struct Plugin<'a> {
     pub(crate) manifest: Manifest,
 
     // Events
-    pub(crate) on_chat_message: Vec<Box<fn(&ChatMessage)>>,
-    pub(crate) on_chat_user_joined: Vec<Box<fn(&User)>>,
-    pub(crate) on_chat_user_parted: Vec<Box<fn(&User)>>,
-    pub(crate) on_chat_user_renamed: Vec<Box<fn(&ChatUserRename)>>,
-    pub(crate) on_message_moderated: Vec<Box<fn(&ChatMessageModeration)>>,
+    pub(crate) on_chat_message: Vec<fn(&ChatMessage)>,
+    pub(crate) on_chat_user_joined: Vec<fn(&User)>,
+    pub(crate) on_chat_user_parted: Vec<fn(&User)>,
+    pub(crate) on_chat_user_renamed: Vec<fn(&ChatUserRename)>,
+    pub(crate) on_message_moderated: Vec<fn(&ChatMessageModeration)>,
 
-    pub(crate) on_stream_started: Vec<Box<fn(&StreamStarted)>>,
-    pub(crate) on_stream_stopped: Vec<Box<fn(&StreamStopped)>>,
-    pub(crate) on_stream_title_changed: Vec<Box<fn(&StreamTitleChange)>>,
+    pub(crate) on_stream_started: Vec<fn(&StreamStarted)>,
+    pub(crate) on_stream_stopped: Vec<fn(&StreamStopped)>,
+    pub(crate) on_stream_title_changed: Vec<fn(&StreamTitleChange)>,
 
-    pub(crate) on_sse_connect: Vec<Box<fn(&SSEConnectionEvent)>>,
-    pub(crate) on_sse_disconnect: Vec<Box<fn(&SSEConnectionEvent)>>,
+    pub(crate) on_sse_connect: Vec<fn(&SSEConnectionEvent)>,
+    pub(crate) on_sse_disconnect: Vec<fn(&SSEConnectionEvent)>,
 
-    pub(crate) on_tick: Vec<Box<fn(&TickEvent)>>,
+    pub(crate) on_tick: Vec<fn(&TickEvent)>,
 
-    pub(crate) on_fediverse: Vec<Box<fn(&HashMap<String, String>)>>,
-    pub(crate) on_fediverse_follow: Vec<Box<fn(&FediverseEngagement)>>,
-    pub(crate) on_fediverse_like: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_repost: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_quote: Vec<Box<fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_mention: Vec<Box<fn(&FediverseInboundPost)>>,
-    pub(crate) on_fediverse_reply: Vec<Box<fn(&FediverseInboundPost)>>,
+    pub(crate) on_fediverse: Vec<fn(&HashMap<String, String>)>,
+    pub(crate) on_fediverse_follow: Vec<fn(&FediverseEngagement)>,
+    pub(crate) on_fediverse_like: Vec<fn(&FediverseTargetedEngagement)>,
+    pub(crate) on_fediverse_repost: Vec<fn(&FediverseTargetedEngagement)>,
+    pub(crate) on_fediverse_quote: Vec<fn(&FediverseTargetedEngagement)>,
+    pub(crate) on_fediverse_mention: Vec<fn(&FediverseInboundPost)>,
+    pub(crate) on_fediverse_reply: Vec<fn(&FediverseInboundPost)>,
 
     pub(crate) on: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
 
     // Filter
-    pub(crate) filter_chat_message: Vec<(u8, Box<fn(&ChatMessage) -> FilterResult>)>,
+    pub(crate) filter_chat_message: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
 
     // HTTP
-    pub(crate) on_http_request: HashMap<(Method, String), Box<&'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
+    pub(crate) on_http_request: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
-    pub(crate) on_auth_check: Vec<Box<fn(&AuthCheckRequest) -> AuthCheckResult>>,
+    pub(crate) on_auth_check: Vec<fn(&AuthCheckRequest) -> AuthCheckResult>,
 
     // Tab Content
-    pub(crate) on_tab_content: HashMap<String, Box<fn(&ContentRequest) -> String>>,
+    pub(crate) on_tab_content: HashMap<String, fn(&ContentRequest) -> String>,
 
     // Page Content
-    pub(crate) on_page_content: HashMap<String, Box<fn(&ContentRequest) -> String>>,
+    pub(crate) on_page_content: HashMap<String, fn(&ContentRequest) -> String>,
 
     // Page Styles
-    pub(crate) on_page_styles: Option<Box<fn() -> String>>,
+    pub(crate) on_page_styles: Option<fn() -> String>,
 
     // Page Scripts
-    pub(crate) on_page_scripts: Option<Box<fn() -> String>>,
+    pub(crate) on_page_scripts: Option<fn() -> String>,
 
     // Commands
-    pub(crate) commands: HashMap<String, CommandDefinition<'a>>
+    pub(crate) commands: HashMap<String, CommandDefinition>
 }
 
 impl<'a> Plugin<'a> {

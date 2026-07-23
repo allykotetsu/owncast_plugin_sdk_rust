@@ -176,7 +176,7 @@ videoConfig: {
 
 pub fn owncast_send_chat(s: &str) -> Result<(), String> {
     if PLUGIN.is_permitted(Permission::ChatSend) {
-        owncast_send_chat(s);
+        owncast_send_chat(s)?;
         Ok(())
     } else {
         Err("You are not permitted to use owncast.chat.send".to_string())

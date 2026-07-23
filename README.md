@@ -24,7 +24,7 @@ define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuil
     
     // When a user types "!update", "!time", or "!livetime", tell them that the stream has been live for a while.
     plugin_builder.commands("!", false, vec![
-        CommandBuilder::new("update", &|ctx| {
+        CommandBuilder::new("update", |ctx| {
             ctx.reply("we've been live a while!");
         })
         .with_aliases(&["time", "livetime"])
