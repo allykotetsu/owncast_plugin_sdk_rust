@@ -527,6 +527,24 @@ impl<'a> PluginBuilder<'a> {
         }
         Ok(())
     }
+
+    pub fn on_tab_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, f: F) -> Result<(), String> {
+        if self.on_tab_content_.is_some() {
+            Err("You can only call on_tab_content once.".to_string())
+        } else {
+            self.on_tab_content_ = Some(Box::new(f));
+            Ok(())
+        }
+    }
+
+    pub fn on_page_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, f: F) -> Result<(), String> {
+        if self.on_page_content_.is_some() {
+            Err("You can only call on_tab_content once.".to_string())
+        } else {
+            self.on_page_content_ = Some(Box::new(f));
+            Ok(())
+        }
+    }
 }
 
 impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
