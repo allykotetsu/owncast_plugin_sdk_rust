@@ -4,6 +4,7 @@ use serde::de::DeserializeOwned;
 use serde_json::Error;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
+use crate::errors::{Duplicate, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -422,9 +423,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Creates a chat filter. Priority must be between 0 (inclusive) and 101 (exclusive). Defaults to 100.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if priority is greater than or equal to 101.
+    /// Errors if priority is greater than or equal to 101.
     ///
     /// # Examples
     ///
@@ -440,11 +441,11 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), String> {
+    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), OutOfBounds> {
         // TODO if possible then put a compile-time restraint on priority.
         let priority = priority.unwrap_or(100);
         if priority >= 101 {
-            Err("Filter priority must be between 0 (inclusive) and 101 (exclusive).".to_string())
+            Err(OutOfBounds("Filter priority must be between 0 (inclusive) and 101 (exclusive).".to_string()))
         } else {
             self.filter_chat_message_.push((priority, f));
             Ok(())
@@ -453,9 +454,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Creates an event hook for when an http request is made to a given path with a given method. The callback function is a reference since multiple HTTP methods can run the same callback.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the method and path combination are not unique.
+    /// Errors if the method and path combination are not unique.
     ///
     /// # Examples
     ///
@@ -471,10 +472,10 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_http_request(&mut self, method: &[Method], path: &str, f: &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), String> {
+    pub fn on_http_request(&mut self, method: &[Method], path: &str, f: &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), Duplicate> {
         for method in method {
             if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
-                return Err(format!("An HTTP request handler already exists for {method} {path}."));
+                return Err(Duplicate(format!("An HTTP request handler already exists for {method} {path}.")));
             }
         }
         Ok(())
@@ -506,9 +507,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers commands. The callback function is a reference since aliased commands run the same callback.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if a duplicate command has been registered.
+    /// Errors if a duplicate command has been registered.
     ///
     /// # Examples
     ///
@@ -524,11 +525,11 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder>) -> Result<(), String> {
+    pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder>) -> Result<(), Duplicate> {
         for command_builder in command_builders {
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
             if let Some(CommandDefinition { command: Command { name, prefix, .. }, .. }) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
-                return Err(format!("Command {prefix}{name} already exists."));
+                return Err(Duplicate(format!("Command {prefix}{name} already exists.")));
             }
         }
         Ok(())
@@ -536,9 +537,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers content for when a specific tab is being viewed.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if a duplicate slug is registered.
+    /// Errors if a duplicate slug is registered.
     ///
     /// # Examples
     ///
@@ -550,9 +551,9 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tab_content(&mut self, tab: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
+    pub fn on_tab_content(&mut self, tab: &str, f: fn(&ContentRequest) -> String) -> Result<(), Duplicate> {
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
-            Err(format!("A tab content handler already exists for {tab}."))
+            Err(Duplicate(format!("A tab content handler already exists for {tab}.")))
         } else {
             Ok(())
         }
@@ -560,9 +561,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers content for when a specific page is being viewed.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if a duplicate slug is registered.
+    /// Errors if a duplicate slug is registered.
     ///
     /// # Examples
     ///
@@ -574,9 +575,9 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_content(&mut self, page: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
+    pub fn on_page_content(&mut self, page: &str, f: fn(&ContentRequest) -> String) -> Result<(), Duplicate> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
-            Err(format!("A page content handler already exists for {page}."))
+            Err(Duplicate(format!("A page content handler already exists for {page}.")))
         } else {
             Ok(())
         }
@@ -584,9 +585,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers a function for returning custom CSS.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if this function is called more than once.
+    /// Errors if this function is called more than once.
     ///
     /// # Examples
     ///
@@ -598,9 +599,9 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_styles(&mut self, f: fn() -> String) -> Result<(), String> {
+    pub fn on_page_styles(&mut self, f: fn() -> String) -> Result<(), Duplicate> {
         if self.on_page_styles_.is_some() {
-            Err("Can only set on_page_styles once.".to_string())
+            Err(Duplicate("Can only set on_page_styles once.".to_string()))
         } else {
             self.on_page_styles_ = Some(f);
             Ok(())
@@ -609,9 +610,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers a function for returning custom client-side JS.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if this function is called more than once.
+    /// Errors if this function is called more than once.
     ///
     /// # Examples
     ///
@@ -623,9 +624,9 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_scripts(&mut self, f: fn() -> String) -> Result<(), String> {
+    pub fn on_page_scripts(&mut self, f: fn() -> String) -> Result<(), Duplicate> {
         if self.on_page_scripts_.is_some() {
-            Err("Can only set on_page_scripts once.".to_string())
+            Err(Duplicate("Can only set on_page_scripts once.".to_string()))
         } else {
             self.on_page_scripts_ = Some(f);
             Ok(())
@@ -634,9 +635,9 @@ impl<'a> PluginBuilder<'a> {
 
     /// Registers a function that implements an authentication gate.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if this function is called more than once.
+    /// Errors if this function is called more than once.
     ///
     /// # Examples
     ///
@@ -652,9 +653,9 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_auth_check(&mut self, f: fn(&AuthCheckRequest) -> AuthCheckResult) -> Result<(), String> {
+    pub fn on_auth_check(&mut self, f: fn(&AuthCheckRequest) -> AuthCheckResult) -> Result<(), Duplicate> {
         if self.on_auth_check_.is_some() {
-            Err("Can only set on_page_scripts once.".to_string())
+            Err(Duplicate("Can only set on_page_scripts once.".to_string()))
         } else {
             self.on_auth_check_ = Some(f);
             Ok(())

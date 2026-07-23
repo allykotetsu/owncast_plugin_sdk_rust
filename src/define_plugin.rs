@@ -1,6 +1,6 @@
 /// Macro for defining one Owncast plugin. Only call this once for your project, and call it outside of function scope.
 ///
-/// define_plugin! expects a parameter that is a `Fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>>` closure
+/// define_plugin! expects a parameter that is a `fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>>` function pointer.
 ///
 /// Within the body of the function, call functions onto the builder for adding functionality to the plugin, and then return an Ok() wrapping the plugin builder object.
 ///

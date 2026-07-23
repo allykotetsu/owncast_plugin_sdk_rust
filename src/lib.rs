@@ -14,10 +14,11 @@ mod method;
 mod command;
 mod output_json;
 mod partial_manifest;
+mod errors;
 
 define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-        owncast_send_chat(&format!("echo ${body}")).unwrap();
+        owncast_send_chat(&format!("echo ${body}"));
     });
     Ok(plugin_builder)
 });
