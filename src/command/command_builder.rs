@@ -17,7 +17,7 @@ pub struct CommandBuilder<'a> {
 
 impl<'a> CommandBuilder<'a> {
     /// Create a new Command, must have a name and a function for what happens when the command is run.
-    pub fn new<F: Fn(&CommandContext) -> () + 'static>(name: &str, run: &'a F) -> Self {
+    pub fn new(name: &str, run: &'a fn(&CommandContext) -> ()) -> Self {
         Self {
             name_: name.to_string(),
             run_: Box::new(run),

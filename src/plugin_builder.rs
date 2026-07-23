@@ -142,7 +142,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_message<F: Fn(&ChatMessage) -> () + 'static>(&mut self, f: F) {
+    pub fn on_chat_message(&mut self, f: fn(&ChatMessage) -> ()) {
         self.on_chat_message_.push(Box::new(f));
     }
 
@@ -158,7 +158,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_joined<F: Fn(&User) -> () + 'static>(&mut self, f: F) {
+    pub fn on_chat_user_joined(&mut self, f: fn(&User) -> ()) {
         self.on_chat_user_joined_.push(Box::new(f));
     }
 
@@ -174,7 +174,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_parted<F: Fn(&User) -> () + 'static>(&mut self, f: F) {
+    pub fn on_chat_user_parted(&mut self, f: fn(&User) -> ()) {
         self.on_chat_user_parted_.push(Box::new(f));
     }
 
@@ -190,7 +190,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_renamed<F: Fn(&ChatUserRename) -> () + 'static>(&mut self, f: F) {
+    pub fn on_chat_user_renamed(&mut self, f: fn(&ChatUserRename) -> ()) {
         self.on_chat_user_renamed_.push(Box::new(f));
     }
 
@@ -206,7 +206,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_message_moderated<F: Fn(&ChatMessageModeration) -> () + 'static>(&mut self, f: F) {
+    pub fn on_message_moderated(&mut self, f: fn(&ChatMessageModeration) -> ()) {
         self.on_message_moderated_.push(Box::new(f));
     }
 
@@ -222,7 +222,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_started<F: Fn(&StreamStarted) -> () + 'static>(&mut self, f: F) {
+    pub fn on_stream_started(&mut self, f: fn(&StreamStarted) -> ()) {
         self.on_stream_started_.push(Box::new(f));
     }
 
@@ -238,7 +238,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_stopped<F: Fn(&StreamStopped) -> () + 'static>(&mut self, f: F) {
+    pub fn on_stream_stopped(&mut self, f: fn(&StreamStopped) -> ()) {
         self.on_stream_stopped_.push(Box::new(f));
     }
 
@@ -254,7 +254,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_title_changed<F: Fn(&StreamTitleChange) -> () + 'static>(&mut self, f: F) {
+    pub fn on_stream_title_changed(&mut self, f: fn(&StreamTitleChange) -> ()) {
         self.on_stream_title_changed_.push(Box::new(f));
     }
 
@@ -270,7 +270,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_connect<F: Fn(&SSEConnectionEvent) -> () + 'static>(&mut self, f: F) {
+    pub fn on_sse_connect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
         self.on_sse_connect_.push(Box::new(f));
     }
 
@@ -286,7 +286,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_disconnect<F: Fn(&SSEConnectionEvent) -> () + 'static>(&mut self, f: F) {
+    pub fn on_sse_disconnect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
         self.on_sse_disconnect_.push(Box::new(f));
     }
 
@@ -302,7 +302,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tick<F: Fn(&TickEvent) -> () + 'static>(&mut self, f: F) {
+    pub fn on_tick(&mut self, f: fn(&TickEvent) -> ()) {
         self.on_tick_.push(Box::new(f));
     }
 
@@ -319,7 +319,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse<F: Fn(&HashMap<String, String>) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fedivers(&mut self, f: fn(&HashMap<String, String>) -> ()) {
         self.on_fediverse_.push(Box::new(f));
     }
 
@@ -335,7 +335,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_follow<F: Fn(&FediverseEngagement) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_follow(&mut self, f: fn(&FediverseEngagement) -> ()) {
         self.on_fediverse_follow_.push(Box::new(f));
     }
 
@@ -351,7 +351,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_like<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_like(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
         self.on_fediverse_like_.push(Box::new(f));
     }
 
@@ -367,7 +367,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_repost<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_repost(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
         self.on_fediverse_repost_.push(Box::new(f));
     }
 
@@ -384,7 +384,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_quote<F: Fn(&FediverseTargetedEngagement) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_quote(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
         self.on_fediverse_quote_.push(Box::new(f));
     }
 
@@ -400,7 +400,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_mention<F: Fn(&FediverseInboundPost) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_mention(&mut self, f: fn(&FediverseInboundPost) -> ()) {
         self.on_fediverse_mention_.push(Box::new(f));
     }
 
@@ -416,7 +416,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_reply<F: Fn(&FediverseInboundPost) -> () + 'static>(&mut self, f: F) {
+    pub fn on_fediverse_reply(&mut self, f: fn(&FediverseInboundPost) -> ()) {
         self.on_fediverse_reply_.push(Box::new(f));
     }
 
@@ -440,7 +440,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn filter_chat_message<F: Fn(&ChatMessage) -> FilterResult + 'static>(&mut self, priority: Option<u8>, f: F) -> Result<(), String> {
+    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), String> {
         // TODO if possible then put a compile-time restraint on priority.
         let priority = priority.unwrap_or(100);
         if priority >= 101 {
@@ -471,7 +471,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_http_request<F: Fn(&IncomingHttpRequest) -> OutgoingHttpResponse + 'static>(&mut self, method: &[Method], path: &str, f: &'a F) -> Result<(), String> {
+    pub fn on_http_request(&mut self, method: &[Method], path: &str, f: &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), String> {
         for method in method {
             if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), Box::new(f)) {
                 return Err(format!("An HTTP request handler already exists for {method} {path}."));
@@ -497,7 +497,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on<T: DeserializeOwned, F: Fn(&T) -> () + 'static>(&mut self, event: &str, f: F) {
+    pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: fn(&T) -> ()) {
         self.on_.push((event.to_string(), Box::new(move |payload| {
             f(&serde_json::from_str(payload)?);
             Ok(())
@@ -550,7 +550,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tab_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, tab: &str, f: F) -> Result<(), String> {
+    pub fn on_tab_content(&mut self, tab: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), Box::new(f)) {
             Err(format!("A tab content handler already exists for {tab}."))
         } else {
@@ -574,7 +574,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_content<F: Fn(&ContentRequest) -> String + 'static>(&mut self, page: &str, f: F) -> Result<(), String> {
+    pub fn on_page_content(&mut self, page: &str, f: fn(&ContentRequest) -> String) -> Result<(), String> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), Box::new(f)) {
             Err(format!("A page content handler already exists for {page}."))
         } else {

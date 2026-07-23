@@ -23,6 +23,7 @@ use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
+use crate::permission::Permission;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
 pub(crate) struct Plugin<'a> {
@@ -81,6 +82,10 @@ pub(crate) struct Plugin<'a> {
 }
 
 impl<'a> Plugin<'a> {
+    pub fn is_permitted(&self, permission: Permission) -> bool {
+        self.manifest.permissions.contains(&permission)
+    }
+
     pub(crate) fn get_manifest(&self) -> Manifest {
         self.manifest.clone()
     }

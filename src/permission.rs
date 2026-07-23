@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub(crate) enum Permission {
     #[serde(rename = "chat.send")]
     ChatSend,
@@ -57,4 +57,25 @@ pub(crate) enum Permission {
     UiModify
 }
 
-// TODO actually implement permissions
+/*/// # Examples
+/// ```
+/// #[permitted(Permission::ChatSend)]
+/// fn do_thing(_: &str) -> bool;
+/// ```
+///
+/// expands to
+/// ```
+/// fn do_thing_(_: &str) -> bool;
+///
+/// pub fn do_thing(arg_0: &str) -> Result<bool, PermissionsError> {
+///     if PLUGIN.permitted(Permission::ChatSend) {
+///         Ok(do_thing_(arg_0))
+///     } else {
+///         Err(PermissionsError)
+///     }
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn permitted(attr: TokenStream, item: TokenStream) -> TokenStream {
+    todo!()
+}*/

@@ -6,58 +6,61 @@ use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
 use crate::json_objects::user_register_result::UserRegisterResult;
 use crate::output_json::OutputJson;
+use crate::permission::Permission;
+use crate::PLUGIN;
 
 // TODO import other owncast functions
 
 #[wasm_bindgen]
 extern "C" {
     // Chat
+    // #[permitted(Permission::ChatSend)]
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = send)]
-    pub fn owncast_send_chat(_: &str);
+    fn owncast_send_chat_(_: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = sendAction)]
-    pub fn owncast_send_chat_action(_: &str);
+    fn owncast_send_chat_action_(_: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = system)]
-    pub fn owncast_send_chat_system(_: &str);
+    fn owncast_send_chat_system_(_: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = sendTo)]
-    pub fn owncast_send_chat_to(_: u64, _: &str);
+    fn owncast_send_chat_to_(_: u64, _: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = replyTo)]
-    pub fn owncast_send_chat_reply_u64(_: u64, _: &str) -> bool;
+    fn owncast_send_chat_reply_u64_(_: u64, _: &str) -> bool;
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = replyTo)]
-    pub fn owncast_send_chat_reply(_: OutputJson<ChatMessage>, _: &str) -> bool;
+    fn owncast_send_chat_reply_(_: OutputJson<ChatMessage>, _: &str) -> bool;
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = history)]
-    pub fn owncast_chat_history(_: Option<u64>) -> InputJson<Vec<ChatMessage>>;
+    fn owncast_chat_history_(_: Option<u64>) -> InputJson<Vec<ChatMessage>>;
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = deleteMessage)]
-    pub fn owncast_delete_message(_: &str);
+    fn owncast_delete_message_(_: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = kick)]
-    pub fn owncast_kick_client(_: u64);
+    fn owncast_kick_client_(_: u64);
 
     #[wasm_bindgen(js_namespace = ["owncast", "chat"], js_name = clients)]
-    pub fn owncast_chat_clients() -> InputJson<Vec<ChatClient>>;
+    fn owncast_chat_clients_() -> InputJson<Vec<ChatClient>>;
 
     // Users
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = list)]
-    pub fn owncast_users_list() -> InputJson<Vec<User>>;
+    fn owncast_users_list_() -> InputJson<Vec<User>>;
 
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = get)]
-    pub fn owncast_user_get(_: &str) -> InputJson<Option<User>>;
+    fn owncast_user_get_(_: &str) -> InputJson<Option<User>>;
 
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = setEnabled)]
-    pub fn owncast_user_set_enabled(_: &str, _: bool, _: Option<String>);
+    fn owncast_user_set_enabled_(_: &str, _: bool, _: Option<String>);
 
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = banIP)]
-    pub fn owncast_ban_ip(_: &str);
+    fn owncast_ban_ip_(_: &str);
 
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = register)]
-    pub fn owncast_users_register(_: OutputJson<UserRegisterRequest>) -> InputJson<UserRegisterResult>;
+    fn owncast_users_register_(_: OutputJson<UserRegisterRequest>) -> InputJson<UserRegisterResult>;
     #[wasm_bindgen(js_namespace = ["owncast", "users"], js_name = register)]
-    pub fn owncast_users_register_string(_: &str) -> InputJson<UserRegisterResult>;
+    fn owncast_users_register_string_(_: &str) -> InputJson<UserRegisterResult>;
 
 
     // Auth
@@ -68,7 +71,7 @@ extern "C" {
 
     // Fediverse
     #[wasm_bindgen(js_namespace = ["owncast", "fediverse"], js_name = post)]
-    pub fn owncast_fediverse_post(_: &str) -> Option<String>;
+    fn owncast_fediverse_post(_: &str) -> Option<String>;
 
     // Notifications
 
@@ -170,3 +173,20 @@ videoConfig: {
     write(config: VideoConfigUpdate): void;
 };
  */
+
+pub fn owncast_send_chat(s: &str) -> Result<(), String> {
+    if PLUGIN.is_permitted(Permission::ChatSend) {
+        owncast_send_chat(s);
+        Ok(())
+    } else {
+        Err("You are not permitted to use owncast.chat.send".to_string())
+    }
+}
+
+pub fn owncast_send_chat_reply(r: OutputJson<ChatMessage>,s: &str) -> Result<bool, String> {
+    if PLUGIN.is_permitted(Permission::ChatSend) {
+        Ok(owncast_send_chat_reply_(r, s))
+    } else {
+        Err("You are not permitted to use owncast.chat.replyTo".to_string())
+    }
+}

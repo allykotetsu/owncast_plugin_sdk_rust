@@ -17,9 +17,8 @@ mod partial_manifest;
 
 define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
-        owncast_send_chat(&format!("echo ${body}"));
+        owncast_send_chat(&format!("echo ${body}")).unwrap();
     });
-
     Ok(plugin_builder)
 });
 

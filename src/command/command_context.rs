@@ -14,13 +14,15 @@ pub(crate) struct CommandContext {
 }
 
 impl CommandContext {
-    pub fn reply(&self, text: &str) {
-        owncast_send_chat(text);
+    pub fn reply(&self, text: &str) -> Result<(), String> {
+        owncast_send_chat(text)?;
+        Ok(())
     }
 
-    pub fn reply_privately(&self, text: &str) {
-        if !owncast_send_chat_reply(OutputJson(self.msg.clone()), text) {
-            owncast_send_chat(text)
+    pub fn reply_privately(&self, text: &str) -> Result<(), String> {
+        if !owncast_send_chat_reply(OutputJson(self.msg.clone()), text)? {
+            owncast_send_chat(text)?;
         }
+        Ok(())
     }
 }
