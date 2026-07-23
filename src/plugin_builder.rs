@@ -37,51 +37,51 @@ pub struct PluginBuilder<'a> {
     // Events
     partial_manifest: PartialManifest,
 
-    on_chat_message_: Vec<Box<dyn Fn(&ChatMessage)>>,
-    on_chat_user_joined_: Vec<Box<dyn Fn(&User)>>,
-    on_chat_user_parted_: Vec<Box<dyn Fn(&User)>>,
-    on_chat_user_renamed_: Vec<Box<dyn Fn(&ChatUserRename)>>,
-    on_message_moderated_: Vec<Box<dyn Fn(&ChatMessageModeration)>>,
+    on_chat_message_: Vec<Box<fn(&ChatMessage)>>,
+    on_chat_user_joined_: Vec<Box<fn(&User)>>,
+    on_chat_user_parted_: Vec<Box<fn(&User)>>,
+    on_chat_user_renamed_: Vec<Box<fn(&ChatUserRename)>>,
+    on_message_moderated_: Vec<Box<fn(&ChatMessageModeration)>>,
 
-    on_stream_started_: Vec<Box<dyn Fn(&StreamStarted)>>,
-    on_stream_stopped_: Vec<Box<dyn Fn(&StreamStopped)>>,
-    on_stream_title_changed_: Vec<Box<dyn Fn(&StreamTitleChange)>>,
+    on_stream_started_: Vec<Box<fn(&StreamStarted)>>,
+    on_stream_stopped_: Vec<Box<fn(&StreamStopped)>>,
+    on_stream_title_changed_: Vec<Box<fn(&StreamTitleChange)>>,
 
-    on_sse_connect_: Vec<Box<dyn Fn(&SSEConnectionEvent)>>,
-    on_sse_disconnect_: Vec<Box<dyn Fn(&SSEConnectionEvent)>>,
+    on_sse_connect_: Vec<Box<fn(&SSEConnectionEvent)>>,
+    on_sse_disconnect_: Vec<Box<fn(&SSEConnectionEvent)>>,
 
-    on_tick_: Vec<Box<dyn Fn(&TickEvent)>>,
+    on_tick_: Vec<Box<fn(&TickEvent)>>,
 
-    on_fediverse_: Vec<Box<dyn Fn(&HashMap<String, String>)>>,
-    on_fediverse_follow_: Vec<Box<dyn Fn(&FediverseEngagement)>>,
-    on_fediverse_like_: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_repost_: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_quote_: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    on_fediverse_mention_: Vec<Box<dyn Fn(&FediverseInboundPost)>>,
-    on_fediverse_reply_: Vec<Box<dyn Fn(&FediverseInboundPost)>>,
+    on_fediverse_: Vec<Box<fn(&HashMap<String, String>)>>,
+    on_fediverse_follow_: Vec<Box<fn(&FediverseEngagement)>>,
+    on_fediverse_like_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    on_fediverse_repost_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    on_fediverse_quote_: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    on_fediverse_mention_: Vec<Box<fn(&FediverseInboundPost)>>,
+    on_fediverse_reply_: Vec<Box<fn(&FediverseInboundPost)>>,
 
     on_: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
 
     // Filter
-    filter_chat_message_: Vec<(u8, Box<dyn Fn(&ChatMessage) -> FilterResult>)>,
+    filter_chat_message_: Vec<(u8, Box<fn(&ChatMessage) -> FilterResult>)>,
 
     // HTTP
-    on_http_request_: HashMap<(Method, String), Box<&'a dyn Fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
+    on_http_request_: HashMap<(Method, String), Box<&'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
 
     // Auth Check
-    on_auth_check_: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
+    on_auth_check_: Vec<Box<fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    on_tab_content_: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
+    on_tab_content_: HashMap<String, Box<fn(&ContentRequest) -> String>>,
 
     // Page Content
-    on_page_content_: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
+    on_page_content_: HashMap<String, Box<fn(&ContentRequest) -> String>>,
 
     // Page Styles
-    on_page_styles_: Vec<Box<dyn Fn() -> String>>,
+    on_page_styles_: Option<Box<fn() -> String>>,
 
     // Page Scripts
-    on_page_scripts_: Vec<Box<dyn Fn() -> String>>,
+    on_page_scripts_: Option<Box<fn() -> String>>,
 
     // Commands
     commands_: HashMap<String, CommandDefinition<'a>>
@@ -122,9 +122,9 @@ impl<'a> PluginBuilder<'a> {
 
             on_page_content_: HashMap::new(),
 
-            on_page_styles_: vec![],
+            on_page_styles_: None,
 
-            on_page_scripts_: vec![],
+            on_page_scripts_: None,
 
             commands_: HashMap::new()
         })
@@ -578,6 +578,56 @@ impl<'a> PluginBuilder<'a> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), Box::new(f)) {
             Err(format!("A page content handler already exists for {page}."))
         } else {
+            Ok(())
+        }
+    }
+
+    /// Registers a function for returning custom CSS.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this function is called more than once.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_page_styles(|| {
+    ///         "* { font-size: 24pt; }".to_string()
+    ///     })?;
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_page_styles(&mut self, f: fn() -> String) -> Result<(), String> {
+        if self.on_page_styles_.is_some() {
+            Err("Can only set on_page_styles once.".to_string())
+        } else {
+            self.on_page_styles_ = Some(Box::new(f));
+            Ok(())
+        }
+    }
+
+    /// Registers a function for returning custom client-side JS.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this function is called more than once.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    ///     plugin_builder.on_page_scripts(|| {
+    ///         "alert('Welcome to stream!');".to_string()
+    ///     })?;
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_page_scripts(&mut self, f: fn() -> String) -> Result<(), String> {
+        if self.on_page_scripts_.is_some() {
+            Err("Can only set on_page_scripts once.".to_string())
+        } else {
+            self.on_page_scripts_ = Some(Box::new(f));
             Ok(())
         }
     }

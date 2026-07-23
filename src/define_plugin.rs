@@ -109,16 +109,16 @@ macro_rules! define_plugin {
         }
 
         // Optional. Only export if exists and if permissions are correct.
-        /*#[wasm_bindgen]
+        #[wasm_bindgen]
         pub fn on_page_styles() -> String {
-
-        }*/
+            PLUGIN.dispatch_page_styles().unwrap_or(String::new())
+        }
 
         // Optional. Only export if exists and if permissions are correct.
-        /*#[wasm_bindgen]
+        #[wasm_bindgen]
         pub fn on_page_scripts() -> String {
-
-        }*/
+            PLUGIN.dispatch_page_scripts().unwrap_or(String::new())
+        }
 
         // Optional. Only export if exists.
         /*#[wasm_bindgen]

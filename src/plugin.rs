@@ -31,51 +31,51 @@ pub(crate) struct Plugin<'a> {
     pub(crate) manifest: Manifest,
 
     // Events
-    pub(crate) on_chat_message: Vec<Box<dyn Fn(&ChatMessage)>>,
-    pub(crate) on_chat_user_joined: Vec<Box<dyn Fn(&User)>>,
-    pub(crate) on_chat_user_parted: Vec<Box<dyn Fn(&User)>>,
-    pub(crate) on_chat_user_renamed: Vec<Box<dyn Fn(&ChatUserRename)>>,
-    pub(crate) on_message_moderated: Vec<Box<dyn Fn(&ChatMessageModeration)>>,
+    pub(crate) on_chat_message: Vec<Box<fn(&ChatMessage)>>,
+    pub(crate) on_chat_user_joined: Vec<Box<fn(&User)>>,
+    pub(crate) on_chat_user_parted: Vec<Box<fn(&User)>>,
+    pub(crate) on_chat_user_renamed: Vec<Box<fn(&ChatUserRename)>>,
+    pub(crate) on_message_moderated: Vec<Box<fn(&ChatMessageModeration)>>,
 
-    pub(crate) on_stream_started: Vec<Box<dyn Fn(&StreamStarted)>>,
-    pub(crate) on_stream_stopped: Vec<Box<dyn Fn(&StreamStopped)>>,
-    pub(crate) on_stream_title_changed: Vec<Box<dyn Fn(&StreamTitleChange)>>,
+    pub(crate) on_stream_started: Vec<Box<fn(&StreamStarted)>>,
+    pub(crate) on_stream_stopped: Vec<Box<fn(&StreamStopped)>>,
+    pub(crate) on_stream_title_changed: Vec<Box<fn(&StreamTitleChange)>>,
 
-    pub(crate) on_sse_connect: Vec<Box<dyn Fn(&SSEConnectionEvent)>>,
-    pub(crate) on_sse_disconnect: Vec<Box<dyn Fn(&SSEConnectionEvent)>>,
+    pub(crate) on_sse_connect: Vec<Box<fn(&SSEConnectionEvent)>>,
+    pub(crate) on_sse_disconnect: Vec<Box<fn(&SSEConnectionEvent)>>,
 
-    pub(crate) on_tick: Vec<Box<dyn Fn(&TickEvent)>>,
+    pub(crate) on_tick: Vec<Box<fn(&TickEvent)>>,
 
-    pub(crate) on_fediverse: Vec<Box<dyn Fn(&HashMap<String, String>)>>,
-    pub(crate) on_fediverse_follow: Vec<Box<dyn Fn(&FediverseEngagement)>>,
-    pub(crate) on_fediverse_like: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_repost: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_quote: Vec<Box<dyn Fn(&FediverseTargetedEngagement)>>,
-    pub(crate) on_fediverse_mention: Vec<Box<dyn Fn(&FediverseInboundPost)>>,
-    pub(crate) on_fediverse_reply: Vec<Box<dyn Fn(&FediverseInboundPost)>>,
+    pub(crate) on_fediverse: Vec<Box<fn(&HashMap<String, String>)>>,
+    pub(crate) on_fediverse_follow: Vec<Box<fn(&FediverseEngagement)>>,
+    pub(crate) on_fediverse_like: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    pub(crate) on_fediverse_repost: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    pub(crate) on_fediverse_quote: Vec<Box<fn(&FediverseTargetedEngagement)>>,
+    pub(crate) on_fediverse_mention: Vec<Box<fn(&FediverseInboundPost)>>,
+    pub(crate) on_fediverse_reply: Vec<Box<fn(&FediverseInboundPost)>>,
 
     pub(crate) on: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
 
     // Filter
-    pub(crate) filter_chat_message: Vec<(u8, Box<dyn Fn(&ChatMessage) -> FilterResult>)>,
+    pub(crate) filter_chat_message: Vec<(u8, Box<fn(&ChatMessage) -> FilterResult>)>,
 
     // HTTP
-    pub(crate) on_http_request: HashMap<(Method, String), Box<&'a dyn Fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
+    pub(crate) on_http_request: HashMap<(Method, String), Box<&'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>>,
 
     // Auth Check
-    pub(crate) on_auth_check: Vec<Box<dyn Fn(&AuthCheckRequest) -> AuthCheckResult>>,
+    pub(crate) on_auth_check: Vec<Box<fn(&AuthCheckRequest) -> AuthCheckResult>>,
 
     // Tab Content
-    pub(crate) on_tab_content: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_tab_content: HashMap<String, Box<fn(&ContentRequest) -> String>>,
 
     // Page Content
-    pub(crate) on_page_content: HashMap<String, Box<dyn Fn(&ContentRequest) -> String>>,
+    pub(crate) on_page_content: HashMap<String, Box<fn(&ContentRequest) -> String>>,
 
     // Page Styles
-    pub(crate) on_page_styles: Vec<Box<dyn Fn() -> String>>,
+    pub(crate) on_page_styles: Option<Box<fn() -> String>>,
 
     // Page Scripts
-    pub(crate) on_page_scripts: Vec<Box<dyn Fn() -> String>>,
+    pub(crate) on_page_scripts: Option<Box<fn() -> String>>,
 
     // Commands
     pub(crate) commands: HashMap<String, CommandDefinition<'a>>
@@ -246,6 +246,14 @@ impl<'a> Plugin<'a> {
 
     pub(crate) fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
         Some(self.on_page_content.get(&content_request.slug)?(&content_request))
+    }
+
+    pub(crate) fn dispatch_page_styles(&self) -> Option<String> {
+        Some(self.on_page_styles.clone()?())
+    }
+
+    pub(crate) fn dispatch_page_scripts(&self) -> Option<String> {
+        Some(self.on_page_scripts.clone()?())
     }
 
     // TODO
