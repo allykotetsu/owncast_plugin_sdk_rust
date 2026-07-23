@@ -4,7 +4,7 @@ use crate::plugin_builder::PluginBuilder;
 use crate::imports::owncast_send_chat;
 
 mod json_objects;
-mod permissions;
+mod permission;
 mod input_json;
 mod plugin_builder;
 mod plugin;

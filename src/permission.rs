@@ -1,7 +1,7 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
-pub(crate) enum Permissions {
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) enum Permission {
     #[serde(rename = "chat.send")]
     ChatSend,
     #[serde(rename = "chat.history")]

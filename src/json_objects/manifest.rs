@@ -11,6 +11,7 @@ use crate::json_objects::network::Network;
 use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tab::Tab;
 use crate::partial_manifest::PartialManifest;
+use crate::permission::Permission;
 
 #[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -22,7 +23,7 @@ pub struct Manifest {
     pub(crate) description: String,
     pub(crate) config: Option<HashMap<String, Config>>,
     pub(crate) bot: Option<Bot>,
-    pub(crate) permissions: Vec<String>,
+    pub(crate) permissions: Vec<Permission>,
     pub(crate) actions: Option<Vec<ActionButton>>,
     pub(crate) admin: Option<Admin>,
     pub(crate) network: Option<Network>,

@@ -8,6 +8,7 @@ use crate::json_objects::config::Config;
 use crate::json_objects::extra_page_content::ExtraPageContent;
 use crate::json_objects::network::Network;
 use crate::json_objects::tab::Tab;
+use crate::permission::Permission;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -19,7 +20,7 @@ pub(crate) struct PartialManifest {
     pub(crate) description: String,
     pub(crate) config: Option<HashMap<String, Config>>,
     pub(crate) bot: Option<Bot>,
-    pub(crate) permissions: Vec<String>,
+    pub(crate) permissions: Vec<Permission>,
     pub(crate) actions: Option<Vec<ActionButton>>,
     pub(crate) admin: Option<Admin>,
     pub(crate) network: Option<Network>,
