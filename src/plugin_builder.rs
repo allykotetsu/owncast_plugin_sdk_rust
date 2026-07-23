@@ -320,7 +320,7 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fedivers(&mut self, f: fn(&HashMap<String, String>) -> ()) {
+    pub fn on_fediverse(&mut self, f: fn(&HashMap<String, String>) -> ()) {
         self.on_fediverse_.push(f);
     }
 

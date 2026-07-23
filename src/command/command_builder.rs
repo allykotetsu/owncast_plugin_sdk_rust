@@ -37,6 +37,21 @@ impl CommandBuilder {
         self
     }
 
+    pub fn on_denied(mut self, f: fn(&CommandContext)) -> Self {
+        self.on_denied_ = Some(f);
+        self
+    }
+
+    pub fn with_description(mut self, desc: String) -> Self {
+        self.description_ = Some(desc);
+        self
+    }
+
+    pub fn with_usage(mut self, usage: String) -> Self {
+        self.usage_ = Some(usage);
+        self
+    }
+
     /// Aliases this command uses.
     pub fn with_aliases(mut self, aliases: &[&str]) -> Self {
         let mut v = vec![];
@@ -44,6 +59,16 @@ impl CommandBuilder {
             v.push(alias.to_string());
         }
         self.aliases_ = Some(v);
+        self
+    }
+
+    pub fn mod_only(mut self) -> Self {
+        self.mod_only_ = Some(true);
+        self
+    }
+
+    pub fn on_cooldown(mut self, f: fn(&CommandContext)) -> Self {
+        self.on_cooldown_ = Some(f);
         self
     }
 
