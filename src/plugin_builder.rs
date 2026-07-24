@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use extism_pdk::{config, info, FnResult};
+use extism_pdk::{info, FnResult};
 use serde::de::DeserializeOwned;
 use serde_json::Error;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
-use crate::errors::{Dbg, Duplicate, MissingManifest, OutOfBounds};
+use crate::errors::{Duplicate, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -90,9 +90,27 @@ pub struct PluginBuilder<'a> {
 
 impl<'a> PluginBuilder<'a> {
     pub fn new() -> FnResult<Self> {
-        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf. In the meantime we are going to do a workaround.
         info!("Building plugin...");
-        let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
+        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
+        // In the meantime we are going to do a hardcoded workaround for debugging purposes.
+        // But once that bug is fixed we will revert to the commented out code below:
+
+        // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
+
+        let manifest = r#"{
+          "api": "1",
+          "name": "Echo Bot",
+          "slug": "rust-echo-bot",
+          "category": "chat-bots",
+          "version": "0.1.0",
+          "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
+          "permissions": [
+            "chat.send"
+          ],
+          "bot": {
+            "displayName": "Echo Bot"
+          }
+        }"#;
 
         Ok(Self {
             partial_manifest: serde_json::from_str(&manifest)?,
