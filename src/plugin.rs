@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use extism_pdk::error;
 use serde_json::Error;
 use crate::command::command_context::CommandContext;
 use crate::command::command_definition::CommandDefinition;
@@ -81,7 +82,7 @@ pub struct Plugin<'a> {
     pub(crate) commands: HashMap<String, CommandDefinition>
 }
 
-impl<'a> Plugin<'a> {
+impl Plugin<'_> {
     pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
     }
@@ -164,7 +165,7 @@ impl<'a> Plugin<'a> {
                     })
                 }
             }
-            Envelope::TimerFire(payload) => {
+            Envelope::TimerFire(_) => {
                 // TODO
             }
 
@@ -172,7 +173,7 @@ impl<'a> Plugin<'a> {
                 for (other_name, func) in &self.on {
                     if event_type == *other_name {
                         if let Err(err) = func(payload.as_str()) {
-                            println!("{err}");
+                            error!("{err}");
                         }
                     }
                 }

@@ -24,3 +24,13 @@ impl Display for BadEventType {
     }
 }
 impl StdError for BadEventType {}
+
+#[derive(Debug)]
+pub struct Dbg(pub String);
+impl Display for Dbg {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let Dbg(msg) = self;
+        write!(f, "{msg}")
+    }
+}
+impl StdError for Dbg {}

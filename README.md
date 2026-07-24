@@ -10,13 +10,13 @@ This crate is a very early work in progress. When it's more complete and functio
 The development of this crate also depends on how the plugin system for Owncast evolves. It's also in very early stages and is subject to change, so as it changes this repo will likely change as well, perhaps very drastically.
 
 # Usage
-To create a plugin, use the define_plugin! macro. It takes a closure as a parameter. The closure returns a Result<PluginBuilder, Box<dyn Error>>, and it takes a PluginBuilder<'static> as a parameter.
+To create a plugin, use the define_plugin! macro. It takes a function pointer as a parameter. The function pointer returns a FnResult<PluginBuilder>, and it takes a PluginBuilder<'static> as a parameter.
 
 To add functionality to your plugin, call the PluginBuilder's functions. The following example is a simple chat echo bot. (Use statements are not shown.)
 
 You must use define_plugin! outside of function scope, as the macro expands to create a const PLUGIN variable, and global functions. The functions are WASM exports that return data through the PLUGIN variable.
 ```rust
-define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+define_plugin!(|mut plugin_builder| {
     // When a message is sent in the Owncast chat, echo it back.
     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
         owncast_send_chat(&format!("echo ${body}"));

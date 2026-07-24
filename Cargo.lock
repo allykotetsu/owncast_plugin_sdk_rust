@@ -183,6 +183,7 @@ dependencies = [
 name = "owncast_plugin_sdk_rust"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "extism-pdk",
  "serde",
  "serde_json",

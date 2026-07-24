@@ -1,10 +1,10 @@
 use std::collections::HashMap;
-use extism_pdk::config;
+use extism_pdk::{config, info, FnResult};
 use serde::de::DeserializeOwned;
 use serde_json::Error;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
-use crate::errors::{Duplicate, MissingManifest, OutOfBounds};
+use crate::errors::{Dbg, Duplicate, MissingManifest, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -89,50 +89,50 @@ pub struct PluginBuilder<'a> {
 }
 
 impl<'a> PluginBuilder<'a> {
-    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        if let Some(manifest) =  config::get("manifest")? {
-            Ok(Self {
-                partial_manifest: serde_json::from_str(&manifest)?,
+    pub fn new() -> FnResult<Self> {
+        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf. In the meantime we are going to do a workaround.
+        info!("Building plugin...");
+        let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 
-                on_chat_message_: vec![],
-                on_chat_user_joined_: vec![],
-                on_chat_user_parted_: vec![],
-                on_chat_user_renamed_: vec![],
-                on_message_moderated_: vec![],
-                on_stream_started_: vec![],
-                on_stream_stopped_: vec![],
-                on_stream_title_changed_: vec![],
-                on_sse_connect_: vec![],
-                on_sse_disconnect_: vec![],
-                on_tick_: vec![],
-                on_fediverse_: vec![],
-                on_fediverse_follow_: vec![],
-                on_fediverse_like_: vec![],
-                on_fediverse_repost_: vec![],
-                on_fediverse_quote_: vec![],
-                on_fediverse_mention_: vec![],
-                on_fediverse_reply_: vec![],
-                on_: vec![],
+        Ok(Self {
+            partial_manifest: serde_json::from_str(&manifest)?,
 
-                filter_chat_message_: vec![],
+            on_chat_message_: vec![],
+            on_chat_user_joined_: vec![],
+            on_chat_user_parted_: vec![],
+            on_chat_user_renamed_: vec![],
+            on_message_moderated_: vec![],
+            on_stream_started_: vec![],
+            on_stream_stopped_: vec![],
+            on_stream_title_changed_: vec![],
+            on_sse_connect_: vec![],
+            on_sse_disconnect_: vec![],
+            on_tick_: vec![],
+            on_fediverse_: vec![],
+            on_fediverse_follow_: vec![],
+            on_fediverse_like_: vec![],
+            on_fediverse_repost_: vec![],
+            on_fediverse_quote_: vec![],
+            on_fediverse_mention_: vec![],
+            on_fediverse_reply_: vec![],
+            on_: vec![],
 
-                on_http_request_: HashMap::new(),
+            filter_chat_message_: vec![],
 
-                on_auth_check_: None,
+            on_http_request_: HashMap::new(),
 
-                on_tab_content_: HashMap::new(),
+            on_auth_check_: None,
 
-                on_page_content_: HashMap::new(),
+            on_tab_content_: HashMap::new(),
 
-                on_page_styles_: None,
+            on_page_content_: HashMap::new(),
 
-                on_page_scripts_: None,
+            on_page_styles_: None,
 
-                commands_: HashMap::new()
-            })
-        } else {
-            Err(Box::new(MissingManifest))
-        }
+            on_page_scripts_: None,
+
+            commands_: HashMap::new()
+        })
     }
 
     /// Creates an event hook for when a chat message is sent.
@@ -140,7 +140,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
     ///         owncast_send_chat(&format!("echo {body}"));
     ///     });
@@ -156,7 +156,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_user_joined(|ChatUser { display_name, .. }| {
     ///         owncast_send_chat(&format!("Welcome, {display_name}!"));
     ///     });
@@ -172,7 +172,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_user_parted(|ChatUser { display_name, .. }| {
     ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
     ///     });
@@ -188,7 +188,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_user_renamed(|ChatUserRename { display_name, .. }| {
     ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
     ///     });
@@ -204,7 +204,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_message_moderated(|ChatMessageModeration { message_id, visible, .. }| {
     ///         owncast_send_chat(&format!("A moderator changed {message_id} to {visible}!"));
     ///     });
@@ -220,7 +220,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_started(|StreamStarted { title, .. }| {
     ///         owncast_send_chat(&format!("Stream {title} is starting!"));
     ///     });
@@ -236,7 +236,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_stopped(|StreamStopped { stopped_at }| {
     ///         owncast_send_chat(&format!("Stream stopped at {stopped_at}!"));
     ///     });
@@ -252,7 +252,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_title_changed(|StreamTitleChange { from, to }| {
     ///         owncast_send_chat(&format!("Stream title changed from {from} to {to}."));
     ///     });
@@ -268,7 +268,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_sse_connect(|SSEConnectionEvent { connection_id, .. }| {
     ///         owncast_send_chat(&format!("Connected to {connection_id}."));
     ///     });
@@ -284,7 +284,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_sse_disconnect(|SSEConnectionEvent { connection_id, .. }| {
     ///         owncast_send_chat(&format!("Disconnected from {connection_id}."));
     ///     });
@@ -300,7 +300,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_tick(|TickEvent { now }| {
     ///         owncast_send_chat(&format!("The time is now {now}"));
     ///     });
@@ -316,7 +316,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse(|hash_map| {
     ///             TODO
     ///         owncast_send_chat(&format!("The time is now {now}"));
@@ -333,7 +333,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_follow(|FediverseEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} followed stream!"));
     ///     });
@@ -349,7 +349,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_like(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} liked that stream went live!"));
     ///     });
@@ -365,7 +365,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} reposted that stream went live!"));
     ///     });
@@ -381,7 +381,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
     /// TODO include said quote
     ///         owncast_send_chat(&format!("{name} quoted that stream went live!"));
@@ -398,7 +398,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
     ///         owncast_send_chat(&format!("Someone had this to say about stream: {content_text}"));
     ///     });
@@ -414,7 +414,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
     ///         owncast_send_chat(&format!("Someone had this to say in reply to stream: {content_text}"));
     ///     });
@@ -434,7 +434,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.filter_chat_message(None, |ChatMessage { body, .. }| {
     ///         if body.contains("bad word") {
     ///             FilterResult::Drop("No bad words allowed!".to_string())
@@ -465,7 +465,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }| {
     ///         OutgoingHttpResponse {
     ///             status: Some(200),
@@ -495,7 +495,7 @@ impl<'a> PluginBuilder<'a> {
     ///     pub(crate) data: String
     /// }
     ///
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on("another-plugin.something", |CustomEventPayload { data }| {
     ///         owncast_send_chat(format!("Received {data}."));
     ///     });
@@ -518,7 +518,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.commands("!", false, vec![
     ///         CommandBuilder::new("update", |ctx| {
     ///             ctx.reply("we've been live a while!");
@@ -548,7 +548,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_tab_content("store", |ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
@@ -572,7 +572,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_content("store", |ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
@@ -596,7 +596,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_styles(|| {
     ///         "* { font-size: 24pt; }".to_string()
     ///     })?;
@@ -621,7 +621,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_scripts(|| {
     ///         "alert('Welcome to stream!');".to_string()
     ///     })?;
@@ -646,7 +646,7 @@ impl<'a> PluginBuilder<'a> {
     /// # Examples
     ///
     /// ```
-    /// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+    /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_auth_check(|AuthCheckRequest { user: User { display_name, .. } }| {
     ///         if display_name.as_str() == "Authorized user" {
     ///             AuthCheckResult::Ok()
@@ -711,6 +711,8 @@ impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
 
         let subscriptions = Subscriptions { notify, filter };
         let commands: Vec<Command> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
+
+        info!("Plugin built!");
 
         Plugin {
             manifest: Manifest::from((self.partial_manifest, subscriptions, commands)),
