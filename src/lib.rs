@@ -19,7 +19,7 @@ pub mod prelude {
     pub use crate::json_objects::auth_check_request::AuthCheckRequest;
     pub use crate::json_objects::auth_check_result::AuthCheckResult;
     pub use crate::json_objects::content_request::ContentRequest;
-    pub use crate::json_objects::event::Event;
+    pub use crate::json_objects::envelope::Envelope;
     pub use crate::json_objects::event_type::EventType;
     pub use crate::json_objects::filter_result::FilterResult;
     pub use crate::json_objects::incoming_http_request::IncomingHttpRequest;
@@ -30,7 +30,7 @@ pub mod prelude {
 
 use crate::prelude::*;
 
-define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn std::error::Error>> {
+define_plugin!(|mut plugin_builder| {
     plugin_builder.on_chat_message(|_| {
         // owncast_send_chat(&format!("echo ${body}"));
     });

@@ -8,7 +8,7 @@ use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
 use crate::json_objects::content_request::ContentRequest;
-use crate::json_objects::event::Event;
+use crate::json_objects::envelope::Envelope;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
@@ -90,69 +90,69 @@ impl<'a> Plugin<'a> {
         self.manifest.clone()
     }
 
-    pub fn dispatch_event(&self, event: Event) {
+    pub fn dispatch_event(&self, event: Envelope) {
         match event {
-            Event::ChatMessageReceived { payload } => {
+            Envelope::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message { func(&payload); }
             }
-            Event::ChatUserJoined { payload } => {
+            Envelope::ChatUserJoined(payload) => {
                 for func in &self.on_chat_user_joined { func(&payload); }
             }
-            Event::ChatUserParted { payload } => {
+            Envelope::ChatUserParted(payload) => {
                 for func in &self.on_chat_user_parted { func(&payload); }
             }
-            Event::ChatUserRenamed { payload } => {
+            Envelope::ChatUserRenamed(payload) => {
                 for func in &self.on_chat_user_renamed { func(&payload); }
             }
-            Event::ChatMessageModerated { payload } => {
+            Envelope::ChatMessageModerated(payload) => {
                 for func in &self.on_message_moderated { func(&payload); }
             }
 
-            Event::StreamStarted { payload } => {
+            Envelope::StreamStarted(payload) => {
                 for func in &self.on_stream_started { func(&payload); }
             }
-            Event::StreamStopped { payload } => {
+            Envelope::StreamStopped(payload) => {
                 for func in &self.on_stream_stopped { func(&payload); }
             }
-            Event::StreamTitleChanged { payload } => {
+            Envelope::StreamTitleChanged(payload) => {
                 for func in &self.on_stream_title_changed { func(&payload); }
             }
 
-            Event::SseConnect { payload } => {
+            Envelope::SseConnect(payload) => {
                 for func in &self.on_sse_connect { func(&payload); }
             }
-            Event::SseDisconnect { payload } => {
+            Envelope::SseDisconnect(payload) => {
                 for func in &self.on_sse_disconnect { func(&payload);}
             }
 
-            Event::Tick { payload } => {
+            Envelope::Tick(payload) => {
                 for func in &self.on_tick { func(&payload); }
             }
 
-            Event::FediverseActivity { payload } => {
+            Envelope::FediverseActivity(payload) => {
                 for func in &self.on_fediverse { func(&payload); }
             }
-            Event::FediverseFollow { payload } => {
+            Envelope::FediverseFollow(payload) => {
                 for func in &self.on_fediverse_follow { func(&payload); }
             }
-            Event::FediverseLike { payload } => {
+            Envelope::FediverseLike(payload) => {
                 for func in &self.on_fediverse_like { func(&payload); }
             }
-            Event::FediverseRepost { payload } => {
+            Envelope::FediverseRepost(payload) => {
                 for func in &self.on_fediverse_repost { func(&payload); }
             }
-            Event::FediverseQuote { payload } => {
+            Envelope::FediverseQuote(payload) => {
                 for func in &self.on_fediverse_quote { func(&payload); }
             }
 
-            Event::FediverseMention { payload } => {
+            Envelope::FediverseMention(payload) => {
                 for func in &self.on_fediverse_mention { func(&payload); }
             }
-            Event::FediverseReply { payload } => {
+            Envelope::FediverseReply(payload) => {
                 for func in &self.on_fediverse_reply { func(&payload); }
             }
 
-            Event::ChatCommand { payload } => {
+            Envelope::ChatCommand(payload) => {
                 if let Some(command_definition) = self.commands.get(&payload.command) {
                     (command_definition.run)(&CommandContext {
                         user: payload.message.user.clone(),
@@ -164,11 +164,11 @@ impl<'a> Plugin<'a> {
                     })
                 }
             }
-            Event::TimerFire { .. } => {
+            Envelope::TimerFire(payload) => {
                 // TODO
             }
 
-            Event::Custom { event_type, payload } => {
+            Envelope::Custom { event_type, payload } => {
                 for (other_name, func) in &self.on {
                     if event_type == *other_name {
                         if let Err(err) = func(payload.as_str()) {
@@ -180,7 +180,7 @@ impl<'a> Plugin<'a> {
         }
     }
 
-    pub fn dispatch_filter(&self, msg: ChatMessage) -> FilterResult {
+    pub fn dispatch_filter(&self, mut msg: ChatMessage) -> FilterResult {
         let mut body = String::new();
 
         for (_, filter_chat_message) in &self.filter_chat_message {
@@ -189,7 +189,8 @@ impl<'a> Plugin<'a> {
                     continue;
                 }
                 FilterResult::Modify { payload } => {
-                    body = payload;
+                    body = payload.clone();
+                    msg.body = payload;
                 }
                 FilterResult::Drop { reason } => {
                     return FilterResult::Drop { reason }

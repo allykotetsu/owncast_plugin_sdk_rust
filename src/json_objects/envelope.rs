@@ -1,8 +1,6 @@
 use extism_pdk::{FromBytes, Json};
 use std::collections::HashMap;
-use serde::{Deserialize, Deserializer};
-use serde::de::{Error, MapAccess, SeqAccess, Visitor};
-use serde_json::Error as JsonError;
+use serde::Deserialize;
 use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
@@ -16,63 +14,62 @@ use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
-use crate::prelude::EventType;
 
 #[derive(FromBytes, Deserialize)]
 #[encoding(Json)]
-#[serde(tag = "event_type")]
-pub enum Event {
+#[serde(tag = "event_type", content = "payload")]
+pub enum Envelope {
     // Chat events
     #[serde(rename = "chat.message.received")]
-    ChatMessageReceived { payload: ChatMessage },
+    ChatMessageReceived(ChatMessage),
     #[serde(rename = "chat.user.joined")]
-    ChatUserJoined { payload: User },
+    ChatUserJoined(User),
     #[serde(rename = "chat.user.parted")]
-    ChatUserParted { payload: User },
+    ChatUserParted(User),
     #[serde(rename = "chat.user.renamed")]
-    ChatUserRenamed { payload: ChatUserRename },
+    ChatUserRenamed(ChatUserRename),
     #[serde(rename = "chat.message.moderated")]
-    ChatMessageModerated { payload: ChatMessageModeration },
+    ChatMessageModerated(ChatMessageModeration),
 
     // Stream lifecycle
     #[serde(rename = "stream.started")]
-    StreamStarted { payload: StreamStarted },
+    StreamStarted(StreamStarted),
     #[serde(rename = "stream.stopped")]
-    StreamStopped { payload: StreamStopped },
+    StreamStopped(StreamStopped),
     #[serde(rename = "stream.title.changed")]
-    StreamTitleChanged { payload: StreamTitleChange },
+    StreamTitleChanged(StreamTitleChange),
 
     // SSE connection lifecycle (who connected to / left a plugin's stream)
     #[serde(rename = "sse.connect")]
-    SseConnect { payload: SSEConnectionEvent },
+    SseConnect(SSEConnectionEvent),
     #[serde(rename = "sse.disconnect")]
-    SseDisconnect { payload: SSEConnectionEvent },
+    SseDisconnect(SSEConnectionEvent),
 
     // Once-a-second tick for periodic work (opt in by defining onTick)
     #[serde(rename = "tick")]
-    Tick { payload: TickEvent },
+    Tick(TickEvent),
 
     // Fediverse, engagement (metadata only) + inbound posts (with content)
     #[serde(rename = "fediverse.activity")]
-    FediverseActivity { payload: HashMap<String, String> },
+    FediverseActivity(HashMap<String, String>),
     #[serde(rename = "fediverse.follow")]
-    FediverseFollow { payload: FediverseEngagement },
+    FediverseFollow(FediverseEngagement),
     #[serde(rename = "fediverse.like")]
-    FediverseLike { payload: FediverseTargetedEngagement },
+    FediverseLike(FediverseTargetedEngagement),
     #[serde(rename = "fediverse.repost")]
-    FediverseRepost { payload: FediverseTargetedEngagement },
+    FediverseRepost(FediverseTargetedEngagement),
     #[serde(rename = "fediverse.quote")]
-    FediverseQuote { payload: FediverseTargetedEngagement },
+    FediverseQuote(FediverseTargetedEngagement),
     #[serde(rename = "fediverse.mention")]
-    FediverseMention { payload: FediverseInboundPost },
+    FediverseMention(FediverseInboundPost),
     #[serde(rename = "fediverse.reply")]
-    FediverseReply { payload: FediverseInboundPost },
+    FediverseReply(FediverseInboundPost),
 
     // Internal events
     #[serde(rename = "chat.command")]
-    ChatCommand { payload: CommandEvent },
+    ChatCommand(CommandEvent),
     #[serde(rename = "timer.fire")]
-    TimerFire{ payload: () },
+    TimerFire(()),
 
     #[serde(untagged)]
     Custom { event_type: String, payload: String }

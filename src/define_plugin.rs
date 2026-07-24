@@ -11,7 +11,7 @@
 /// # Examples
 ///
 /// ```
-/// define_plugin!(|mut plugin_builder: PluginBuilder<'static>| -> Result<PluginBuilder, Box<dyn Error>> {
+/// define_plugin!(|mut plugin_builder| {
 ///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
 ///         owncast_send_chat(&format!("echo {body}"));
 ///     });
@@ -22,7 +22,8 @@
 macro_rules! define_plugin {
     ($func:expr) => {
         const PLUGIN: LazyLock<Plugin> = LazyLock::new(|| {
-            $func(PluginBuilder::new().unwrap()).unwrap().into()
+            let func: fn(PluginBuilder<'static>) -> Result<PluginBuilder, Box<dyn Error>> = $func;
+            func(PluginBuilder::new().unwrap()).unwrap().into()
         });
 
         // Exported functions.
@@ -32,16 +33,16 @@ macro_rules! define_plugin {
         }
 
         #[plugin_fn]
-        pub fn on_event(event: Event) -> FnResult<()> {
-            Ok(PLUGIN.dispatch_event(event))
+        pub fn on_event(envelope: Envelope) -> FnResult<()> {
+            Ok(PLUGIN.dispatch_event(envelope))
         }
 
         #[plugin_fn]
-        pub fn on_filter(event: Event) -> FnResult<FilterResult> {
-            let payload = if let Event::ChatMessageReceived { payload } = event {
+        pub fn on_filter(envelope: Envelope) -> FnResult<FilterResult> {
+            let payload = if let Envelope::ChatMessageReceived(payload) = envelope {
                 Ok(payload)
             } else {
-                Err(BadEventType(EventType::ChatMessageReceived, event.into()))
+                Err(BadEventType(EventType::ChatMessageReceived, envelope.into()))
             }?;
 
             Ok(PLUGIN.dispatch_filter(payload))

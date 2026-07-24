@@ -10,7 +10,7 @@ pub mod chat_message;
 pub(crate) mod subscriptions;
 pub(crate) mod command;
 pub(crate) mod notify;
-pub(crate) mod event;
+pub(crate) mod envelope;
 pub(crate) mod filter;
 pub(crate) mod chat_user_rename;
 pub(crate) mod chat_message_moderation;

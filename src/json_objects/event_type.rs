@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
-use crate::prelude::Event;
+use crate::prelude::Envelope;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum EventType {
@@ -59,36 +59,36 @@ impl Display for EventType {
     }
 }
 
-impl From<Event> for EventType {
-    fn from(event: Event) -> Self {
+impl From<Envelope> for EventType {
+    fn from(event: Envelope) -> Self {
         match event {
-            Event::ChatMessageReceived { .. } => Self::ChatMessageReceived,
-            Event::ChatUserJoined { .. } => Self::ChatUserJoined,
-            Event::ChatUserParted { .. } => Self::ChatUserParted,
-            Event::ChatUserRenamed { .. } => Self::ChatUserRenamed,
-            Event::ChatMessageModerated { .. } => Self::ChatMessageModerated,
+            Envelope::ChatMessageReceived { .. } => Self::ChatMessageReceived,
+            Envelope::ChatUserJoined { .. } => Self::ChatUserJoined,
+            Envelope::ChatUserParted { .. } => Self::ChatUserParted,
+            Envelope::ChatUserRenamed { .. } => Self::ChatUserRenamed,
+            Envelope::ChatMessageModerated { .. } => Self::ChatMessageModerated,
 
-            Event::StreamStarted { .. } => Self::StreamStarted,
-            Event::StreamStopped { .. } => Self::StreamStopped,
-            Event::StreamTitleChanged { .. } => Self::StreamTitleChanged,
+            Envelope::StreamStarted { .. } => Self::StreamStarted,
+            Envelope::StreamStopped { .. } => Self::StreamStopped,
+            Envelope::StreamTitleChanged { .. } => Self::StreamTitleChanged,
 
-            Event::SseConnect { .. } => Self::SseConnect,
-            Event::SseDisconnect { .. } => Self::SseDisconnect,
+            Envelope::SseConnect { .. } => Self::SseConnect,
+            Envelope::SseDisconnect { .. } => Self::SseDisconnect,
 
-            Event::Tick { .. } => Self::Tick,
+            Envelope::Tick { .. } => Self::Tick,
 
-            Event::FediverseActivity { .. } => Self::FediverseActivity,
-            Event::FediverseFollow { .. } => Self::FediverseFollow,
-            Event::FediverseLike { .. } => Self::FediverseLike,
-            Event::FediverseRepost { .. } => Self::FediverseRepost,
-            Event::FediverseQuote { .. } => Self::FediverseQuote,
-            Event::FediverseMention { .. } => Self::FediverseMention,
-            Event::FediverseReply { .. } => Self::FediverseReply,
+            Envelope::FediverseActivity { .. } => Self::FediverseActivity,
+            Envelope::FediverseFollow { .. } => Self::FediverseFollow,
+            Envelope::FediverseLike { .. } => Self::FediverseLike,
+            Envelope::FediverseRepost { .. } => Self::FediverseRepost,
+            Envelope::FediverseQuote { .. } => Self::FediverseQuote,
+            Envelope::FediverseMention { .. } => Self::FediverseMention,
+            Envelope::FediverseReply { .. } => Self::FediverseReply,
 
-            Event::ChatCommand { .. } => Self::ChatCommand,
-            Event::TimerFire { .. } => Self::TimerFire,
+            Envelope::ChatCommand { .. } => Self::ChatCommand,
+            Envelope::TimerFire { .. } => Self::TimerFire,
 
-            Event::Custom { event_type, .. } => Self::Custom(event_type)
+            Envelope::Custom { event_type, .. } => Self::Custom(event_type)
         }
     }
 }
