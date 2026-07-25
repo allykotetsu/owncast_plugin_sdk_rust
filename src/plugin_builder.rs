@@ -551,8 +551,9 @@ impl PluginBuilder {
     pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder>) -> Result<(), Duplicate> {
         for command_builder in command_builders {
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
-            if let Some(CommandDefinition { command: Command { name, prefix, .. }, .. }) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
-                return Err(Duplicate(format!("{prefix}{name}")));
+            let name = command_data.command.name.clone();
+            if let Some(_) = self.commands_.insert(name.clone(), command_data) {
+                return Err(Duplicate(name));
             }
         }
         Ok(())
