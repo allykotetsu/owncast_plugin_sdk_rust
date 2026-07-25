@@ -8,7 +8,7 @@ use crate::json_objects::command_event::CommandEvent;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
-use crate::json_objects::sse_connection_event::SSEConnectionEvent;
+use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
@@ -41,9 +41,9 @@ pub enum Envelope {
 
     // SSE connection lifecycle (who connected to / left a plugin's stream)
     #[serde(rename = "sse.connect")]
-    SseConnect(SSEConnectionEvent),
+    SseConnect(SseConnectionEvent),
     #[serde(rename = "sse.disconnect")]
-    SseDisconnect(SSEConnectionEvent),
+    SseDisconnect(SseConnectionEvent),
 
     // Once-a-second tick for periodic work (opt in by defining onTick)
     #[serde(rename = "tick")]

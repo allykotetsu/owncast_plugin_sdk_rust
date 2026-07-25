@@ -23,7 +23,7 @@ use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
 use crate::json_objects::notify::Notify;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
-use crate::json_objects::sse_connection_event::SSEConnectionEvent;
+use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
@@ -48,8 +48,8 @@ pub struct PluginBuilder {
     on_stream_stopped_: Vec<fn(&StreamStopped)>,
     on_stream_title_changed_: Vec<fn(&StreamTitleChange)>,
 
-    on_sse_connect_: Vec<fn(&SSEConnectionEvent)>,
-    on_sse_disconnect_: Vec<fn(&SSEConnectionEvent)>,
+    on_sse_connect_: Vec<fn(&SseConnectionEvent)>,
+    on_sse_disconnect_: Vec<fn(&SseConnectionEvent)>,
 
     on_tick_: Vec<fn(&TickEvent)>,
 
@@ -300,7 +300,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_connect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
+    pub fn on_sse_connect(&mut self, f: fn(&SseConnectionEvent) -> ()) {
         self.on_sse_connect_.push(f);
     }
 
@@ -316,7 +316,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_disconnect(&mut self, f: fn(&SSEConnectionEvent) -> ()) {
+    pub fn on_sse_disconnect(&mut self, f: fn(&SseConnectionEvent) -> ()) {
         self.on_sse_disconnect_.push(f);
     }
 

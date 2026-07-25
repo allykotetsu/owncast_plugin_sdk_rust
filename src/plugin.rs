@@ -18,7 +18,7 @@ use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
-use crate::json_objects::sse_connection_event::SSEConnectionEvent;
+use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
@@ -42,8 +42,8 @@ pub struct Plugin {
     pub(crate) on_stream_stopped: Vec<fn(&StreamStopped)>,
     pub(crate) on_stream_title_changed: Vec<fn(&StreamTitleChange)>,
 
-    pub(crate) on_sse_connect: Vec<fn(&SSEConnectionEvent)>,
-    pub(crate) on_sse_disconnect: Vec<fn(&SSEConnectionEvent)>,
+    pub(crate) on_sse_connect: Vec<fn(&SseConnectionEvent)>,
+    pub(crate) on_sse_disconnect: Vec<fn(&SseConnectionEvent)>,
 
     pub(crate) on_tick: Vec<fn(&TickEvent)>,
 
