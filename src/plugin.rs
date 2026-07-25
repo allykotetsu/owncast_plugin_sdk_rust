@@ -182,7 +182,7 @@ impl Plugin {
     }
 
     pub fn dispatch_filter(&self, mut msg: ChatMessage) -> FilterResult {
-        let mut body = String::new();
+        let mut changed = false;
 
         for (_, filter_chat_message) in &self.filter_chat_message {
             match filter_chat_message(&msg) {
@@ -190,8 +190,8 @@ impl Plugin {
                     continue;
                 }
                 FilterResult::Modify { payload } => {
-                    body = payload.clone();
-                    msg.body = payload;
+                    changed = true;
+                    msg = payload;
                 }
                 FilterResult::Drop { reason } => {
                     return FilterResult::Drop { reason }
@@ -199,10 +199,10 @@ impl Plugin {
             }
         }
 
-        if body.is_empty() {
-            FilterResult::Pass
+        if changed {
+            FilterResult::Modify { payload: msg }
         } else {
-            FilterResult::Modify { payload: body }
+            FilterResult::Pass
         }
     }
 

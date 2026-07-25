@@ -1,11 +1,11 @@
 use std::collections::HashMap;
-use extism_pdk::{info, FnResult, WithReturnCode};
+use extism_pdk::{info, WithReturnCode};
 use extism_pdk::Error as ExtismError;
 use serde::de::DeserializeOwned;
 use serde_json::Error as JsonError;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
-use crate::errors::{Duplicate, MissingManifest, OutOfBounds};
+use crate::errors::{Duplicate, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -31,7 +31,6 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
-use crate::partial_manifest::PartialManifest;
 use crate::plugin::Plugin;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
@@ -711,26 +710,16 @@ impl TryInto<Plugin> for PluginBuilder {
         // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 
         let manifest = r#"{
-          "api": "1",
-          "name": "Echo Bot",
-          "slug": "rust-echo-bot",
-          "category": "chat-bots",
-          "version": "0.1.0",
-          "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
-          "permissions": [
-            "ui.modify",
-            "chat.send",
-            "chat.filter",
-            "http.serve"
-          ],
-          "tabs": [
-            { "title": "Music",    "slug": "music",    "content": "music.html" },
-            { "title": "Schedule", "slug": "schedule", "content": "schedule.html" }
-          ],
-          "bot": {
-            "displayName": "Echo Bot"
-          }
-        }"#;
+  "api": "1",
+  "name": "Example Profanity Filter (Rust)",
+  "slug": "rust-profanity-filter",
+  "version": "0.1.0",
+  "description": "Redacts a hardcoded wordlist from chat. This example was written in Rust.",
+  "category": "chat-filters",
+  "permissions": [
+    "chat.filter"
+  ]
+}"#;
 
         info!("Plugin built!");
 

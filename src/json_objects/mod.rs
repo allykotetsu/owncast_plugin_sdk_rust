@@ -1,5 +1,5 @@
 pub(crate) mod manifest;
-pub(crate) mod filter_result;
+pub mod filter_result;
 pub(crate) mod incoming_http_request;
 pub(crate) mod outgoing_http_response;
 pub(crate) mod content_request;

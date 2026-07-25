@@ -1,0 +1,11 @@
+{
+  "api": "1",
+  "name": "Example Profanity Filter (Rust)",
+  "slug": "rust-profanity-filter",
+  "version": "0.1.0",
+  "description": "Redacts a hardcoded wordlist from chat. This example was written in Rust.",
+  "category": "chat-filters",
+  "permissions": [
+    "chat.filter"
+  ]
+}
