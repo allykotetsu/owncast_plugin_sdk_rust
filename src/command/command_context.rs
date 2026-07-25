@@ -1,6 +1,7 @@
-use crate::errors::Forbidden;
 use crate::json_objects::user::User;
 use crate::json_objects::chat_message::ChatMessage;
+use crate::imports::owncast_send_chat_;
+use crate::imports::owncast_send_chat_to_;
 
 pub struct CommandContext {
     pub(crate) msg: ChatMessage,
@@ -12,16 +13,15 @@ pub struct CommandContext {
 }
 
 impl CommandContext {
-    pub fn reply(&self, text: &str) -> Result<(), Forbidden> {
-        // Ok(owncast_send_chat(text)?)
-        Ok(())
+    pub fn reply(&self, text: &str) {
+        owncast_send_chat_(text)
     }
 
-    pub fn reply_privately(&self, text: &str) -> Result<(), Forbidden> {
-        // if !owncast_send_chat_reply(OutputJson(self.msg.clone()), text)? {
-        //     owncast_send_chat(text)?;
-        // }
-        // Ok(())
-        Ok(())
+    pub fn reply_privately(&self, text: &str) {
+        if let Some(client_id) = self.msg.client_id {
+            owncast_send_chat_to_(client_id, text)
+        } else {
+            owncast_send_chat_(text)
+        }
     }
 }

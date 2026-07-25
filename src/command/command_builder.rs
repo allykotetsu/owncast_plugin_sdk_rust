@@ -42,13 +42,13 @@ impl CommandBuilder {
         self
     }
 
-    pub fn with_description(mut self, desc: String) -> Self {
-        self.description_ = Some(desc);
+    pub fn with_description(mut self, desc: &str) -> Self {
+        self.description_ = Some(desc.to_string());
         self
     }
 
-    pub fn with_usage(mut self, usage: String) -> Self {
-        self.usage_ = Some(usage);
+    pub fn with_usage(mut self, usage: &str) -> Self {
+        self.usage_ = Some(usage.to_string());
         self
     }
 

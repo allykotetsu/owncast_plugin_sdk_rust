@@ -1,7 +1,9 @@
+use extism_pdk::{FromBytes, Json};
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, FromBytes)]
 #[serde(rename_all = "camelCase")]
+#[encoding(Json)]
 pub(crate) struct ChatClient {
     pub(crate) id: u64,
     pub(crate) user_id: Option<String>,

@@ -4,15 +4,15 @@ use serde::Deserialize;
 #[derive(Eq, Hash, PartialEq, Clone, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Method {
-    CONNECT,
-    DELETE,
-    GET,
-    HEAD,
-    OPTIONS,
-    PATH,
-    POST,
-    PUT,
-    TRACE
+    Connect,
+    Delete,
+    Get,
+    Head,
+    Options,
+    Path,
+    Post,
+    Put,
+    Trace
 }
 
 impl Display for Method {

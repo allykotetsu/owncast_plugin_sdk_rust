@@ -2,9 +2,8 @@ pub mod json_objects;
 pub mod plugin_builder;
 mod plugin;
 mod define_plugin;
-mod imports;
-mod method;
-mod command;
+pub mod imports;
+pub mod command;
 mod partial_manifest;
 mod errors;
 

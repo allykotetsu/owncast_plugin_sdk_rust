@@ -10,7 +10,7 @@ This crate is a very early work in progress. When it's more complete and functio
 The development of this crate also depends on how the plugin system for Owncast evolves. It's also in very early stages and is subject to change, so as it changes this repo will likely change as well, perhaps very drastically.
 
 # Usage
-To create a plugin, use the define_plugin! macro. It takes a function pointer as a parameter. The function pointer returns a FnResult<PluginBuilder>, and it takes a PluginBuilder<'static> as a parameter.
+To create a plugin, use the define_plugin! macro. It takes a function pointer as a parameter. The function pointer returns a FnResult<PluginBuilder>, and it takes a PluginBuilder as a parameter.
 
 To add functionality to your plugin, call the PluginBuilder's functions. The following example is a simple chat echo bot. (Use statements are not shown.)
 

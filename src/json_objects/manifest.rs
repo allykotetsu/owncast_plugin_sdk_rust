@@ -32,7 +32,7 @@ pub struct Manifest {
     pub(crate) styles: Option<Vec<String>>,
     pub(crate) scripts: Option<Vec<String>>,
     pub(crate) extra_page_content: Option<ExtraPageContent>,
-    pub(crate) tabs: Option<Tab>,
+    pub(crate) tabs: Option<Vec<Tab>>,
     pub(crate) category: Category,
 
     pub(crate) subscriptions: Subscriptions,

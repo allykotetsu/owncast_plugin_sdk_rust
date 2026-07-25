@@ -18,9 +18,9 @@ use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter::Filter;
 use crate::json_objects::filter_result::FilterResult;
-use crate::method::Method;
 use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
+use crate::json_objects::method::Method;
 use crate::json_objects::notify::Notify;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
 use crate::json_objects::sse_connection_event::SSEConnectionEvent;
@@ -34,7 +34,7 @@ use crate::partial_manifest::PartialManifest;
 use crate::plugin::Plugin;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
-pub struct PluginBuilder<'a> {
+pub struct PluginBuilder {
     // Events
     partial_manifest: PartialManifest,
 
@@ -67,7 +67,7 @@ pub struct PluginBuilder<'a> {
     filter_chat_message_: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
 
     // HTTP
-    on_http_request_: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
+    on_http_request_: HashMap<(Method, String), fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
     on_auth_check_: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
@@ -88,7 +88,7 @@ pub struct PluginBuilder<'a> {
     commands_: HashMap<String, CommandDefinition>
 }
 
-impl<'a> PluginBuilder<'a> {
+impl PluginBuilder {
     pub fn new() -> FnResult<Self> {
         info!("Building plugin...");
         // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
@@ -105,7 +105,14 @@ impl<'a> PluginBuilder<'a> {
           "version": "0.1.0",
           "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
           "permissions": [
-            "chat.send"
+            "ui.modify",
+            "chat.send",
+            "chat.filter",
+            "http.serve"
+          ],
+          "tabs": [
+            { "title": "Music",    "slug": "music",    "content": "music.html" },
+            { "title": "Schedule", "slug": "schedule", "content": "schedule.html" }
           ],
           "bot": {
             "displayName": "Echo Bot"
@@ -463,11 +470,11 @@ impl<'a> PluginBuilder<'a> {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), OutOfBounds> {
+    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), OutOfBounds<u8>> {
         // TODO if possible then put a compile-time restraint on priority.
         let priority = priority.unwrap_or(100);
         if priority >= 101 {
-            Err(OutOfBounds("Filter priority must be between 0 (inclusive) and 101 (exclusive).".to_string()))
+            Err(OutOfBounds(0, 101, priority))
         } else {
             self.filter_chat_message_.push((priority, f));
             Ok(())
@@ -484,21 +491,15 @@ impl<'a> PluginBuilder<'a> {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_http_request(&[Method::GET], "/echo", &|IncomingHttpRequest { body, .. }| {
-    ///         OutgoingHttpResponse {
-    ///             status: Some(200),
-    ///             headers: Some(HashMap::from([("Content-Type".to_string(), "text/plain".to_string())])),
-    ///             body: Some(body)
-    ///         }
+    ///     plugin_builder.on_http_request(Method::Get, "/echo", |IncomingHttpRequest { body, .. }| {
+    ///         OutgoingHttpResponse::text_plain(200, &format!("echo {body}"))
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_http_request(&mut self, method: &[Method], path: &str, f: &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), Duplicate> {
-        for method in method {
-            if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
-                return Err(Duplicate(format!("An HTTP request handler already exists for {method} {path}.")));
-            }
+    pub fn on_http_request(&mut self, method: Method, path: &str, f: fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), Duplicate> {
+        if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
+            return Err(Duplicate(format!("{method} {path}")));
         }
         Ok(())
     }
@@ -551,7 +552,7 @@ impl<'a> PluginBuilder<'a> {
         for command_builder in command_builders {
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
             if let Some(CommandDefinition { command: Command { name, prefix, .. }, .. }) = self.commands_.insert(format!("{}{}", command_data.command.prefix, command_data.command.name), command_data) {
-                return Err(Duplicate(format!("Command {prefix}{name} already exists.")));
+                return Err(Duplicate(format!("{prefix}{name}")));
             }
         }
         Ok(())
@@ -685,8 +686,8 @@ impl<'a> PluginBuilder<'a> {
     }
 }
 
-impl<'a> Into<Plugin<'a>> for PluginBuilder<'a> {
-    fn into(self) -> Plugin<'a> {
+impl Into<Plugin> for PluginBuilder {
+    fn into(self) -> Plugin {
         let mut filter_chat_message_ = self.filter_chat_message_;
         filter_chat_message_.sort_by(|(a, _), (b, _)| {
             b.cmp(&a)

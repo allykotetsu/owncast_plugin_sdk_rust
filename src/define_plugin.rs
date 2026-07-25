@@ -2,7 +2,7 @@ use extism_pdk::{Error, WithReturnCode};
 
 /// Macro for defining one Owncast plugin. Only call this once for your project, and call it outside of function scope.
 ///
-/// define_plugin! expects a parameter that is a `fn(PluginBuilder<'static>) -> FnResult<PluginBuilder>` function pointer.
+/// define_plugin! expects a parameter that is a `fn(PluginBuilder) -> FnResult<PluginBuilder>` function pointer.
 ///
 /// Within the body of the function, call functions onto the builder for adding functionality to the plugin, and then return an Ok() wrapping the plugin builder object.
 ///
@@ -24,7 +24,7 @@ use extism_pdk::{Error, WithReturnCode};
 macro_rules! define_plugin {
     ($func:expr) => {
         const PLUGIN: LazyLock<FnResult<Plugin>> = LazyLock::new(|| {
-            let func: fn(PluginBuilder<'static>) -> FnResult<PluginBuilder> = $func;
+            let func: fn(PluginBuilder) -> FnResult<PluginBuilder> = $func;
             Ok(func(PluginBuilder::new()?)?.into())
         });
 

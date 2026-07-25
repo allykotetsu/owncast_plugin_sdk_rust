@@ -14,9 +14,9 @@ use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter_result::FilterResult;
-use crate::method::Method;
 use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
+use crate::json_objects::method::Method;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
 use crate::json_objects::sse_connection_event::SSEConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
@@ -27,7 +27,7 @@ use crate::json_objects::user::User;
 use crate::json_objects::permission::Permission;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
-pub struct Plugin<'a> {
+pub struct Plugin {
     // Manifest
     pub(crate) manifest: Manifest,
 
@@ -61,7 +61,7 @@ pub struct Plugin<'a> {
     pub(crate) filter_chat_message: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
 
     // HTTP
-    pub(crate) on_http_request: HashMap<(Method, String), &'a fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
+    pub(crate) on_http_request: HashMap<(Method, String), fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
 
     // Auth Check
     pub(crate) on_auth_check: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
@@ -82,7 +82,7 @@ pub struct Plugin<'a> {
     pub(crate) commands: HashMap<String, CommandDefinition>
 }
 
-impl Plugin<'_> {
+impl Plugin {
     pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
     }
@@ -209,26 +209,12 @@ impl Plugin<'_> {
     pub fn dispatch_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             // If plugin does not listen for HTTP requests, then return 404.
-            OutgoingHttpResponse {
-                status: Some(404),
-                headers: None,
-                body: None
-            }
+            OutgoingHttpResponse::new(404)
         } else {
             if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
-                let outgoing_http_response = func(&incoming_http_request);
-
-                OutgoingHttpResponse {
-                    status: Some(outgoing_http_response.status.unwrap_or(200)),
-                    headers: outgoing_http_response.headers,
-                    body: outgoing_http_response.body
-                }
+                func(&incoming_http_request).clean_clone()
             } else {
-                OutgoingHttpResponse {
-                    status: Some(200),
-                    headers: None,
-                    body: None
-                }
+                OutgoingHttpResponse::new(200)
             }
         }
     }
