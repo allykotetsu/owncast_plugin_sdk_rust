@@ -681,7 +681,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_auth_check(&mut self, f: fn(&AuthCheckRequest) -> AuthCheckResult) -> Result<(), Duplicate> {
         if self.on_auth_check_.is_some() {
-            Err(Duplicate("Can only set on_page_scripts once.".to_string()))
+            Err(Duplicate("Can only set on_auth_check once.".to_string()))
         } else {
             self.on_auth_check_ = Some(f);
             Ok(())

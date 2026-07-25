@@ -1,11 +1,10 @@
 use serde::{Deserialize, Serialize};
-use crate::json_objects::config_type::ConfigType;
-
-// TODO custom de/serialize logic
 
 #[derive(Deserialize, Serialize, Clone)]
+#[serde(tag = "type")]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct Config {
-    pub(crate) r#type: ConfigType,
-    pub(crate) description: String
+pub(crate) enum Config {
+    String { default: String, description: String },
+    Number { default: i16, description: String },
+    Boolean { default: bool, description: String }
 }

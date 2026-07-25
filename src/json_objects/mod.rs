@@ -32,7 +32,6 @@ pub(crate) mod bot;
 pub(crate) mod admin;
 pub(crate) mod extra_page_content;
 pub(crate) mod config;
-pub(crate) mod config_type;
 pub(crate) mod admin_page;
 pub(crate) mod action_button;
 pub(crate) mod tab;
