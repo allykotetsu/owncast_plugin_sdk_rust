@@ -1,6 +1,6 @@
 use owncast_plugin_sdk_rust::prelude::*;
 use owncast_plugin_sdk_rust::json_objects::filter_result::FilterResult;
-use regex::{regex, Regex, RegexSet};
+use regex::Regex;
 
 // Construct a list of banned words.
 const WORDLIST: &[&str] = &["damn", "hell", "crap"];
