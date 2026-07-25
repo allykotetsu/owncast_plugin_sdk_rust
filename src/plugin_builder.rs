@@ -1,10 +1,11 @@
 use std::collections::HashMap;
-use extism_pdk::{info, FnResult};
+use extism_pdk::{info, FnResult, WithReturnCode};
+use extism_pdk::Error as ExtismError;
 use serde::de::DeserializeOwned;
-use serde_json::Error;
+use serde_json::Error as JsonError;
 use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
-use crate::errors::{Duplicate, OutOfBounds};
+use crate::errors::{Duplicate, MissingManifest, OutOfBounds};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -36,8 +37,6 @@ use crate::plugin::Plugin;
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
     // Events
-    partial_manifest: PartialManifest,
-
     on_chat_message_: Vec<fn(&ChatMessage)>,
     on_chat_user_joined_: Vec<fn(&User)>,
     on_chat_user_parted_: Vec<fn(&User)>,
@@ -61,7 +60,7 @@ pub struct PluginBuilder {
     on_fediverse_mention_: Vec<fn(&FediverseInboundPost)>,
     on_fediverse_reply_: Vec<fn(&FediverseInboundPost)>,
 
-    on_: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
+    on_: Vec<(String, Box<dyn Fn(&str) -> Result<(), JsonError>>)>,
 
     // Filter
     filter_chat_message_: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
@@ -89,39 +88,8 @@ pub struct PluginBuilder {
 }
 
 impl PluginBuilder {
-    pub fn new() -> FnResult<Self> {
-        info!("Building plugin...");
-        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
-        // In the meantime we are going to do a hardcoded workaround for debugging purposes.
-        // But once that bug is fixed we will revert to the commented out code below:
-
-        // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
-
-        let manifest = r#"{
-          "api": "1",
-          "name": "Echo Bot",
-          "slug": "rust-echo-bot",
-          "category": "chat-bots",
-          "version": "0.1.0",
-          "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
-          "permissions": [
-            "ui.modify",
-            "chat.send",
-            "chat.filter",
-            "http.serve"
-          ],
-          "tabs": [
-            { "title": "Music",    "slug": "music",    "content": "music.html" },
-            { "title": "Schedule", "slug": "schedule", "content": "schedule.html" }
-          ],
-          "bot": {
-            "displayName": "Echo Bot"
-          }
-        }"#;
-
-        Ok(Self {
-            partial_manifest: serde_json::from_str(&manifest)?,
-
+    pub fn new() -> Self {
+        Self {
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
             on_chat_user_parted_: vec![],
@@ -157,7 +125,7 @@ impl PluginBuilder {
             on_page_scripts_: None,
 
             commands_: HashMap::new()
-        })
+        }
     }
 
     /// Creates an event hook for when a chat message is sent.
@@ -689,8 +657,10 @@ impl PluginBuilder {
     }
 }
 
-impl Into<Plugin> for PluginBuilder {
-    fn into(self) -> Plugin {
+impl TryInto<Plugin> for PluginBuilder {
+    type Error = WithReturnCode<ExtismError>;
+
+    fn try_into(self) -> Result<Plugin, Self::Error> {
         let mut filter_chat_message_ = self.filter_chat_message_;
         filter_chat_message_.sort_by(|(a, _), (b, _)| {
             b.cmp(&a)
@@ -734,10 +704,38 @@ impl Into<Plugin> for PluginBuilder {
         let subscriptions = Subscriptions { notify, filter };
         let commands: Vec<Command> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
 
+        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
+        // In the meantime we are going to do a hardcoded workaround for debugging purposes.
+        // But once that bug is fixed we will revert to the commented out code below:
+
+        // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
+
+        let manifest = r#"{
+          "api": "1",
+          "name": "Echo Bot",
+          "slug": "rust-echo-bot",
+          "category": "chat-bots",
+          "version": "0.1.0",
+          "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
+          "permissions": [
+            "ui.modify",
+            "chat.send",
+            "chat.filter",
+            "http.serve"
+          ],
+          "tabs": [
+            { "title": "Music",    "slug": "music",    "content": "music.html" },
+            { "title": "Schedule", "slug": "schedule", "content": "schedule.html" }
+          ],
+          "bot": {
+            "displayName": "Echo Bot"
+          }
+        }"#;
+
         info!("Plugin built!");
 
-        Plugin {
-            manifest: Manifest::from((self.partial_manifest, subscriptions, commands)),
+        Ok(Plugin {
+            manifest: Manifest::from((serde_json::from_str(&manifest)?, subscriptions, commands)),
 
             on_chat_message: self.on_chat_message_,
             on_chat_user_joined: self.on_chat_user_joined_,
@@ -774,6 +772,6 @@ impl Into<Plugin> for PluginBuilder {
             on_page_scripts: self.on_page_scripts_,
 
             commands: self.commands_
-        }
+        })
     }
 }

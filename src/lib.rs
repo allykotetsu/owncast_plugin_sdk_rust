@@ -31,3 +31,9 @@ pub mod prelude {
     pub use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
     pub use crate::plugin::Plugin;
 }
+
+use prelude::*;
+
+define_plugin!(|x| {
+    Ok(x)
+});

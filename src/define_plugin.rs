@@ -25,7 +25,7 @@ macro_rules! define_plugin {
     ($func:expr) => {
         const PLUGIN: LazyLock<FnResult<Plugin>> = LazyLock::new(|| {
             let func: fn(PluginBuilder) -> FnResult<PluginBuilder> = $func;
-            Ok(func(PluginBuilder::new()?)?.into())
+            Ok(func(PluginBuilder::new())?.try_into()?)
         });
 
         // Exported functions.
