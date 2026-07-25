@@ -1,0 +1,14 @@
+{
+  "api": "1",
+  "name": "Example Echo Bot (Rust)",
+  "slug": "rust-echo-bot",
+  "version": "0.1.0",
+  "description": "Echoes chat messages back with a prefix. This example was written in Rust.",
+  "category": "chat-bots",
+  "permissions": [
+    "chat.send"
+  ],
+  "bot": {
+    "displayName": "Example Echo Bot (Rust)"
+  }
+}
