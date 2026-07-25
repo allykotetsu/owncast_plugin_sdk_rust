@@ -36,11 +36,11 @@ You must use `define_plugin!` outside of function scope, as the macro expands to
 To add functionality to your plugin, call the `PluginBuilder`'s functions. The following example is a simple chat echo bot, stripped down to just the macro and its contents.
 ```rust
 define_plugin!(|mut plugin_builder| {
-    // When a message is sent in the Owncast chat, echo it back.
+    // When a message is sent in the Owncast chat, run some code.
     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+        // Send a chat message.
         owncast_send_chat(&format!("echo {body}"));
     });
-    
     // If there have been no errors thus far, then return an Ok.
     Ok(plugin_builder)
 });
@@ -49,7 +49,7 @@ To learn how to add more functionality to your plugin, please read the [Wiki](ht
 
 ## Building
 When your plugin is ready to build, do the following:
-1. Run `cargo build --target wasm32-unknown-unknown` in the terminal.
+1. Run `cargo build --target wasm32-unknown-unknown --release` in the terminal.
 2. Move it into a directory that contains a `plugin.manifest.json` file.
 3. Rename the built `*.wasm` file to `plugin.wasm`.
 4. Run `zip -q "<slug>.ocpkg" plugin.wasm plugin.manifest.json`, where `<slug>` is the unique identifier for your plugin.

@@ -462,7 +462,9 @@ impl PluginBuilder {
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.filter_chat_message(None, |ChatMessage { body, .. }| {
     ///         if body.contains("bad word") {
-    ///             FilterResult::Drop("No bad words allowed!".to_string())
+    ///             FilterResult::Drop {
+    ///                 payload: "No bad words allowed!".to_string()
+    ///             }
     ///         } else {
     ///             FilterResult::Pass
     ///         }
