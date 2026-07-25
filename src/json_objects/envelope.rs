@@ -17,7 +17,7 @@ use crate::json_objects::user::User;
 
 #[derive(FromBytes, Deserialize)]
 #[encoding(Json)]
-#[serde(tag = "event_type", content = "payload")]
+#[serde(tag = "eventType", content = "payload")]
 pub enum Envelope {
     // Chat events
     #[serde(rename = "chat.message.received")]
