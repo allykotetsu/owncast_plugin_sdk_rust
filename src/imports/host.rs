@@ -1,20 +1,18 @@
-use extism_pdk::{error, host_fn, Json};
+use extism_pdk::{host_fn, Json};
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
-
-// TODO import other owncast functions
 
 #[host_fn]
 extern "ExtismHost" {
     // Chat
-    fn owncast_send_chat(textPtr: &str);
-    fn owncast_send_chat_action(textPtr: &str);
-    fn owncast_send_chat_system(bodyPtr: &str);
-    fn owncast_send_chat_to(clientId: i64, textPtr: &str);
-    fn owncast_chat_history(limit: i64) -> Json<Vec<ChatMessage>>;
-    fn owncast_delete_message(idPtr: &str);
-    fn owncast_kick_client(clientId: i64);
-    fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
+    pub(crate) fn owncast_send_chat(textPtr: &str);
+    pub(crate) fn owncast_send_chat_action(textPtr: &str);
+    pub(crate) fn owncast_send_chat_system(bodyPtr: &str);
+    pub(crate) fn owncast_send_chat_to(clientId: i64, textPtr: &str);
+    pub(crate) fn owncast_chat_history(limit: i64) -> Json<Vec<ChatMessage>>;
+    pub(crate) fn owncast_delete_message(idPtr: &str);
+    pub(crate) fn owncast_kick_client(clientId: i64);
+    pub(crate) fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
 
     // Users
     /*fn owncast_users_list() -> Vec<User>;
@@ -63,26 +61,3 @@ extern "ExtismHost" {
     fn owncast_add_actions(actionsPtr: PTR);
     fn owncast_clear_actions();*/
 }
-
-pub mod funcs {
-    use extism_pdk::error;
-
-    pub fn owncast_send_chat(i: &str) {
-        unsafe {
-            match crate::imports::owncast_send_chat(i) {
-                Err(err) => error!("{err}"),
-                _ => ()
-            }
-        }
-    }
-
-    pub fn owncast_send_chat_to(i: i64, j: &str) {
-        unsafe {
-            match crate::imports::owncast_send_chat_to(i, j) {
-                Err(err) => error!("{err}"),
-                _ => ()
-            }
-        }
-    }
-}
-

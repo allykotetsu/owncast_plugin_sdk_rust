@@ -3,6 +3,11 @@ use serde::de::StdError;
 use crate::json_objects::event_type::EventType;
 
 pub struct Forbidden;
+impl Display for Forbidden {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Forbidden.")
+    }
+}
 
 #[derive(Debug)]
 pub struct Duplicate(pub(crate) String);

@@ -1,5 +1,10 @@
 use extism_pdk::{Error, WithReturnCode};
 
+pub fn clone(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Error> {
+    WithReturnCode(anyhow::anyhow!("{}", t), *u)
+}
+
+
 /// Macro for defining one Owncast plugin. Only call this once for your project, and call it outside of function scope.
 ///
 /// define_plugin! expects a parameter that is a `fn(PluginBuilder) -> FnResult<PluginBuilder>` function pointer.
@@ -79,8 +84,4 @@ macro_rules! define_plugin {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_auth_check(auth_check_request).unwrap_or(AuthCheckResult::Ok))
         }
     };
-}
-
-pub fn clone(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Error> {
-    WithReturnCode(anyhow::anyhow!("{}", t), *u)
 }

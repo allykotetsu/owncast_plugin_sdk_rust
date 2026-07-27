@@ -2,11 +2,12 @@ pub mod json_objects;
 pub mod plugin_builder;
 mod plugin;
 mod define_plugin;
-pub mod imports;
 pub mod command;
 mod partial_manifest;
 mod errors;
 mod state;
+mod run;
+mod imports;
 
 pub mod prelude {
     pub use std::error::Error;
