@@ -25,9 +25,10 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::json_objects::permission::Permission;
+use crate::state::State;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
-pub struct Plugin {
+pub struct Plugin<T: State> {
     // Manifest
     pub(crate) manifest: Manifest,
 
@@ -79,10 +80,12 @@ pub struct Plugin {
     pub(crate) on_page_scripts: Option<fn() -> String>,
 
     // Commands
-    pub(crate) commands: HashMap<String, CommandDefinition>
+    pub(crate) commands: HashMap<String, CommandDefinition>,
+
+    pub(crate) t: T
 }
 
-impl Plugin {
+impl<T: State> Plugin<T> {
     pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
     }
@@ -95,6 +98,7 @@ impl Plugin {
         match event {
             Envelope::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message { func(&payload); }
+                // for func in &self.on_chat_message { func(FromStateAndPayload::from(&self.t, &payload)); }
             }
             Envelope::ChatUserJoined(payload) => {
                 for func in &self.on_chat_user_joined { func(&payload); }

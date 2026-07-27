@@ -32,9 +32,12 @@ use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::plugin::Plugin;
+use crate::state::State;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
+    manifest: String,
+
     // Events
     on_chat_message_: Vec<fn(&ChatMessage)>,
     on_chat_user_joined_: Vec<fn(&User)>,
@@ -87,8 +90,10 @@ pub struct PluginBuilder {
 }
 
 impl PluginBuilder {
-    pub fn new() -> Self {
+    pub fn new(manifest: &str) -> Self {
         Self {
+            manifest: manifest.to_string(),
+
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
             on_chat_user_parted_: vec![],
@@ -656,10 +661,10 @@ impl PluginBuilder {
     }
 }
 
-impl TryInto<Plugin> for PluginBuilder {
+impl<T: State> TryInto<Plugin<T>> for PluginBuilder {
     type Error = WithReturnCode<ExtismError>;
 
-    fn try_into(self) -> Result<Plugin, Self::Error> {
+    fn try_into(self) -> Result<Plugin<T>, Self::Error> {
         let mut filter_chat_message_ = self.filter_chat_message_;
         filter_chat_message_.sort_by(|(a, _), (b, _)| {
             b.cmp(&a)
@@ -709,22 +714,10 @@ impl TryInto<Plugin> for PluginBuilder {
 
         // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 
-        let manifest = r#"{
-  "api": "1",
-  "name": "Example Profanity Filter (Rust)",
-  "slug": "rust-profanity-filter",
-  "version": "0.1.0",
-  "description": "Redacts a hardcoded wordlist from chat. This example was written in Rust.",
-  "category": "chat-filters",
-  "permissions": [
-    "chat.filter"
-  ]
-}"#;
-
         info!("Plugin built!");
 
         Ok(Plugin {
-            manifest: Manifest::from((serde_json::from_str(&manifest)?, subscriptions, commands)),
+            manifest: Manifest::from((serde_json::from_str(&self.manifest)?, subscriptions, commands)),
 
             on_chat_message: self.on_chat_message_,
             on_chat_user_joined: self.on_chat_user_joined_,
@@ -760,7 +753,9 @@ impl TryInto<Plugin> for PluginBuilder {
 
             on_page_scripts: self.on_page_scripts_,
 
-            commands: self.commands_
+            commands: self.commands_,
+
+            t: T::new()
         })
     }
 }

@@ -6,6 +6,7 @@ pub mod imports;
 pub mod command;
 mod partial_manifest;
 mod errors;
+mod state;
 
 pub mod prelude {
     pub use std::error::Error;
@@ -25,8 +26,35 @@ pub mod prelude {
     pub use crate::json_objects::content_request::ContentRequest;
     pub use crate::json_objects::envelope::Envelope;
     pub use crate::json_objects::event_type::EventType;
+    pub use crate::json_objects::filter_result::FilterResult;
     pub use crate::json_objects::incoming_http_request::IncomingHttpRequest;
     pub use crate::json_objects::manifest::Manifest;
     pub use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
     pub use crate::plugin::Plugin;
+    pub use crate::state::State;
 }
+
+struct TestState {
+    data: String
+}
+
+impl State for TestState {
+    fn new() -> Self {
+        todo!()
+    }
+}
+
+use crate::prelude::*;
+
+define_plugin!("", TestState, |mut x| {
+    /*x.with_state(TestState { data: "".to_string() });
+    let y: &TestState = x.get_state().unwrap();*/
+    /*x.on_chat_message(|chat_message| {
+
+    });
+    x.on_chat_message(|state, chat_message| {
+
+    });*/
+
+    Ok(x)
+});

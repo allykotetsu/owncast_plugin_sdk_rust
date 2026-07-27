@@ -22,10 +22,11 @@ use extism_pdk::{Error, WithReturnCode};
 /// ```
 #[macro_export]
 macro_rules! define_plugin {
-    ($func:expr) => {
-        const PLUGIN: LazyLock<FnResult<Plugin>> = LazyLock::new(|| {
+    ($manifest:expr, $state:ty, $func:expr) => {
+        const PLUGIN: LazyLock<FnResult<Plugin<$state>>> = LazyLock::new(|| {
+            let manifest: &str = $manifest;
             let func: fn(PluginBuilder) -> FnResult<PluginBuilder> = $func;
-            Ok(func(PluginBuilder::new())?.try_into()?)
+            Ok(func(PluginBuilder::new(manifest))?.try_into()?)
         });
 
         // Exported functions.
