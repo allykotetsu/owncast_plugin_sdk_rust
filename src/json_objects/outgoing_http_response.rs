@@ -8,9 +8,9 @@ const CONTENT_TYPE: &str = "content-type";
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct OutgoingHttpResponse {
-    status: Option<u16>,
-    headers: Option<HashMap<String, String>>,
-    body: Option<String>
+    pub status: Option<u16>,
+    pub headers: Option<HashMap<String, String>>,
+    pub body: Option<String>
 }
 
 impl OutgoingHttpResponse {

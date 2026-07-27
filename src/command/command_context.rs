@@ -1,6 +1,6 @@
 use crate::json_objects::user::User;
 use crate::json_objects::chat_message::ChatMessage;
-use crate::imports::owncast;
+use crate::owncast;
 use crate::run;
 
 pub struct CommandContext {

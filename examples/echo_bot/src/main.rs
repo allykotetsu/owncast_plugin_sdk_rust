@@ -1,6 +1,6 @@
 use owncast_plugin_sdk_rust::prelude::*;
 use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
-use owncast_plugin_sdk_rust::imports::owncast;
+use owncast_plugin_sdk_rust::owncast;
 
 define_plugin!(|mut plugin_builder| {
     plugin_builder.on(|ChatMessage { body, .. }| {

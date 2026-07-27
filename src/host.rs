@@ -1,6 +1,9 @@
 use extism_pdk::{host_fn, Json};
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
+use crate::json_objects::user::User;
+use crate::json_objects::user_register_request::UserRegisterRequest;
+use crate::json_objects::user_register_result::UserRegisterResult;
 
 #[host_fn]
 extern "ExtismHost" {
@@ -15,14 +18,14 @@ extern "ExtismHost" {
     pub(crate) fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
 
     // Users
-    /*fn owncast_users_list() -> Vec<User>;
-    fn owncast_user_get(idPtr: &str) -> Option<User>;
-    fn owncast_user_set_enabled(idPtr: &str, enabled: bool, reasonPtr: Option<String>);
-    fn owncast_ban_ip(ipPtr: &str);
-    fn owncast_users_register(reqPtr: PTR) -> PTR; // TODO
+    pub(crate) fn owncast_users_list() -> Json<Vec<User>>;
+    pub(crate) fn owncast_user_get(idPtr: &str) -> Option<User>;
+    pub(crate) fn owncast_user_set_enabled(idPtr: &str, enabled: bool, reasonPtr: &str);
+    pub(crate) fn owncast_ban_ip(ipPtr: &str);
+    pub(crate) fn owncast_users_register(reqPtr: UserRegisterRequest) -> UserRegisterResult; // TODO
 
     // Auth
-    fn owncast_auth_grant_session(reqPtr: PTR); // TODO
+    /*fn owncast_auth_grant_session(reqPtr: PTR); // TODO
     fn owncast_auth_end_session();
 
     // Storage

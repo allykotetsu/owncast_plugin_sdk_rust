@@ -1,7 +1,9 @@
+use extism_pdk::{FromBytes, Json};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, FromBytes)]
 #[serde(rename_all = "camelCase")]
+#[encoding(Json)]
 pub struct User {
     pub(crate) id: String,
     pub(crate) display_name: String,
