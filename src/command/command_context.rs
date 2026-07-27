@@ -1,7 +1,7 @@
 use crate::json_objects::user::User;
 use crate::json_objects::chat_message::ChatMessage;
-use crate::imports::owncast_send_chat_;
-use crate::imports::owncast_send_chat_to_;
+use crate::imports::funcs::owncast_send_chat;
+use crate::imports::funcs::owncast_send_chat_to;
 
 pub struct CommandContext {
     pub(crate) msg: ChatMessage,
@@ -14,14 +14,14 @@ pub struct CommandContext {
 
 impl CommandContext {
     pub fn reply(&self, text: &str) {
-        owncast_send_chat_(text)
+        owncast_send_chat(text)
     }
 
     pub fn reply_privately(&self, text: &str) {
         if let Some(client_id) = self.msg.client_id {
-            owncast_send_chat_to_(client_id, text)
+            owncast_send_chat_to(client_id, text)
         } else {
-            owncast_send_chat_(text)
+            owncast_send_chat(text)
         }
     }
 }

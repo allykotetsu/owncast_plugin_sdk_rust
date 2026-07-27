@@ -64,34 +64,25 @@ extern "ExtismHost" {
     fn owncast_clear_actions();*/
 }
 
-pub fn owncast_send_chat_(i: &str) {
-    unsafe {
-        match owncast_send_chat(i) {
-            Err(err) => error!("{err}"),
-            _ => ()
-        }
-    }
-}
+pub mod funcs {
+    use extism_pdk::error;
 
-pub fn owncast_send_chat_to_(i: i64, j: &str) {
-    unsafe {
-        match owncast_send_chat_to(i, j) {
-            Err(err) => error!("{err}"),
-            _ => ()
-        }
-    }
-}
-
-/*macro_rules! permitted {
-    ($permission:expr, $func:expr) => {
-        pub fn $func() -> Result<, Forbidden> {
-            unsafe {
-                $func
+    pub fn owncast_send_chat(i: &str) {
+        unsafe {
+            match crate::imports::owncast_send_chat(i) {
+                Err(err) => error!("{err}"),
+                _ => ()
             }
         }
-    };
+    }
+
+    pub fn owncast_send_chat_to(i: i64, j: &str) {
+        unsafe {
+            match crate::imports::owncast_send_chat_to(i, j) {
+                Err(err) => error!("{err}"),
+                _ => ()
+            }
+        }
+    }
 }
 
-permitted!(Permission::ChatSend, owncast_send_chat_action);*/
-
-// #[permitted(Permission::ChatSend)]

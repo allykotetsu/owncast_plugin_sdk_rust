@@ -34,27 +34,8 @@ pub mod prelude {
     pub use crate::state::State;
 }
 
-struct TestState {
-    data: String
-}
-
-impl State for TestState {
-    fn new() -> Self {
-        todo!()
-    }
-}
-
 use crate::prelude::*;
 
-define_plugin!("", TestState, |mut x| {
-    /*x.with_state(TestState { data: "".to_string() });
-    let y: &TestState = x.get_state().unwrap();*/
-    /*x.on_chat_message(|chat_message| {
-
-    });
-    x.on_chat_message(|state, chat_message| {
-
-    });*/
-
+define_plugin!("", (), |x| {
     Ok(x)
 });
