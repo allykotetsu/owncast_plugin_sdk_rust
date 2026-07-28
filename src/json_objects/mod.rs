@@ -44,3 +44,5 @@ pub mod grant_session_request;
 pub mod error;
 pub mod url;
 pub mod fs_result;
+pub mod browser_push_payload;
+pub mod fediverse_payload;
