@@ -9,9 +9,9 @@ pub fn set_enabled(text: &str) -> Result<(), Forbidden> {
     }
 }
 
-pub fn ban_ip(payload: &BrowserPushPayload) -> Result<(), Forbidden> {
+pub fn ban_ip(payload: impl Into<BrowserPushPayload>) -> Result<(), Forbidden> {
     unsafe {
-        owncast_notify_browser_push(payload).map_err(|_| Forbidden)
+        owncast_notify_browser_push(&payload.into()).map_err(|_| Forbidden)
     }
 }
 

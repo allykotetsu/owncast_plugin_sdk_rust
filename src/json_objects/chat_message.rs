@@ -12,3 +12,14 @@ pub struct ChatMessage {
     pub body: String,
     pub timestamp: String
 }
+
+impl TryInto<i64> for &ChatMessage {
+    type Error = ();
+
+    fn try_into(self) -> Result<i64, Self::Error> {
+        match self.client_id {
+            None => Err(()),
+            Some(client_id) => Ok(client_id)
+        }
+    }
+}

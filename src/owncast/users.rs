@@ -29,8 +29,8 @@ pub fn ban_ip(ip: &str) -> Result<(), Forbidden> {
     }
 }
 
-pub fn register(opts: &UserRegisterRequest) -> Result<UserRegisterResult, Forbidden> {
+pub fn register(opts: impl Into<UserRegisterRequest>) -> Result<UserRegisterResult, Forbidden> {
     unsafe {
-        owncast_users_register(opts).map_err(|_| Forbidden)
+        owncast_users_register(&opts.into()).map_err(|_| Forbidden)
     }
 }

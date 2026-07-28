@@ -28,8 +28,8 @@ pub fn send_to(client_id: i64, text: &str) -> Result<(), Forbidden> {
     }
 }
 
-pub fn reply_to(chat_message: &ChatMessage, text: &str) -> Result<bool, Forbidden> {
-    let Some(client_id) = chat_message.client_id else {
+pub fn reply_to(chat_message: impl TryInto<i64>, text: &str) -> Result<bool, Forbidden> {
+    let Ok(client_id) = chat_message.try_into() else {
         return Ok(false)
     };
     send_to(client_id, text)?;

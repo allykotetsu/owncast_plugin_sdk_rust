@@ -5,5 +5,8 @@ use serde::Serialize;
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct FediversePayload {
-
+    pub r#type: String,
+    pub body: String,
+    pub image: Option<String>,
+    pub link: Option<String>
 }

@@ -17,9 +17,9 @@ pub fn read_text(path: &str) -> Result<Option<String>, Box<dyn Error>> {
     Ok(Some(String::from_utf8(vecu8)?))
 }
 
-pub fn write(path: &str, data: &[u8]) -> Result<FsResult, Forbidden> {
+pub fn write(path: &str, data: impl Into<Vec<u8>>) -> Result<FsResult, Forbidden> {
     unsafe {
-        owncast_fs_write(path, data).map_err(|_| Forbidden)
+        owncast_fs_write(path, &data.into()).map_err(|_| Forbidden)
     }
 }
 
