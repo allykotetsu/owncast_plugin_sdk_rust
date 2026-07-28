@@ -2,9 +2,8 @@
 #[macro_export]
 macro_rules! run {
     ($func:expr) => {
-        use extism_pdk::error;
         match $func {
-            Err(err) => error!("{err}"),
+            Err(err) => extism_pdk::error!("{err}"),
             _ => {}
         }
     };

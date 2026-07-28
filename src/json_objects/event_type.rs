@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
-use crate::prelude::Envelope;
+use crate::json_objects::envelope::Envelope;
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub enum EventType {

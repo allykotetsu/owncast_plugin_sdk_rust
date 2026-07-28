@@ -28,59 +28,59 @@ pub fn clone(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Err
 #[macro_export]
 macro_rules! define_plugin {
     ($manifest:expr, $state:ty, $func:expr) => {
-        const PLUGIN: LazyLock<FnResult<Plugin<$state>>> = LazyLock::new(|| {
+        const PLUGIN: std::sync::LazyLock<extism_pdk::FnResult<Plugin<$state>>> = std::sync::LazyLock::new(|| {
             let manifest: &str = $manifest;
-            let func: fn(PluginBuilder) -> FnResult<PluginBuilder> = $func;
+            let func: fn(PluginBuilder) -> extism_pdk::FnResult<PluginBuilder> = $func;
             Ok(func(PluginBuilder::new(manifest))?.try_into()?)
         });
 
         // Exported functions.
-        #[plugin_fn]
-        pub fn register() -> FnResult<Manifest> {
+        #[extism_pdk::plugin_fn]
+        pub fn register() -> extism_pdk::FnResult<Manifest> {
             Ok(PLUGIN.as_ref().map_err(clone)?.get_manifest())
         }
 
-        #[plugin_fn]
-        pub fn on_event(envelope: Envelope) -> FnResult<()> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_event(envelope: Envelope) -> extism_pdk::FnResult<()> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_event(envelope))
         }
 
-        #[plugin_fn]
-        pub fn on_filter(envelope: Envelope) -> FnResult<FilterResult> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_filter(envelope: Envelope) -> extism_pdk::FnResult<FilterResult> {
             let Envelope::ChatMessageReceived(payload) = envelope else {
                 return Err(BadEventType(EventType::ChatMessageReceived, envelope.into()).into())
             };
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_filter(payload))
         }
 
-        #[plugin_fn]
-        pub fn on_http_request(incoming_http_request: IncomingHttpRequest) -> FnResult<OutgoingHttpResponse> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_http_request(incoming_http_request: IncomingHttpRequest) -> extism_pdk::FnResult<OutgoingHttpResponse> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_http_request(incoming_http_request))
         }
 
-        #[plugin_fn]
-        pub fn on_tab_content(content_request: ContentRequest) -> FnResult<String> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_tab_content(content_request: ContentRequest) -> extism_pdk::FnResult<String> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_tab_content(content_request).unwrap_or(String::new()))
         }
 
-        #[plugin_fn]
-        pub fn on_page_content(content_request: ContentRequest) -> FnResult<String> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_page_content(content_request: ContentRequest) -> extism_pdk::FnResult<String> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_page_content(content_request).unwrap_or(String::new()))
         }
 
         // TODO is it possible to only export these functions if the plugin has the correct permissions?
-        #[plugin_fn]
-        pub fn on_page_styles() -> FnResult<String> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_page_styles() -> extism_pdk::FnResult<String> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_page_styles().unwrap_or(String::new()))
         }
 
-        #[plugin_fn]
-        pub fn on_page_scripts() -> FnResult<String> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_page_scripts() -> extism_pdk::FnResult<String> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_page_scripts().unwrap_or(String::new()))
         }
 
-        #[plugin_fn]
-        pub fn on_auth_check(auth_check_request: AuthCheckRequest) -> FnResult<AuthCheckResult> {
+        #[extism_pdk::plugin_fn]
+        pub fn on_auth_check(auth_check_request: AuthCheckRequest) -> extism_pdk::FnResult<AuthCheckResult> {
             Ok(PLUGIN.as_ref().map_err(clone)?.dispatch_auth_check(auth_check_request).unwrap_or(AuthCheckResult::Ok))
         }
     };
