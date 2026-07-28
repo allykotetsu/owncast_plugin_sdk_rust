@@ -3,5 +3,5 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StreamStopped {
-    stopped_at: String
+    pub stopped_at: String
 }

@@ -4,7 +4,7 @@ use crate::json_objects::user::User;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SseConnectionEvent {
-    pub(crate) channel: String,
-    pub(crate) connection_id: u64,
-    pub(crate) user: Option<User>
+    pub channel: String,
+    pub connection_id: u64,
+    pub user: Option<User>
 }

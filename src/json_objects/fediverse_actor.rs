@@ -2,9 +2,9 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct FediverseActor {
-    pub(crate) name: String,
-    pub(crate) handle: String,
-    pub(crate) url: Option<String>,
-    pub(crate) image: Option<String>
+pub struct FediverseActor {
+    pub name: String,
+    pub handle: String,
+    pub url: Option<String>,
+    pub image: Option<String>
 }

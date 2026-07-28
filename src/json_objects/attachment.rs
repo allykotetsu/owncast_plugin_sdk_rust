@@ -2,8 +2,8 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct Attachment {
-    pub(crate) url: String,
-    pub(crate) media_type: String,
-    pub(crate) alt: Option<String>,
+pub struct Attachment {
+    pub url: String,
+    pub media_type: String,
+    pub alt: Option<String>,
 }

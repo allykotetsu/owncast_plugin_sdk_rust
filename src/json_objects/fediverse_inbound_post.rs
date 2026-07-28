@@ -5,12 +5,12 @@ use crate::json_objects::fediverse_actor::FediverseActor;
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FediverseInboundPost {
-    actor: FediverseActor,
-    content: String,
-    content_text: String,
-    url: String,
-    posted_at: String,
-    in_reply_to: Option<String>,
-    attachments: Option<Vec<Attachment>>,
-    language: Option<String>,
+    pub actor: FediverseActor,
+    pub content: String,
+    pub content_text: String,
+    pub url: String,
+    pub posted_at: String,
+    pub in_reply_to: Option<String>,
+    pub attachments: Option<Vec<Attachment>>,
+    pub language: Option<String>,
 }

@@ -1,4 +1,5 @@
 use extism_pdk::{host_fn, Json};
+use serde::de::DeserializeOwned;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
@@ -52,12 +53,15 @@ extern "ExtismHost" {
     pub(crate) fn owncast_notify_browser_push(payloadPtr: &BrowserPushPayload); // TODO haven't verified as working.
     pub(crate) fn owncast_notify_fediverse(payloadPtr: &FediversePayload); // TODO haven't verified as working.
 
+    // KV
     pub(crate) fn owncast_kv_get(keyPtr: &str) -> Option<String>; // TODO haven't verified as working.
     pub(crate) fn owncast_kv_set(keyPtr: &str, valPtr: &str); // TODO haven't verified as working.
 
+    // Config
+    pub(crate) fn owncast_config_get<T: DeserializeOwned>(keyPtr: &str) -> Json<T>; // TODO haven't verified as working.
+
     /*pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
     pub(crate) fn owncast_timer_clear(id: i64);
-    pub(crate) fn owncast_config_get(keyPtr: PTR) -> PTR;
     pub(crate) fn owncast_asset_read(pathPtr: PTR) -> PTR;
     pub(crate) fn owncast_emit_event(eventTypePtr: PTR, payloadPtr: PTR);
     pub(crate) fn owncast_sse_send(channelPtr: PTR, eventPtr: PTR, dataPtr: PTR);
