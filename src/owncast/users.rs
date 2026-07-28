@@ -1,3 +1,4 @@
+use std::net::Ipv4Addr;
 use extism_pdk::Json;
 use crate::errors::forbidden::Forbidden;
 use crate::host::{owncast_users_list, owncast_user_get, owncast_ban_ip, owncast_user_set_enabled, owncast_users_register};
@@ -23,9 +24,9 @@ pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> Result<(), 
     }
 }
 
-pub fn ban_ip(ip: &str) -> Result<(), Forbidden> {
+pub fn ban_ip(ip: &Ipv4Addr) -> Result<(), Forbidden> { // TODO make IP struct
     unsafe {
-        owncast_ban_ip(ip).map_err(|_| Forbidden)
+        owncast_ban_ip(&ip.to_string()).map_err(|_| Forbidden)
     }
 }
 
