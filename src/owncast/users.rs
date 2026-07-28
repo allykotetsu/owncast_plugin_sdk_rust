@@ -1,5 +1,5 @@
 use extism_pdk::Json;
-use crate::errors::Forbidden;
+use crate::errors::forbidden::Forbidden;
 use crate::host::{owncast_users_list, owncast_user_get, owncast_ban_ip, owncast_user_set_enabled, owncast_users_register};
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
@@ -29,7 +29,7 @@ pub fn ban_ip(ip: &str) -> Result<(), Forbidden> {
     }
 }
 
-pub fn register(opts: UserRegisterRequest) -> Result<UserRegisterResult, Forbidden> {
+pub fn register(opts: &UserRegisterRequest) -> Result<UserRegisterResult, Forbidden> {
     unsafe {
         owncast_users_register(opts).map_err(|_| Forbidden)
     }

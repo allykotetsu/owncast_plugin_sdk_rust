@@ -26,10 +26,10 @@ extern "ExtismHost" {
     pub(crate) fn owncast_user_get(idPtr: &str) -> Option<User>; // TODO haven't verified as working.
     pub(crate) fn owncast_user_set_enabled(idPtr: &str, enabled: bool, reasonPtr: &str); // TODO haven't verified as working.
     pub(crate) fn owncast_ban_ip(ipPtr: &str); // TODO haven't verified as working.
-    pub(crate) fn owncast_users_register(reqPtr: UserRegisterRequest) -> UserRegisterResult; // TODO haven't verified as working.
+    pub(crate) fn owncast_users_register(reqPtr: &UserRegisterRequest) -> UserRegisterResult; // TODO haven't verified as working.
 
     // Auth
-    pub(crate) fn owncast_auth_grant_session(reqPtr: GrantSessionRequest) -> Error; // TODO haven't verified as working.
+    pub(crate) fn owncast_auth_grant_session(reqPtr: &GrantSessionRequest) -> Error; // TODO haven't verified as working.
     pub(crate) fn owncast_auth_end_session(); // TODO haven't verified as working.
 
     // Storage
@@ -42,6 +42,9 @@ extern "ExtismHost" {
     pub(crate) fn owncast_fs_delete(pathPtr: &str) -> FsResult; // TODO haven't verified as working.
     pub(crate) fn owncast_fs_exists(pathPtr: &str) -> i64; // TODO haven't verified as working.
 
+    // Fediverse
+    pub(crate) fn owncast_fediverse_post(textPtr: &str) -> Option<Url>; // TODO haven't verified as working.
+
     /*pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
     pub(crate) fn owncast_timer_clear(id: i64);
     pub(crate) fn owncast_config_get(keyPtr: PTR) -> PTR;
@@ -51,7 +54,7 @@ extern "ExtismHost" {
     pub(crate) fn owncast_notify_fediverse(payloadPtr: PTR);
 
 
-    pub(crate) fn owncast_fediverse_post(textPtr: PTR) -> PTR;
+
     pub(crate) fn owncast_kv_get(keyPtr: PTR) -> PTR;
     pub(crate) fn owncast_kv_set(keyPtr: PTR, valPtr: PTR);
     pub(crate) fn owncast_emit_event(eventTypePtr: PTR, payloadPtr: PTR);

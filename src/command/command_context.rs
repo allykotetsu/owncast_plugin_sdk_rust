@@ -18,9 +18,7 @@ impl CommandContext {
     }
 
     pub fn reply_privately(&self, text: &str) {
-        if let Some(client_id) = self.msg.client_id {
-            run!(owncast::chat::send_to(client_id, text));
-        } else {
+        if let Ok(false) = owncast::chat::reply_to(&self.msg, text) {
             run!(owncast::chat::send(text));
         }
     }

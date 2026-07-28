@@ -1,5 +1,5 @@
 use extism_pdk::Json;
-use crate::errors::Forbidden;
+use crate::errors::forbidden::Forbidden;
 use crate::host::{owncast_send_chat, owncast_send_chat_action, owncast_send_chat_system, owncast_send_chat_to, owncast_chat_history, owncast_delete_message, owncast_kick_client, owncast_chat_clients};
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
@@ -28,7 +28,13 @@ pub fn send_to(client_id: i64, text: &str) -> Result<(), Forbidden> {
     }
 }
 
-// TODO implement reply_to?
+pub fn reply_to(chat_message: &ChatMessage, text: &str) -> Result<bool, Forbidden> {
+    let Some(client_id) = chat_message.client_id else {
+        return Ok(false)
+    };
+    send_to(client_id, text)?;
+    Ok(true)
+}
 
 pub fn history(limit: Option<i64>) -> Result<Vec<ChatMessage>, Forbidden> {
     unsafe {

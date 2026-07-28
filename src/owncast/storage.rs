@@ -1,4 +1,4 @@
-use crate::errors::Forbidden;
+use crate::errors::forbidden::Forbidden;
 use crate::host::owncast_storage_upload;
 use crate::json_objects::url::Url;
 

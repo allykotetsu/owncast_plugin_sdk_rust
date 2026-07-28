@@ -1,5 +1,6 @@
+use std::error::Error;
 use extism_pdk::Json;
-use crate::errors::Forbidden;
+use crate::errors::forbidden::Forbidden;
 use crate::host::{owncast_fs_read, owncast_fs_write, owncast_fs_list, owncast_fs_delete, owncast_fs_exists};
 use crate::json_objects::fs_result::FsResult;
 
@@ -9,11 +10,12 @@ pub fn read(path: &str) -> Result<Option<Vec<u8>>, Forbidden> {
     }
 }
 
-/*pub fn read_text(path: &str) -> Result<Option<String>, Forbidden> {
-    unsafe {
-        owncast_fs_read(path).map_err(|_| Forbidden)
-    }
-}*/
+pub fn read_text(path: &str) -> Result<Option<String>, Box<dyn Error>> {
+    let Some(vecu8) = read(path)? else {
+        return Ok(None)
+    };
+    Ok(Some(String::from_utf8(vecu8)?))
+}
 
 pub fn write(path: &str, data: &[u8]) -> Result<FsResult, Forbidden> {
     unsafe {
