@@ -1,5 +1,6 @@
 use extism_pdk::{host_fn, Json};
 use serde::de::DeserializeOwned;
+use serde::Serialize;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
@@ -63,9 +64,11 @@ extern "ExtismHost" {
     // Assets
     pub(crate) fn owncast_asset_read(pathPtr: &str) -> Option<Vec<u8>>; // TODO haven't verified as working.
 
+    // Events
+    pub(crate) fn owncast_emit_event(eventTypePtr: &str, payloadPtr: Json<impl Serialize>); // TODO haven't verified as working.
+
     /*pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
     pub(crate) fn owncast_timer_clear(id: i64);
-    pub(crate) fn owncast_emit_event(eventTypePtr: PTR, payloadPtr: PTR);
     pub(crate) fn owncast_sse_send(channelPtr: PTR, eventPtr: PTR, dataPtr: PTR);
     pub(crate) fn owncast_stream_current() -> PTR;
     pub(crate) fn owncast_server_info() -> PTR;
