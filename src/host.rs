@@ -1,6 +1,7 @@
 use extism_pdk::{host_fn, Json};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
@@ -67,6 +68,10 @@ extern "ExtismHost" {
     // Events
     pub(crate) fn owncast_emit_event(eventTypePtr: &str, payloadPtr: Json<impl Serialize>); // TODO haven't verified as working.
 
+    // Actions
+    pub(crate) fn owncast_add_actions(actionsPtr: Json<Vec<ActionButton>>); // TODO haven't verified as working.
+    pub(crate) fn owncast_clear_actions(); // TODO haven't verified as working.
+
     /*pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
     pub(crate) fn owncast_timer_clear(id: i64);
     pub(crate) fn owncast_sse_send(channelPtr: PTR, eventPtr: PTR, dataPtr: PTR);
@@ -78,7 +83,5 @@ extern "ExtismHost" {
     pub(crate) fn owncast_stream_broadcaster() -> PTR;
     pub(crate) fn owncast_server_tags() -> PTR;
     pub(crate) fn owncast_video_config_read() -> PTR;
-    pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;
-    pub(crate) fn owncast_add_actions(actionsPtr: PTR);
-    pub(crate) fn owncast_clear_actions();*/
+    pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;*/
 }

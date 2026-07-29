@@ -1,9 +1,9 @@
-use crate::errors::forbidden::Forbidden;
+use extism_pdk::SharedFnResult;
 use crate::host::owncast_fediverse_post;
 use crate::json_objects::url::Url;
 
-pub fn post(text: &str) -> Result<Option<Url>, Forbidden> {
+pub fn post(text: &str) -> SharedFnResult<Option<Url>> {
     unsafe {
-        owncast_fediverse_post(text).map_err(|_| Forbidden)
+        owncast_fediverse_post(text)
     }
 }

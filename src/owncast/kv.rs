@@ -1,29 +1,28 @@
-use std::error::Error;
+use extism_pdk::SharedFnResult;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use crate::errors::forbidden::Forbidden;
 use crate::errors::key_not_found::KeyNotFound;
 use crate::host::{owncast_kv_get, owncast_kv_set};
 
-pub fn get(key: &str) -> Result<Option<String>, Forbidden> {
+pub fn get(key: &str) -> SharedFnResult<Option<String>> {
     unsafe {
-        owncast_kv_get(key).map_err(|_| Forbidden)
+        owncast_kv_get(key)
     }
 }
 
-pub fn set<'a>(key: &str, value: impl Into<&'a str>) -> Result<(), Forbidden> {
+pub fn set<'a>(key: &str, value: impl Into<&'a str>) -> SharedFnResult<()> {
     unsafe {
-        owncast_kv_set(key, value.into()).map_err(|_| Forbidden)
+        owncast_kv_set(key, value.into())
     }
 }
 
-pub fn get_json<T: DeserializeOwned>(key: &str) -> Result<Option<T>, Box<dyn Error>> {
+pub fn get_json<T: DeserializeOwned>(key: &str) -> SharedFnResult<Option<T>> {
     let Some(value) = get(key)? else {
-        return Err(Box::new(KeyNotFound(key.to_string())));
+        return Err(KeyNotFound(key.to_string()).into());
     };
     Ok(Some(serde_json::from_str(&value)?))
 }
 
-pub fn set_json(key: &str, value: impl Serialize) -> Result<(), Box<dyn Error>> {
-    Ok(set(key, serde_json::to_string(&value)?.as_str())?)
+pub fn set_json(key: &str, value: impl Serialize) -> SharedFnResult<()> {
+    set(key, serde_json::to_string(&value)?.as_str())
 }
