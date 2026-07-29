@@ -9,6 +9,8 @@ use crate::json_objects::error::Error;
 use crate::json_objects::fediverse_payload::FediversePayload;
 use crate::json_objects::fs_result::FsResult;
 use crate::json_objects::grant_session_request::GrantSessionRequest;
+use crate::json_objects::stream_broadcaster::StreamBroadcaster;
+use crate::json_objects::stream_info::StreamInfo;
 use crate::json_objects::url::Url;
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
@@ -79,13 +81,15 @@ extern "ExtismHost" {
     pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64; // TODO haven't verified as working.
     pub(crate) fn owncast_timer_clear(id: i64); // TODO haven't verified as working.
 
+    // Stream
+    pub(crate) fn owncast_stream_current() -> Option<StreamInfo>; // TODO haven't verified as working.
+    pub(crate) fn owncast_stream_broadcaster() -> Option<StreamBroadcaster>; // TODO haven't verified as working.
+
     /*
-    pub(crate) fn owncast_stream_current() -> PTR;
     pub(crate) fn owncast_server_info() -> PTR;
     pub(crate) fn owncast_server_socials() -> PTR;
     pub(crate) fn owncast_server_emotes() -> PTR;
     pub(crate) fn owncast_server_federation() -> PTR;
-    pub(crate) fn owncast_stream_broadcaster() -> PTR;
     pub(crate) fn owncast_server_tags() -> PTR;
     pub(crate) fn owncast_video_config_read() -> PTR;
     pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;
