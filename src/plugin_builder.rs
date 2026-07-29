@@ -7,6 +7,7 @@ use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
 use crate::errors::duplicate::Duplicate;
 use crate::errors::out_of_bounds::OutOfBounds;
+use crate::event_function::{EventFunction, EventFunctionVoid};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -33,58 +34,59 @@ use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::plugin::Plugin;
-use crate::state::State;
+use crate::plugin_state::PluginState;
+
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
     manifest: String,
 
     // Events
-    on_chat_message_: Vec<fn(&ChatMessage)>,
-    on_chat_user_joined_: Vec<fn(&User)>,
-    on_chat_user_parted_: Vec<fn(&User)>,
-    on_chat_user_renamed_: Vec<fn(&ChatUserRename)>,
-    on_message_moderated_: Vec<fn(&ChatMessageModeration)>,
+    on_chat_message_: Vec<EventFunctionVoid<ChatMessage>>,
+    on_chat_user_joined_: Vec<EventFunctionVoid<User>>,
+    on_chat_user_parted_: Vec<EventFunctionVoid<User>>,
+    on_chat_user_renamed_: Vec<EventFunctionVoid<ChatUserRename>>,
+    on_message_moderated_: Vec<EventFunctionVoid<ChatMessageModeration>>,
 
-    on_stream_started_: Vec<fn(&StreamStarted)>,
-    on_stream_stopped_: Vec<fn(&StreamStopped)>,
-    on_stream_title_changed_: Vec<fn(&StreamTitleChange)>,
+    on_stream_started_: Vec<EventFunctionVoid<StreamStarted>>,
+    on_stream_stopped_: Vec<EventFunctionVoid<StreamStopped>>,
+    on_stream_title_changed_: Vec<EventFunctionVoid<StreamTitleChange>>,
 
-    on_sse_connect_: Vec<fn(&SseConnectionEvent)>,
-    on_sse_disconnect_: Vec<fn(&SseConnectionEvent)>,
+    on_sse_connect_: Vec<EventFunctionVoid<SseConnectionEvent>>,
+    on_sse_disconnect_: Vec<EventFunctionVoid<SseConnectionEvent>>,
 
-    on_tick_: Vec<fn(&TickEvent)>,
+    on_tick_: Vec<EventFunctionVoid<TickEvent>>,
 
-    on_fediverse_: Vec<fn(&HashMap<String, String>)>,
-    on_fediverse_follow_: Vec<fn(&FediverseEngagement)>,
-    on_fediverse_like_: Vec<fn(&FediverseTargetedEngagement)>,
-    on_fediverse_repost_: Vec<fn(&FediverseTargetedEngagement)>,
-    on_fediverse_quote_: Vec<fn(&FediverseTargetedEngagement)>,
-    on_fediverse_mention_: Vec<fn(&FediverseInboundPost)>,
-    on_fediverse_reply_: Vec<fn(&FediverseInboundPost)>,
+    on_fediverse_: Vec<EventFunctionVoid<HashMap<String, String>>>,
+    on_fediverse_follow_: Vec<EventFunctionVoid<FediverseEngagement>>,
+    on_fediverse_like_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    on_fediverse_repost_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    on_fediverse_quote_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    on_fediverse_mention_: Vec<EventFunctionVoid<FediverseInboundPost>>,
+    on_fediverse_reply_: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
-    on_: Vec<(String, Box<dyn Fn(&str) -> Result<(), JsonError>>)>,
+    on_: Vec<(String, Box<dyn Fn(&mut PluginState, &str) -> Result<(), JsonError>>)>,
 
     // Filter
-    filter_chat_message_: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
+    filter_chat_message_: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
 
     // HTTP
-    on_http_request_: HashMap<(Method, String), fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
+    on_http_request_: HashMap<(Method, String), EventFunction<IncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
-    on_auth_check_: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
+    on_auth_check_: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
 
     // Tab Content
-    on_tab_content_: HashMap<String, fn(&ContentRequest) -> String>,
+    on_tab_content_: HashMap<String, EventFunction<ContentRequest, String>>,
 
     // Page Content
-    on_page_content_: HashMap<String, fn(&ContentRequest) -> String>,
+    on_page_content_: HashMap<String, EventFunction<ContentRequest, String>>,
 
     // Page Styles
-    on_page_styles_: Option<fn() -> String>,
+    on_page_styles_: Option<fn(&mut PluginState) -> String>,
 
     // Page Scripts
-    on_page_scripts_: Option<fn() -> String>,
+    on_page_scripts_: Option<fn(&mut PluginState) -> String>,
 
     // Commands
     commands_: HashMap<String, CommandDefinition>
@@ -145,7 +147,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_message(&mut self, f: fn(&ChatMessage) -> ()) {
+    pub fn on_chat_message(&mut self, f: EventFunctionVoid<ChatMessage>) {
         self.on_chat_message_.push(f);
     }
 
@@ -161,7 +163,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_joined(&mut self, f: fn(&User) -> ()) {
+    pub fn on_chat_user_joined(&mut self, f: EventFunctionVoid<User>) {
         self.on_chat_user_joined_.push(f);
     }
 
@@ -177,7 +179,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_parted(&mut self, f: fn(&User) -> ()) {
+    pub fn on_chat_user_parted(&mut self, f: EventFunctionVoid<User>) {
         self.on_chat_user_parted_.push(f);
     }
 
@@ -193,7 +195,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_chat_user_renamed(&mut self, f: fn(&ChatUserRename) -> ()) {
+    pub fn on_chat_user_renamed(&mut self, f: EventFunctionVoid<ChatUserRename>) {
         self.on_chat_user_renamed_.push(f);
     }
 
@@ -209,7 +211,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_message_moderated(&mut self, f: fn(&ChatMessageModeration) -> ()) {
+    pub fn on_message_moderated(&mut self, f: EventFunctionVoid<ChatMessageModeration>) {
         self.on_message_moderated_.push(f);
     }
 
@@ -225,7 +227,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_started(&mut self, f: fn(&StreamStarted) -> ()) {
+    pub fn on_stream_started(&mut self, f: EventFunctionVoid<StreamStarted>) {
         self.on_stream_started_.push(f);
     }
 
@@ -241,7 +243,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_stopped(&mut self, f: fn(&StreamStopped) -> ()) {
+    pub fn on_stream_stopped(&mut self, f: EventFunctionVoid<StreamStopped>) {
         self.on_stream_stopped_.push(f);
     }
 
@@ -257,7 +259,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_stream_title_changed(&mut self, f: fn(&StreamTitleChange) -> ()) {
+    pub fn on_stream_title_changed(&mut self, f: EventFunctionVoid<StreamTitleChange>) {
         self.on_stream_title_changed_.push(f);
     }
 
@@ -273,7 +275,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_connect(&mut self, f: fn(&SseConnectionEvent) -> ()) {
+    pub fn on_sse_connect(&mut self, f: EventFunctionVoid<SseConnectionEvent>) {
         self.on_sse_connect_.push(f);
     }
 
@@ -289,7 +291,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_sse_disconnect(&mut self, f: fn(&SseConnectionEvent) -> ()) {
+    pub fn on_sse_disconnect(&mut self, f: EventFunctionVoid<SseConnectionEvent>) {
         self.on_sse_disconnect_.push(f);
     }
 
@@ -305,7 +307,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tick(&mut self, f: fn(&TickEvent) -> ()) {
+    pub fn on_tick(&mut self, f: EventFunctionVoid<TickEvent>) {
         self.on_tick_.push(f);
     }
 
@@ -322,7 +324,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse(&mut self, f: fn(&HashMap<String, String>) -> ()) {
+    pub fn on_fediverse(&mut self, f: EventFunctionVoid<HashMap<String, String>>) {
         self.on_fediverse_.push(f);
     }
 
@@ -338,7 +340,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_follow(&mut self, f: fn(&FediverseEngagement) -> ()) {
+    pub fn on_fediverse_follow(&mut self, f: EventFunctionVoid<FediverseEngagement>) {
         self.on_fediverse_follow_.push(f);
     }
 
@@ -354,7 +356,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_like(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
+    pub fn on_fediverse_like(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
         self.on_fediverse_like_.push(f);
     }
 
@@ -370,7 +372,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_repost(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
+    pub fn on_fediverse_repost(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
         self.on_fediverse_repost_.push(f);
     }
 
@@ -387,7 +389,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_quote(&mut self, f: fn(&FediverseTargetedEngagement) -> ()) {
+    pub fn on_fediverse_quote(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
         self.on_fediverse_quote_.push(f);
     }
 
@@ -403,7 +405,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_mention(&mut self, f: fn(&FediverseInboundPost) -> ()) {
+    pub fn on_fediverse_mention(&mut self, f: EventFunctionVoid<FediverseInboundPost>) {
         self.on_fediverse_mention_.push(f);
     }
 
@@ -419,7 +421,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_reply(&mut self, f: fn(&FediverseInboundPost) -> ()) {
+    pub fn on_fediverse_reply(&mut self, f: EventFunctionVoid<FediverseInboundPost>) {
         self.on_fediverse_reply_.push(f);
     }
 
@@ -445,7 +447,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: fn(&ChatMessage) -> FilterResult) -> Result<(), OutOfBounds<u8>> {
+    pub fn filter_chat_message(&mut self, priority: Option<u8>, f: EventFunction<ChatMessage, FilterResult>) -> Result<(), OutOfBounds<u8>> {
         // TODO if possible then put a compile-time restraint on priority.
         let priority = priority.unwrap_or(100);
         if priority >= 101 {
@@ -472,7 +474,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_http_request(&mut self, method: Method, path: &str, f: fn(&IncomingHttpRequest) -> OutgoingHttpResponse) -> Result<(), Duplicate> {
+    pub fn on_http_request(&mut self, method: Method, path: &str, f: EventFunction<IncomingHttpRequest, OutgoingHttpResponse>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
             return Err(Duplicate(format!("{method} {path}")));
         }
@@ -496,9 +498,9 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: fn(&T) -> ()) {
-        self.on_.push((event.to_string(), Box::new(move |payload| {
-            f(&serde_json::from_str(payload)?);
+    pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: EventFunctionVoid<T>) {
+        self.on_.push((event.to_string(), Box::new(move |mut plugin_state, payload| {
+            f(&mut plugin_state, &serde_json::from_str(payload)?);
             Ok(())
         })));
     }
@@ -550,7 +552,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tab_content(&mut self, tab: &str, f: fn(&ContentRequest) -> String) -> Result<(), Duplicate> {
+    pub fn on_tab_content(&mut self, tab: &str, f: EventFunction<ContentRequest, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
             Err(Duplicate(format!("A tab content handler already exists for {tab}.")))
         } else {
@@ -574,7 +576,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_content(&mut self, page: &str, f: fn(&ContentRequest) -> String) -> Result<(), Duplicate> {
+    pub fn on_page_content(&mut self, page: &str, f: EventFunction<ContentRequest, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
             Err(Duplicate(format!("A page content handler already exists for {page}.")))
         } else {
@@ -598,7 +600,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_styles(&mut self, f: fn() -> String) -> Result<(), Duplicate> {
+    pub fn on_page_styles(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
         if self.on_page_styles_.is_some() {
             Err(Duplicate("Can only set on_page_styles once.".to_string()))
         } else {
@@ -623,7 +625,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_scripts(&mut self, f: fn() -> String) -> Result<(), Duplicate> {
+    pub fn on_page_scripts(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
         if self.on_page_scripts_.is_some() {
             Err(Duplicate("Can only set on_page_scripts once.".to_string()))
         } else {
@@ -652,7 +654,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_auth_check(&mut self, f: fn(&AuthCheckRequest) -> AuthCheckResult) -> Result<(), Duplicate> {
+    pub fn on_auth_check(&mut self, f: EventFunction<AuthCheckRequest, AuthCheckResult>) -> Result<(), Duplicate> {
         if self.on_auth_check_.is_some() {
             Err(Duplicate("Can only set on_auth_check once.".to_string()))
         } else {
@@ -662,10 +664,10 @@ impl PluginBuilder {
     }
 }
 
-impl<T: State> TryInto<Plugin<T>> for PluginBuilder {
+impl TryInto<Plugin> for PluginBuilder {
     type Error = WithReturnCode<ExtismError>;
 
-    fn try_into(self) -> Result<Plugin<T>, Self::Error> {
+    fn try_into(self) -> Result<Plugin, Self::Error> {
         let mut filter_chat_message_ = self.filter_chat_message_;
         filter_chat_message_.sort_by(|(a, _), (b, _)| {
             b.cmp(&a)
@@ -754,9 +756,7 @@ impl<T: State> TryInto<Plugin<T>> for PluginBuilder {
 
             on_page_scripts: self.on_page_scripts_,
 
-            commands: self.commands_,
-
-            t: T::new()
+            commands: self.commands_
         })
     }
 }

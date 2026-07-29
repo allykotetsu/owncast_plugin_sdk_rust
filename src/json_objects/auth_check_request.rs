@@ -6,5 +6,5 @@ use crate::json_objects::user::User;
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct AuthCheckRequest {
-    pub(crate) user: User
+    pub user: User
 }

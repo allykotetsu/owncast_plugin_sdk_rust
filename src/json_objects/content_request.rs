@@ -6,6 +6,6 @@ use crate::json_objects::user::User;
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct ContentRequest {
-    pub(crate) slug: String,
-    pub(crate) user: Option<User>
+    pub slug: String,
+    pub user: Option<User>
 }

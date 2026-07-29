@@ -3,6 +3,7 @@ use extism_pdk::error;
 use serde_json::Error;
 use crate::command::command_context::CommandContext;
 use crate::command::command_definition::CommandDefinition;
+use crate::event_function::{EventFunction, EventFunctionVoid};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -14,6 +15,7 @@ use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter_result::FilterResult;
+use crate::json_objects::fire_timer::FireTimer;
 use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
@@ -25,67 +27,67 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::json_objects::permission::Permission;
-use crate::state::State;
+use crate::plugin_state::PluginState;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
-pub struct Plugin<T: State> {
+pub struct Plugin {
     // Manifest
     pub(crate) manifest: Manifest,
 
     // Events
-    pub(crate) on_chat_message: Vec<fn(&ChatMessage)>,
-    pub(crate) on_chat_user_joined: Vec<fn(&User)>,
-    pub(crate) on_chat_user_parted: Vec<fn(&User)>,
-    pub(crate) on_chat_user_renamed: Vec<fn(&ChatUserRename)>,
-    pub(crate) on_message_moderated: Vec<fn(&ChatMessageModeration)>,
+    pub(crate) on_chat_message: Vec<EventFunctionVoid<ChatMessage>>,
+    pub(crate) on_chat_user_joined: Vec<EventFunctionVoid<User>>,
+    pub(crate) on_chat_user_parted: Vec<EventFunctionVoid<User>>,
+    pub(crate) on_chat_user_renamed: Vec<EventFunctionVoid<ChatUserRename>>,
+    pub(crate) on_message_moderated: Vec<EventFunctionVoid<ChatMessageModeration>>,
 
-    pub(crate) on_stream_started: Vec<fn(&StreamStarted)>,
-    pub(crate) on_stream_stopped: Vec<fn(&StreamStopped)>,
-    pub(crate) on_stream_title_changed: Vec<fn(&StreamTitleChange)>,
+    pub(crate) on_stream_started: Vec<EventFunctionVoid<StreamStarted>>,
+    pub(crate) on_stream_stopped: Vec<EventFunctionVoid<StreamStopped>>,
+    pub(crate) on_stream_title_changed: Vec<EventFunctionVoid<StreamTitleChange>>,
 
-    pub(crate) on_sse_connect: Vec<fn(&SseConnectionEvent)>,
-    pub(crate) on_sse_disconnect: Vec<fn(&SseConnectionEvent)>,
+    pub(crate) on_sse_connect: Vec<EventFunctionVoid<SseConnectionEvent>>,
+    pub(crate) on_sse_disconnect: Vec<EventFunctionVoid<SseConnectionEvent>>,
 
-    pub(crate) on_tick: Vec<fn(&TickEvent)>,
+    pub(crate) on_tick: Vec<EventFunctionVoid<TickEvent>>,
 
-    pub(crate) on_fediverse: Vec<fn(&HashMap<String, String>)>,
-    pub(crate) on_fediverse_follow: Vec<fn(&FediverseEngagement)>,
-    pub(crate) on_fediverse_like: Vec<fn(&FediverseTargetedEngagement)>,
-    pub(crate) on_fediverse_repost: Vec<fn(&FediverseTargetedEngagement)>,
-    pub(crate) on_fediverse_quote: Vec<fn(&FediverseTargetedEngagement)>,
-    pub(crate) on_fediverse_mention: Vec<fn(&FediverseInboundPost)>,
-    pub(crate) on_fediverse_reply: Vec<fn(&FediverseInboundPost)>,
+    pub(crate) on_fediverse: Vec<EventFunctionVoid<HashMap<String, String>>>,
+    pub(crate) on_fediverse_follow: Vec<EventFunctionVoid<FediverseEngagement>>,
+    pub(crate) on_fediverse_like: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    pub(crate) on_fediverse_repost: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    pub(crate) on_fediverse_quote: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    pub(crate) on_fediverse_mention: Vec<EventFunctionVoid<FediverseInboundPost>>,
+    pub(crate) on_fediverse_reply: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
-    pub(crate) on: Vec<(String, Box<dyn Fn(&str) -> Result<(), Error>>)>,
+    pub(crate) on: Vec<(String, Box<dyn Fn(&mut PluginState, &str) -> Result<(), Error>>)>,
 
     // Filter
-    pub(crate) filter_chat_message: Vec<(u8, fn(&ChatMessage) -> FilterResult)>,
+    pub(crate) filter_chat_message: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
+
+    // TODO put EventFunction around the other things as well.
 
     // HTTP
-    pub(crate) on_http_request: HashMap<(Method, String), fn(&IncomingHttpRequest) -> OutgoingHttpResponse>,
+    pub(crate) on_http_request: HashMap<(Method, String), EventFunction<IncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
-    pub(crate) on_auth_check: Option<fn(&AuthCheckRequest) -> AuthCheckResult>,
+    pub(crate) on_auth_check: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
 
     // Tab Content
-    pub(crate) on_tab_content: HashMap<String, fn(&ContentRequest) -> String>,
+    pub(crate) on_tab_content: HashMap<String, EventFunction<ContentRequest, String>>,
 
     // Page Content
-    pub(crate) on_page_content: HashMap<String, fn(&ContentRequest) -> String>,
+    pub(crate) on_page_content: HashMap<String, EventFunction<ContentRequest, String>>,
 
     // Page Styles
-    pub(crate) on_page_styles: Option<fn() -> String>,
+    pub(crate) on_page_styles: Option<fn(&mut PluginState) -> String>,
 
     // Page Scripts
-    pub(crate) on_page_scripts: Option<fn() -> String>,
+    pub(crate) on_page_scripts: Option<fn(&mut PluginState) -> String>,
 
     // Commands
-    pub(crate) commands: HashMap<String, CommandDefinition>,
-
-    pub(crate) t: T
+    pub(crate) commands: HashMap<String, CommandDefinition>
 }
 
-impl<T: State> Plugin<T> {
+impl Plugin {
     pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
     }
@@ -94,67 +96,67 @@ impl<T: State> Plugin<T> {
         self.manifest.clone()
     }
 
-    pub fn dispatch_event(&self, event: Envelope) {
+    pub fn dispatch_event(&self, plugin_state: &mut PluginState, event: Envelope) {
         match event {
             Envelope::ChatMessageReceived(payload) => {
-                for func in &self.on_chat_message { func(&payload); }
+                for func in &self.on_chat_message { func(plugin_state, &payload); }
                 // for func in &self.on_chat_message { func(FromStateAndPayload::from(&self.t, &payload)); }
             }
             Envelope::ChatUserJoined(payload) => {
-                for func in &self.on_chat_user_joined { func(&payload); }
+                for func in &self.on_chat_user_joined { func(plugin_state, &payload); }
             }
             Envelope::ChatUserParted(payload) => {
-                for func in &self.on_chat_user_parted { func(&payload); }
+                for func in &self.on_chat_user_parted { func(plugin_state, &payload); }
             }
             Envelope::ChatUserRenamed(payload) => {
-                for func in &self.on_chat_user_renamed { func(&payload); }
+                for func in &self.on_chat_user_renamed { func(plugin_state, &payload); }
             }
             Envelope::ChatMessageModerated(payload) => {
-                for func in &self.on_message_moderated { func(&payload); }
+                for func in &self.on_message_moderated { func(plugin_state, &payload); }
             }
 
             Envelope::StreamStarted(payload) => {
-                for func in &self.on_stream_started { func(&payload); }
+                for func in &self.on_stream_started { func(plugin_state, &payload); }
             }
             Envelope::StreamStopped(payload) => {
-                for func in &self.on_stream_stopped { func(&payload); }
+                for func in &self.on_stream_stopped { func(plugin_state, &payload); }
             }
             Envelope::StreamTitleChanged(payload) => {
-                for func in &self.on_stream_title_changed { func(&payload); }
+                for func in &self.on_stream_title_changed { func(plugin_state, &payload); }
             }
 
             Envelope::SseConnect(payload) => {
-                for func in &self.on_sse_connect { func(&payload); }
+                for func in &self.on_sse_connect { func(plugin_state, &payload); }
             }
             Envelope::SseDisconnect(payload) => {
-                for func in &self.on_sse_disconnect { func(&payload);}
+                for func in &self.on_sse_disconnect { func(plugin_state, &payload);}
             }
 
             Envelope::Tick(payload) => {
-                for func in &self.on_tick { func(&payload); }
+                for func in &self.on_tick { func(plugin_state, &payload); }
             }
 
             Envelope::FediverseActivity(payload) => {
-                for func in &self.on_fediverse { func(&payload); }
+                for func in &self.on_fediverse { func(plugin_state, &payload); }
             }
             Envelope::FediverseFollow(payload) => {
-                for func in &self.on_fediverse_follow { func(&payload); }
+                for func in &self.on_fediverse_follow { func(plugin_state, &payload); }
             }
             Envelope::FediverseLike(payload) => {
-                for func in &self.on_fediverse_like { func(&payload); }
+                for func in &self.on_fediverse_like { func(plugin_state, &payload); }
             }
             Envelope::FediverseRepost(payload) => {
-                for func in &self.on_fediverse_repost { func(&payload); }
+                for func in &self.on_fediverse_repost { func(plugin_state, &payload); }
             }
             Envelope::FediverseQuote(payload) => {
-                for func in &self.on_fediverse_quote { func(&payload); }
+                for func in &self.on_fediverse_quote { func(plugin_state, &payload); }
             }
 
             Envelope::FediverseMention(payload) => {
-                for func in &self.on_fediverse_mention { func(&payload); }
+                for func in &self.on_fediverse_mention { func(plugin_state, &payload); }
             }
             Envelope::FediverseReply(payload) => {
-                for func in &self.on_fediverse_reply { func(&payload); }
+                for func in &self.on_fediverse_reply { func(plugin_state, &payload); }
             }
 
             Envelope::ChatCommand(payload) => {
@@ -169,14 +171,14 @@ impl<T: State> Plugin<T> {
                     })
                 }
             }
-            Envelope::TimerFire(_) => {
-                // TODO
+            Envelope::TimerFire(FireTimer { id }) => {
+                plugin_state.fire_timer(id);
             }
 
             Envelope::Custom { event_type, payload } => {
                 for (other_name, func) in &self.on {
                     if event_type == *other_name {
-                        if let Err(err) = func(payload.as_str()) {
+                        if let Err(err) = func(plugin_state, payload.as_str()) {
                             error!("{err}");
                         }
                     }
@@ -185,11 +187,11 @@ impl<T: State> Plugin<T> {
         }
     }
 
-    pub fn dispatch_filter(&self, mut msg: ChatMessage) -> FilterResult {
+    pub fn dispatch_filter(&self, plugin_state: &mut PluginState, mut msg: ChatMessage) -> FilterResult {
         let mut changed = false;
 
         for (_, filter_chat_message) in &self.filter_chat_message {
-            match filter_chat_message(&msg) {
+            match filter_chat_message(plugin_state, &msg) {
                 FilterResult::Pass => {
                     continue;
                 }
@@ -210,36 +212,36 @@ impl<T: State> Plugin<T> {
         }
     }
 
-    pub fn dispatch_http_request(&self, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
+    pub fn dispatch_http_request(&self, plugin_state: &mut PluginState, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             // If plugin does not listen for HTTP requests, then return 404.
             OutgoingHttpResponse::new(404)
         } else {
             if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
-                func(&incoming_http_request).clean_clone()
+                func(plugin_state, &incoming_http_request).clean_clone()
             } else {
                 OutgoingHttpResponse::new(200)
             }
         }
     }
 
-    pub fn dispatch_tab_content(&self, content_request: ContentRequest) -> Option<String> {
-        Some(self.on_tab_content.get(&content_request.slug)?(&content_request))
+    pub fn dispatch_tab_content(&self, plugin_state: &mut PluginState, content_request: ContentRequest) -> Option<String> {
+        Some(self.on_tab_content.get(&content_request.slug)?(plugin_state, &content_request))
     }
 
-    pub fn dispatch_page_content(&self, content_request: ContentRequest) -> Option<String> {
-        Some(self.on_page_content.get(&content_request.slug)?(&content_request))
+    pub fn dispatch_page_content(&self, plugin_state: &mut PluginState, content_request: ContentRequest) -> Option<String> {
+        Some(self.on_page_content.get(&content_request.slug)?(plugin_state, &content_request))
     }
 
-    pub fn dispatch_page_styles(&self) -> Option<String> {
-        Some(self.on_page_styles.clone()?())
+    pub fn dispatch_page_styles(&self, plugin_state: &mut PluginState) -> Option<String> {
+        Some(self.on_page_styles.clone()?(plugin_state))
     }
 
-    pub fn dispatch_page_scripts(&self) -> Option<String> {
-        Some(self.on_page_scripts.clone()?())
+    pub fn dispatch_page_scripts(&self, plugin_state: &mut PluginState) -> Option<String> {
+        Some(self.on_page_scripts.clone()?(plugin_state))
     }
 
-    pub fn dispatch_auth_check(&self, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
-        Some(self.on_auth_check?(&auth_check_request))
+    pub fn dispatch_auth_check(&self, plugin_state: &mut PluginState, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
+        Some(self.on_auth_check?(plugin_state, &auth_check_request))
     }
 }

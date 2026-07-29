@@ -72,9 +72,14 @@ extern "ExtismHost" {
     pub(crate) fn owncast_add_actions(actionsPtr: Json<Vec<ActionButton>>); // TODO haven't verified as working.
     pub(crate) fn owncast_clear_actions(); // TODO haven't verified as working.
 
-    /*pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
-    pub(crate) fn owncast_timer_clear(id: i64);
-    pub(crate) fn owncast_sse_send(channelPtr: PTR, eventPtr: PTR, dataPtr: PTR);
+    // SSE
+    pub(crate) fn owncast_sse_send(channelPtr: &str, eventPtr: &str, dataPtr: Json<impl Serialize>); // TODO haven't verified as working.
+
+    // Timer
+    pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64; // TODO haven't verified as working.
+    pub(crate) fn owncast_timer_clear(id: i64); // TODO haven't verified as working.
+
+    /*
     pub(crate) fn owncast_stream_current() -> PTR;
     pub(crate) fn owncast_server_info() -> PTR;
     pub(crate) fn owncast_server_socials() -> PTR;
@@ -83,5 +88,6 @@ extern "ExtismHost" {
     pub(crate) fn owncast_stream_broadcaster() -> PTR;
     pub(crate) fn owncast_server_tags() -> PTR;
     pub(crate) fn owncast_video_config_read() -> PTR;
-    pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;*/
+    pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;
+    */
 }

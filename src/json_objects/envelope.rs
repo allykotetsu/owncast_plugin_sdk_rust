@@ -8,6 +8,7 @@ use crate::json_objects::command_event::CommandEvent;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
+use crate::json_objects::fire_timer::FireTimer;
 use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
@@ -69,7 +70,7 @@ pub enum Envelope {
     #[serde(rename = "chat.command")]
     ChatCommand(CommandEvent),
     #[serde(rename = "timer.fire")]
-    TimerFire(()),
+    TimerFire(FireTimer),
 
     #[serde(untagged)]
     Custom { event_type: String, payload: String }
