@@ -20,6 +20,7 @@ use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
+use crate::json_objects::partial_incoming_http_request::PartialIncomingHttpRequest;
 use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
@@ -66,16 +67,16 @@ pub struct Plugin {
     // TODO put EventFunction around the other things as well.
 
     // HTTP
-    pub(crate) on_http_request: HashMap<(Method, String), EventFunction<IncomingHttpRequest, OutgoingHttpResponse>>,
+    pub(crate) on_http_request: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
     pub(crate) on_auth_check: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
 
     // Tab Content
-    pub(crate) on_tab_content: HashMap<String, EventFunction<ContentRequest, String>>,
+    pub(crate) on_tab_content: HashMap<String, EventFunction<Option<User>, String>>,
 
     // Page Content
-    pub(crate) on_page_content: HashMap<String, EventFunction<ContentRequest, String>>,
+    pub(crate) on_page_content: HashMap<String, EventFunction<Option<User>, String>>,
 
     // Page Styles
     pub(crate) on_page_styles: Option<fn(&mut PluginState) -> String>,
@@ -218,19 +219,19 @@ impl Plugin {
             OutgoingHttpResponse::new(404)
         } else {
             if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
-                func(plugin_state, &incoming_http_request).clean_clone()
+                func(plugin_state, &incoming_http_request.into()).clean_clone()
             } else {
                 OutgoingHttpResponse::new(200)
             }
         }
     }
 
-    pub fn dispatch_tab_content(&self, plugin_state: &mut PluginState, content_request: ContentRequest) -> Option<String> {
-        Some(self.on_tab_content.get(&content_request.slug)?(plugin_state, &content_request))
+    pub fn dispatch_tab_content(&self, plugin_state: &mut PluginState, ContentRequest { slug, user }: ContentRequest) -> Option<String> {
+        Some(self.on_tab_content.get(&slug)?(plugin_state, &user))
     }
 
-    pub fn dispatch_page_content(&self, plugin_state: &mut PluginState, content_request: ContentRequest) -> Option<String> {
-        Some(self.on_page_content.get(&content_request.slug)?(plugin_state, &content_request))
+    pub fn dispatch_page_content(&self, plugin_state: &mut PluginState, ContentRequest { slug, user }: ContentRequest) -> Option<String> {
+        Some(self.on_page_content.get(&slug)?(plugin_state, &user))
     }
 
     pub fn dispatch_page_styles(&self, plugin_state: &mut PluginState) -> Option<String> {

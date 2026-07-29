@@ -14,18 +14,17 @@ use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
 use crate::json_objects::command::Command;
-use crate::json_objects::content_request::ContentRequest;
 use crate::json_objects::event_type::EventType;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter::Filter;
 use crate::json_objects::filter_result::FilterResult;
-use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
 use crate::json_objects::notify::Notify;
 use crate::json_objects::outgoing_http_response::OutgoingHttpResponse;
+use crate::json_objects::partial_incoming_http_request::PartialIncomingHttpRequest;
 use crate::json_objects::sse_connection_event::SseConnectionEvent;
 use crate::json_objects::stream_started::StreamStarted;
 use crate::json_objects::stream_stopped::StreamStopped;
@@ -71,16 +70,16 @@ pub struct PluginBuilder {
     filter_chat_message_: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
 
     // HTTP
-    on_http_request_: HashMap<(Method, String), EventFunction<IncomingHttpRequest, OutgoingHttpResponse>>,
+    on_http_request_: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
     on_auth_check_: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
 
     // Tab Content
-    on_tab_content_: HashMap<String, EventFunction<ContentRequest, String>>,
+    on_tab_content_: HashMap<String, EventFunction<Option<User>, String>>,
 
     // Page Content
-    on_page_content_: HashMap<String, EventFunction<ContentRequest, String>>,
+    on_page_content_: HashMap<String, EventFunction<Option<User>, String>>,
 
     // Page Styles
     on_page_styles_: Option<fn(&mut PluginState) -> String>,
@@ -474,7 +473,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_http_request(&mut self, method: Method, path: &str, f: EventFunction<IncomingHttpRequest, OutgoingHttpResponse>) -> Result<(), Duplicate> {
+    pub fn on_http_request(&mut self, method: Method, path: &str, f: EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
             return Err(Duplicate(format!("{method} {path}")));
         }
@@ -552,7 +551,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_tab_content(&mut self, tab: &str, f: EventFunction<ContentRequest, String>) -> Result<(), Duplicate> {
+    pub fn on_tab_content(&mut self, tab: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
             Err(Duplicate(format!("A tab content handler already exists for {tab}.")))
         } else {
@@ -576,7 +575,7 @@ impl PluginBuilder {
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_page_content(&mut self, page: &str, f: EventFunction<ContentRequest, String>) -> Result<(), Duplicate> {
+    pub fn on_page_content(&mut self, page: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
             Err(Duplicate(format!("A page content handler already exists for {page}.")))
         } else {

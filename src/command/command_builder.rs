@@ -7,12 +7,10 @@ pub struct CommandBuilder {
     name_: String,
     run_: fn(&CommandContext),
     cooldown_ms_: Option<u128>,
-    on_denied_: Option<fn(&CommandContext)>,
     description_: Option<String>,
     usage_: Option<String>,
     aliases_: Option<Vec<String>>,
     mod_only_: Option<bool>,
-    on_cooldown_: Option<fn(&CommandContext)>
 }
 
 impl CommandBuilder {
@@ -22,23 +20,16 @@ impl CommandBuilder {
             name_: name.to_string(),
             run_: run,
             cooldown_ms_: None,
-            on_denied_: None,
             description_: None,
             usage_: None,
             aliases_: None,
             mod_only_: None,
-            on_cooldown_: None
         }
     }
 
     /// If the command has a cooldown, then how long is it.
     pub fn with_cooldown(mut self, cooldown: u128) -> Self {
         self.cooldown_ms_ = Some(cooldown);
-        self
-    }
-
-    pub fn on_denied(mut self, f: fn(&CommandContext)) -> Self {
-        self.on_denied_ = Some(f);
         self
     }
 
@@ -67,16 +58,9 @@ impl CommandBuilder {
         self
     }
 
-    pub fn on_cooldown(mut self, f: fn(&CommandContext)) -> Self {
-        self.on_cooldown_ = Some(f);
-        self
-    }
-
     pub(crate) fn build(self, prefix: String, case_sensitive: bool) -> CommandDefinition {
         CommandDefinition {
             run: self.run_,
-            on_denied: self.on_denied_,
-            on_cooldown: self.on_cooldown_,
             command: Command {
                 name: self.name_,
                 prefix,

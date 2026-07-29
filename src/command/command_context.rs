@@ -4,12 +4,12 @@ use crate::owncast;
 use crate::run;
 
 pub struct CommandContext {
-    pub(crate) msg: ChatMessage,
-    pub(crate) user: Option<User>,
-    pub(crate) command: String,
-    pub(crate) invoked_as: String,
-    pub(crate) args: Vec<String>,
-    pub(crate) arg_string: String
+    pub msg: ChatMessage,
+    pub user: Option<User>,
+    pub command: String,
+    pub invoked_as: String,
+    pub args: Vec<String>,
+    pub arg_string: String
 }
 
 impl CommandContext {
