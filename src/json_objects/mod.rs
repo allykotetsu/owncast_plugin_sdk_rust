@@ -48,3 +48,5 @@ pub mod browser_push_payload;
 pub mod fediverse_payload;
 pub(crate) mod fire_timer;
 pub mod partial_incoming_http_request;
+pub mod http_request_opts;
+pub mod http_response;
