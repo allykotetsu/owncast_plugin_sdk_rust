@@ -5,16 +5,22 @@ use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
+use crate::json_objects::emote::Emote;
 use crate::json_objects::error::Error;
+use crate::json_objects::federation_info::FederationInfo;
 use crate::json_objects::fediverse_payload::FediversePayload;
 use crate::json_objects::fs_result::FsResult;
 use crate::json_objects::grant_session_request::GrantSessionRequest;
+use crate::json_objects::server_info::ServerInfo;
+use crate::json_objects::social_handle::SocialHandle;
 use crate::json_objects::stream_broadcaster::StreamBroadcaster;
 use crate::json_objects::stream_info::StreamInfo;
 use crate::json_objects::url::Url;
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
 use crate::json_objects::user_register_result::UserRegisterResult;
+use crate::json_objects::video_config::VideoConfig;
+use crate::json_objects::video_config_update::VideoConfigUpdate;
 
 #[host_fn]
 extern "ExtismHost" {
@@ -68,14 +74,14 @@ extern "ExtismHost" {
     pub(crate) fn owncast_asset_read(pathPtr: &str) -> Option<Vec<u8>>; // TODO haven't verified as working.
 
     // Events
-    pub(crate) fn owncast_emit_event(eventTypePtr: &str, payloadPtr: Json<impl Serialize>); // TODO haven't verified as working.
+    pub(crate) fn owncast_emit_event(eventTypePtr: &str, payloadPtr: &Json<impl Serialize>); // TODO haven't verified as working.
 
     // Actions
-    pub(crate) fn owncast_add_actions(actionsPtr: Json<Vec<ActionButton>>); // TODO haven't verified as working.
+    pub(crate) fn owncast_add_actions(actionsPtr: &Json<Vec<ActionButton>>); // TODO haven't verified as working.
     pub(crate) fn owncast_clear_actions(); // TODO haven't verified as working.
 
     // SSE
-    pub(crate) fn owncast_sse_send(channelPtr: &str, eventPtr: &str, dataPtr: Json<impl Serialize>); // TODO haven't verified as working.
+    pub(crate) fn owncast_sse_send(channelPtr: &str, eventPtr: &str, dataPtr: &Json<impl Serialize>); // TODO haven't verified as working.
 
     // Timer
     pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64; // TODO haven't verified as working.
@@ -85,13 +91,14 @@ extern "ExtismHost" {
     pub(crate) fn owncast_stream_current() -> Option<StreamInfo>; // TODO haven't verified as working.
     pub(crate) fn owncast_stream_broadcaster() -> Option<StreamBroadcaster>; // TODO haven't verified as working.
 
-    /*
-    pub(crate) fn owncast_server_info() -> PTR;
-    pub(crate) fn owncast_server_socials() -> PTR;
-    pub(crate) fn owncast_server_emotes() -> PTR;
-    pub(crate) fn owncast_server_federation() -> PTR;
-    pub(crate) fn owncast_server_tags() -> PTR;
-    pub(crate) fn owncast_video_config_read() -> PTR;
-    pub(crate) fn owncast_video_config_write(configPtr: PTR) -> PTR;
-    */
+    // Server
+    pub(crate) fn owncast_server_info() -> ServerInfo; // TODO haven't verified as working.
+    pub(crate) fn owncast_server_socials() -> Json<Vec<SocialHandle>>; // TODO haven't verified as working.
+    pub(crate) fn owncast_server_emotes() -> Json<Vec<Emote>>; // TODO haven't verified as working.
+    pub(crate) fn owncast_server_federation() -> FederationInfo; // TODO haven't verified as working.
+    pub(crate) fn owncast_server_tags() -> Json<Vec<String>>; // TODO haven't verified as working.
+
+    // Video Config
+    pub(crate) fn owncast_video_config_read() -> VideoConfig; // TODO haven't verified as working.
+    pub(crate) fn owncast_video_config_write(configPtr: &VideoConfigUpdate) -> Error; // TODO haven't verified as working.
 }
