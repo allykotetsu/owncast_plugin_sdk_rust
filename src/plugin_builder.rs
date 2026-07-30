@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use extism_pdk::{info, WithReturnCode};
+use extism_pdk::{config, WithReturnCode};
 use extism_pdk::Error as ExtismError;
 use serde::de::DeserializeOwned;
 use serde_json::Error as JsonError;
@@ -34,12 +34,10 @@ use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::plugin::Plugin;
 use crate::plugin_state::PluginState;
-
+use crate::prelude::MissingManifest;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
-    manifest: String,
-
     // Events
     on_chat_message_: Vec<EventFunctionVoid<ChatMessage>>,
     on_chat_user_joined_: Vec<EventFunctionVoid<User>>,
@@ -92,10 +90,8 @@ pub struct PluginBuilder {
 }
 
 impl PluginBuilder {
-    pub fn new(manifest: &str) -> Self {
+    pub fn new() -> Self {
         Self {
-            manifest: manifest.to_string(),
-
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
             on_chat_user_parted_: vec![],
@@ -714,12 +710,10 @@ impl TryInto<Plugin> for PluginBuilder {
         // In the meantime we are going to do a hardcoded workaround for debugging purposes.
         // But once that bug is fixed we will revert to the commented out code below:
 
-        // let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
-
-        info!("Plugin built!");
+        let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 
         Ok(Plugin {
-            manifest: Manifest::from((serde_json::from_str(&self.manifest)?, subscriptions, commands)),
+            manifest: Manifest::from((serde_json::from_str(&manifest)?, subscriptions, commands)),
 
             on_chat_message: self.on_chat_message_,
             on_chat_user_joined: self.on_chat_user_joined_,

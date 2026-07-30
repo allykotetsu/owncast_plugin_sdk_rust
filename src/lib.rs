@@ -35,6 +35,6 @@ pub mod prelude {
 }
 
 use prelude::*;
-define_plugin!("", |plugin_builder| {
+define_plugin!(|plugin_builder| {
     Ok(plugin_builder)
 });

@@ -27,11 +27,10 @@ pub fn clone(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Err
 /// ```
 #[macro_export]
 macro_rules! define_plugin {
-    ($manifest:expr, $func:expr) => {
+    ($func:expr) => {
         const PLUGIN: std::sync::LazyLock<extism_pdk::FnResult<Plugin>> = std::sync::LazyLock::new(|| {
-            let manifest: &str = $manifest;
             let func: fn(PluginBuilder) -> extism_pdk::FnResult<PluginBuilder> = $func;
-            Ok(func(PluginBuilder::new(manifest))?.try_into()?)
+            Ok(func(PluginBuilder::new())?.try_into()?)
         });
         static mut PLUGIN_STATE: std::sync::LazyLock<PluginState> = std::sync::LazyLock::new(|| PluginState::new());
 
