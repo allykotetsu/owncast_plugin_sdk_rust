@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use crate::json_objects::chat_message::ChatMessage;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CommandEvent {
     pub(crate) message: ChatMessage,

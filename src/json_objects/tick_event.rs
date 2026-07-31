@@ -1,7 +1,7 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TickEvent {
-    pub now: u128,
+    pub now: i64,
 }

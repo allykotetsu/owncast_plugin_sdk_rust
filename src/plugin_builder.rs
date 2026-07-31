@@ -8,12 +8,11 @@ use crate::command::command_definition::CommandDefinition;
 use crate::errors::duplicate::Duplicate;
 use crate::errors::out_of_bounds::OutOfBounds;
 use crate::event_function::{EventFunction, EventFunctionVoid};
-use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
 use crate::json_objects::chat_user_rename::ChatUserRename;
-use crate::json_objects::command::Command;
+use crate::json_objects::command_info::CommandInfo;
 use crate::json_objects::event_type::EventType;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
@@ -71,7 +70,7 @@ pub struct PluginBuilder {
     on_http_request_: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
-    on_auth_check_: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
+    on_auth_check_: Option<EventFunction<User, AuthCheckResult>>,
 
     // Tab Content
     on_tab_content_: HashMap<String, EventFunction<Option<User>, String>>,
@@ -184,8 +183,8 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_renamed(|ChatUserRename { display_name, .. }| {
-    ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
+    ///     plugin_builder.on_chat_user_renamed(|ChatUserRename { user: User { display_name, .. }, previous_name }| {
+    ///         owncast_send_chat(&format!("{previous_name} is now {display_name}."));
     ///     });
     ///     Ok(plugin_builder)
     /// });
@@ -487,15 +486,17 @@ impl PluginBuilder {
     /// }
     ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on("another-plugin.something", |CustomEventPayload { data }| {
+    ///     plugin_builder.on("another-plugin", "something", |_, CustomEventPayload { data }| {
     ///         owncast_send_chat(format!("Received {data}."));
     ///     });
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: EventFunctionVoid<T>) {
-        self.on_.push((event.to_string(), Box::new(move |mut plugin_state, payload| {
-            f(&mut plugin_state, &serde_json::from_str(payload)?);
+    pub fn on<T: DeserializeOwned + 'static>(&mut self, ns: &str, event: &str, f: EventFunctionVoid<T>) {
+        self.on_.push((format!("{ns}:{event}"), Box::new(move |mut plugin_state, payload| {
+            let value: serde_json::Value = serde_json::from_str(payload)?;
+            let deserialized: T = serde_json::from_value(value)?;
+            f(&mut plugin_state, &deserialized);
             Ok(())
         })));
     }
@@ -639,17 +640,19 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_auth_check(|AuthCheckRequest { user: User { display_name, .. } }| {
+    ///     plugin_builder.on_auth_check(|_, User { display_name, .. }| {
     ///         if display_name.as_str() == "Authorized user" {
     ///             AuthCheckResult::Ok()
     ///         } else {
-    ///             AuthCheckResult::Deny("You are not authorized!".to_string())
+    ///             AuthCheckResult::Deny {
+    ///                 reason: "You are not authorized!".to_string()
+    ///             }
     ///         }
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_auth_check(&mut self, f: EventFunction<AuthCheckRequest, AuthCheckResult>) -> Result<(), Duplicate> {
+    pub fn on_auth_check(&mut self, f: EventFunction<User, AuthCheckResult>) -> Result<(), Duplicate> {
         if self.on_auth_check_.is_some() {
             Err(Duplicate("Can only set on_auth_check once.".to_string()))
         } else {
@@ -694,6 +697,10 @@ impl TryInto<Plugin> for PluginBuilder {
         if !self.on_fediverse_mention_.is_empty() { notify.push(Notify { event: EventType::FediverseMention }); }
         if !self.on_fediverse_reply_.is_empty() { notify.push(Notify { event: EventType::FediverseReply }); }
 
+        for (name, _) in &self.on_ {
+            notify.push(Notify { event: EventType::Custom(name.clone()) });
+        }
+
         // Construct filter.
         let mut filter = vec![];
         if let Some(&(priority, _)) = filter_chat_message_.first() {
@@ -704,7 +711,7 @@ impl TryInto<Plugin> for PluginBuilder {
         }
 
         let subscriptions = Subscriptions { notify, filter };
-        let commands: Vec<Command> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
+        let commands: Vec<CommandInfo> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
 
         // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
         // In the meantime we are going to do a hardcoded workaround for debugging purposes.

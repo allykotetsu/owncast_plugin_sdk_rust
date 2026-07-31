@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 
 pub struct PluginState {
-    pub(crate) timers: HashMap<i64, (fn() -> (), bool)>
+    pub(crate) timers: HashMap<u64, (fn() -> (), bool)>
 }
 
 impl PluginState {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timers: HashMap::new()
         }
     }
 
-    pub(crate) fn set_timer(&mut self, callback: fn() -> (), repeats: bool) -> i64 {
+    pub(crate) fn set_timer(&mut self, callback: fn() -> (), repeats: bool) -> u64 {
         let mut id = 0;
         let id = loop {
             if !self.timers.contains_key(&id) {
@@ -24,11 +24,11 @@ impl PluginState {
         id
     }
 
-    pub(crate) fn clear_timer(&mut self, id: i64) {
+    pub(crate) fn clear_timer(&mut self, id: u64) {
         self.timers.remove(&id);
     }
 
-    pub(crate) fn fire_timer(&mut self, id: i64) {
+    pub(crate) fn fire_timer(&mut self, id: u64) {
         if let Some((callback, repeats)) = self.timers.get(&id) {
             callback();
             if !repeats {

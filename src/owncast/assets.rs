@@ -10,8 +10,8 @@ pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
 
 // Does not require permissions.
 pub fn read_text(path: &str) -> SharedFnResult<Option<String>> {
-    let Some(value) = read(path)? else {
-        return Ok(None)
-    };
-    Ok(Some(String::from_utf8(value)?))
+    Ok(match read(path)? {
+        Some(value) => Some(String::from_utf8(value)?),
+        None => None
+    })
 }

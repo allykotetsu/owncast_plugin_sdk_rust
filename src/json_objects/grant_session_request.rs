@@ -1,7 +1,7 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
-#[derive(Serialize, ToBytes)]
+#[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct GrantSessionRequest {
@@ -9,10 +9,10 @@ pub struct GrantSessionRequest {
     pub ttl: Option<i64>
 }
 
-impl Into<GrantSessionRequest> for &str {
-    fn into(self) -> GrantSessionRequest {
+impl From<&str> for GrantSessionRequest {
+    fn from(s: &str) -> Self {
         GrantSessionRequest {
-            user_id: self.to_string(),
+            user_id: s.to_string(),
             ttl: None
         }
     }

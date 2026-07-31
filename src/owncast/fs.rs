@@ -1,6 +1,6 @@
+use anyhow::anyhow;
 use extism_pdk::{Json, SharedFnResult};
 use crate::host::{owncast_fs_read, owncast_fs_write, owncast_fs_list, owncast_fs_delete, owncast_fs_exists};
-use crate::json_objects::fs_result::FsResult;
 
 pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
     unsafe {
@@ -15,9 +15,13 @@ pub fn read_text(path: &str) -> SharedFnResult<Option<String>> {
     Ok(Some(String::from_utf8(vecu8)?))
 }
 
-pub fn write(path: &str, data: impl Into<Vec<u8>>) -> SharedFnResult<FsResult> {
-    unsafe {
-        owncast_fs_write(path, &data.into())
+pub fn write(path: &str, data: impl Into<Vec<u8>>) -> SharedFnResult<()> {
+    let res = unsafe {
+        owncast_fs_write(path, &data.into())?
+    };
+    match res.error {
+        Some(error) => Err(anyhow!(error)),
+        None => Ok(())
     }
 }
 
@@ -27,13 +31,17 @@ pub fn list(dir: &str) -> SharedFnResult<Vec<String>> {
     }
 }
 
-pub fn delete(path: &str) -> SharedFnResult<FsResult> {
-    unsafe {
-        owncast_fs_delete(path)
+pub fn delete(path: &str) -> SharedFnResult<()> {
+    let res = unsafe {
+        owncast_fs_delete(path)?
+    };
+    match res.error {
+        Some(error) => Err(anyhow!(error)),
+        None => Ok(())
     }
 }
 
-pub fn exists(path: &str,) -> SharedFnResult<bool> {
+pub fn exists(path: &str) -> SharedFnResult<bool> {
     unsafe {
         owncast_fs_exists(path).map(|i| i != 0)
     }

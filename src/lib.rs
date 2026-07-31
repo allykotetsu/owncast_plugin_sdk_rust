@@ -18,9 +18,9 @@ pub mod prelude {
     pub use crate::errors::bad_event_type::BadEventType;
     pub use crate::errors::dbg::Dbg;
     pub use crate::errors::missing_manifest::MissingManifest;
-    pub use crate::errors::pluginless::Pluginless;
     pub use crate::plugin_builder::PluginBuilder;
     pub use crate::plugin_state::PluginState;
+    pub use crate::run::debug;
     pub use crate::json_objects::auth_check_request::AuthCheckRequest;
     pub use crate::json_objects::auth_check_result::AuthCheckResult;
     pub use crate::json_objects::content_request::ContentRequest;
@@ -33,8 +33,3 @@ pub mod prelude {
     pub use crate::plugin::Plugin;
     pub use crate::state::State;
 }
-
-use prelude::*;
-define_plugin!(|plugin_builder| {
-    Ok(plugin_builder)
-});

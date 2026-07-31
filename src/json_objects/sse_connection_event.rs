@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use crate::json_objects::user::User;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct SseConnectionEvent {
     pub channel: String,

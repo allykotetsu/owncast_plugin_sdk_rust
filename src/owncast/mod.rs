@@ -16,3 +16,4 @@ pub mod sse;
 pub mod timer;
 pub mod http;
 pub mod storage;
+pub mod sql;

@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct OutOfBounds<T: Debug + Display>(pub T, pub T, pub T);
 
 impl<T: Debug + Display> Display for OutOfBounds<T> {

@@ -1,7 +1,7 @@
 use extism_pdk::{ToBytes, FromBytes, Json};
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize, FromBytes, ToBytes)]
+#[derive(Deserialize, Serialize, FromBytes, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct StreamVariant {

@@ -1,12 +1,13 @@
 use crate::command::command_definition::CommandDefinition;
 use crate::command::command_context::CommandContext;
-use crate::json_objects::command::Command;
+use crate::event_function::{EventFunctionVoid};
+use crate::json_objects::command_info::CommandInfo;
 
 /// A struct for building a chat command.
 pub struct CommandBuilder {
     name_: String,
-    run_: fn(&CommandContext),
-    cooldown_ms_: Option<u128>,
+    run_: EventFunctionVoid<CommandContext>,
+    cooldown_ms_: Option<i64>,
     description_: Option<String>,
     usage_: Option<String>,
     aliases_: Option<Vec<String>>,
@@ -15,7 +16,7 @@ pub struct CommandBuilder {
 
 impl CommandBuilder {
     /// Create a new Command, must have a name and a function for what happens when the command is run.
-    pub fn new(name: &str, run: fn(&CommandContext) -> ()) -> Self {
+    pub fn new(name: &str, run: EventFunctionVoid<CommandContext>) -> Self {
         Self {
             name_: name.to_string(),
             run_: run,
@@ -28,7 +29,7 @@ impl CommandBuilder {
     }
 
     /// If the command has a cooldown, then how long is it.
-    pub fn with_cooldown(mut self, cooldown: u128) -> Self {
+    pub fn with_cooldown(mut self, cooldown: i64) -> Self {
         self.cooldown_ms_ = Some(cooldown);
         self
     }
@@ -61,9 +62,9 @@ impl CommandBuilder {
     pub(crate) fn build(self, prefix: String, case_sensitive: bool) -> CommandDefinition {
         CommandDefinition {
             run: self.run_,
-            command: Command {
+            command: CommandInfo {
                 name: self.name_,
-                prefix,
+                prefix: Some(prefix),
                 description: self.description_,
                 usage: self.usage_,
                 aliases: self.aliases_,

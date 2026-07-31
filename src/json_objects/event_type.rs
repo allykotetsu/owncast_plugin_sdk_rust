@@ -50,6 +50,7 @@ pub enum EventType {
     #[serde(rename = "timer.fire")]
     TimerFire,
 
+    #[serde(untagged)]
     Custom(String)
 }
 

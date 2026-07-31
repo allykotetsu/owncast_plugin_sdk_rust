@@ -2,7 +2,7 @@ use serde::Deserialize;
 use crate::json_objects::attachment::Attachment;
 use crate::json_objects::fediverse_actor::FediverseActor;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FediverseInboundPost {
     pub actor: FediverseActor,

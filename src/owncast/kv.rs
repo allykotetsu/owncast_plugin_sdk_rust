@@ -12,7 +12,7 @@ pub fn get(key: &str) -> SharedFnResult<Option<String>> {
 
 pub fn set<'a>(key: &str, value: impl Into<&'a str>) -> SharedFnResult<()> {
     unsafe {
-        owncast_kv_set(key, value.into())
+        owncast_kv_set(key, &value.into())
     }
 }
 

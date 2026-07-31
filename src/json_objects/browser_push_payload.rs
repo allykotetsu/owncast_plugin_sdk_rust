@@ -1,7 +1,7 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
-#[derive(Serialize, ToBytes)]
+#[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct BrowserPushPayload {
@@ -10,10 +10,10 @@ pub struct BrowserPushPayload {
     pub url: Option<String>
 }
 
-impl Into<BrowserPushPayload> for &str {
-    fn into(self) -> BrowserPushPayload {
+impl From<&str> for BrowserPushPayload {
+    fn from(s: &str) -> BrowserPushPayload {
         BrowserPushPayload {
-            title: self.to_string(),
+            title: s.to_string(),
             body: None,
             url: None
         }

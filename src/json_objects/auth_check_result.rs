@@ -1,7 +1,7 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
-#[derive(ToBytes, Serialize)]
+#[derive(ToBytes, Serialize, Clone, Debug)]
 #[encoding(Json)]
 #[serde(tag = "action")]
 #[serde(rename_all = "camelCase")]

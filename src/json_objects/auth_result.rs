@@ -1,9 +1,9 @@
 use extism_pdk::{FromBytes, Json};
 use serde::Deserialize;
 
-#[derive(Deserialize, FromBytes)]
+#[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
-pub struct Url {
-    pub url: String
+pub struct AuthResult {
+    pub error: Option<String>
 }

@@ -1,3 +1,6 @@
+use std::fmt::Debug;
+use crate::owncast;
+
 /// A convenience macro for logging an error through Extism when one arises.
 #[macro_export]
 macro_rules! run {
@@ -7,4 +10,8 @@ macro_rules! run {
             _ => {}
         }
     };
+}
+
+pub fn debug(val: impl Debug) {
+    run!(owncast::chat::send(&format!("{val:#?}")));
 }

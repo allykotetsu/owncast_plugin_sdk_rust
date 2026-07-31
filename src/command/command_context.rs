@@ -3,6 +3,7 @@ use crate::json_objects::chat_message::ChatMessage;
 use crate::owncast;
 use crate::run;
 
+#[derive(Debug, Clone)]
 pub struct CommandContext {
     pub msg: ChatMessage,
     pub user: Option<User>,

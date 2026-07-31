@@ -4,7 +4,7 @@ use serde::Serialize;
 
 const CONTENT_TYPE: &str = "content-type";
 
-#[derive(Serialize, ToBytes)]
+#[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct OutgoingHttpResponse {

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use crate::json_objects::user::User;
 use crate::prelude::IncomingHttpRequest;
 
+#[derive(Clone, Debug)]
 pub struct PartialIncomingHttpRequest {
     pub query: HashMap<String, String>,
     pub headers: HashMap<String, String>,

@@ -2,7 +2,7 @@ use std::error::Error;
 use crate::json_objects::event_type::EventType;
 use std::fmt::{Display, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BadEventType(pub EventType, pub EventType);
 
 impl Display for BadEventType {

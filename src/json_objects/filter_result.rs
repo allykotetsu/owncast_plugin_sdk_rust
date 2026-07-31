@@ -2,7 +2,7 @@ use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 use crate::json_objects::chat_message::ChatMessage;
 
-#[derive(ToBytes, Serialize)]
+#[derive(ToBytes, Serialize, Clone, Debug)]
 #[encoding(Json)]
 #[serde(tag = "action")]
 #[serde(rename_all = "camelCase")]

@@ -2,7 +2,7 @@ use extism_pdk::{FromBytes, Json};
 use serde::Deserialize;
 use crate::json_objects::stream_variant::StreamVariant;
 
-#[derive(Deserialize, FromBytes)]
+#[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct VideoConfig {

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::string::FromUtf8Error;
 use extism_pdk::http::HttpResponse as ExtismHttpResponse;
 
+#[derive(Clone, Debug)]
 pub struct HttpResponse {
     pub status: u16,
     pub headers: HashMap<String, String>,

@@ -4,8 +4,9 @@ use serde::Deserialize;
 #[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
-pub struct FederationInfo {
-    pub enabled: bool,
-    pub username: Option<String>,
-    pub is_private: Option<bool>
+pub struct SqlExecResult {
+    pub ok: bool,
+    pub error: Option<String>,
+    pub rows_affected: i64,
+    pub last_insert_id: i64
 }

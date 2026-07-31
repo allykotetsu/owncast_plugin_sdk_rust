@@ -5,7 +5,7 @@ use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::admin::Admin;
 use crate::json_objects::bot::Bot;
 use crate::json_objects::category::Category;
-use crate::json_objects::command::Command;
+use crate::json_objects::command_info::CommandInfo;
 use crate::json_objects::config::Config;
 use crate::json_objects::extra_page_content::ExtraPageContent;
 use crate::json_objects::network::Network;
@@ -14,7 +14,7 @@ use crate::json_objects::tab::Tab;
 use crate::partial_manifest::PartialManifest;
 use crate::json_objects::permission::Permission;
 
-#[derive(Serialize, Clone, ToBytes)]
+#[derive(Serialize, Clone, Debug, ToBytes)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct Manifest {
@@ -36,11 +36,11 @@ pub struct Manifest {
     pub(crate) category: Category,
 
     pub(crate) subscriptions: Subscriptions,
-    pub(crate) commands: Vec<Command>
+    pub(crate) commands: Vec<CommandInfo>
 }
 
-impl From<(PartialManifest, Subscriptions, Vec<Command>)> for Manifest {
-    fn from((partial_manifest, subscriptions, commands): (PartialManifest, Subscriptions, Vec<Command>)) -> Self {
+impl From<(PartialManifest, Subscriptions, Vec<CommandInfo>)> for Manifest {
+    fn from((partial_manifest, subscriptions, commands): (PartialManifest, Subscriptions, Vec<CommandInfo>)) -> Self {
         Self {
             api: partial_manifest.api,
             name: partial_manifest.name,

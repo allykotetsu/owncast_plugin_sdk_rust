@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use crate::json_objects::method::Method;
 
+#[derive(Clone, Debug)]
 pub struct HttpRequestOpts {
     pub method: Option<Method>,
     pub headers: Option<HashMap<String, String>>,

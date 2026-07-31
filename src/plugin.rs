@@ -15,7 +15,7 @@ use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter_result::FilterResult;
-use crate::json_objects::fire_timer::FireTimer;
+use crate::json_objects::timer_fire_event::TimerFireEvent;
 use crate::json_objects::incoming_http_request::IncomingHttpRequest;
 use crate::json_objects::manifest::Manifest;
 use crate::json_objects::method::Method;
@@ -70,7 +70,7 @@ pub struct Plugin {
     pub(crate) on_http_request: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
 
     // Auth Check
-    pub(crate) on_auth_check: Option<EventFunction<AuthCheckRequest, AuthCheckResult>>,
+    pub(crate) on_auth_check: Option<EventFunction<User, AuthCheckResult>>,
 
     // Tab Content
     pub(crate) on_tab_content: HashMap<String, EventFunction<Option<User>, String>>,
@@ -101,7 +101,6 @@ impl Plugin {
         match event {
             Envelope::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message { func(plugin_state, &payload); }
-                // for func in &self.on_chat_message { func(FromStateAndPayload::from(&self.t, &payload)); }
             }
             Envelope::ChatUserJoined(payload) => {
                 for func in &self.on_chat_user_joined { func(plugin_state, &payload); }
@@ -162,7 +161,7 @@ impl Plugin {
 
             Envelope::ChatCommand(payload) => {
                 if let Some(command_definition) = self.commands.get(&payload.command) {
-                    (command_definition.run)(&CommandContext {
+                    (command_definition.run)(plugin_state, &CommandContext {
                         user: payload.message.user.clone(),
                         msg: payload.message,
                         command: payload.command,
@@ -172,7 +171,7 @@ impl Plugin {
                     })
                 }
             }
-            Envelope::TimerFire(FireTimer { id }) => {
+            Envelope::TimerFire(TimerFireEvent { id }) => {
                 plugin_state.fire_timer(id);
             }
 
@@ -242,7 +241,7 @@ impl Plugin {
         Some(self.on_page_scripts.clone()?(plugin_state))
     }
 
-    pub fn dispatch_auth_check(&self, plugin_state: &mut PluginState, auth_check_request: AuthCheckRequest) -> Option<AuthCheckResult> {
-        Some(self.on_auth_check?(plugin_state, &auth_check_request))
+    pub fn dispatch_auth_check(&self, plugin_state: &mut PluginState, AuthCheckRequest { user }: AuthCheckRequest) -> Option<AuthCheckResult> {
+        Some(self.on_auth_check?(plugin_state, &user))
     }
 }

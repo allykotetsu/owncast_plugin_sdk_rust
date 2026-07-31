@@ -1,7 +1,7 @@
 use serde::Deserialize;
 use crate::json_objects::fediverse_actor::FediverseActor;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct FediverseTargetedEngagement {
     pub actor: FediverseActor,

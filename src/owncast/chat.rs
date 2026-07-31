@@ -21,13 +21,13 @@ pub fn system(body: &str) -> SharedFnResult<()> {
     }
 }
 
-pub fn send_to(client_id: i64, text: &str) -> SharedFnResult<()> {
+pub fn send_to(client_id: u64, text: &str) -> SharedFnResult<()> {
     unsafe {
         owncast_send_chat_to(client_id, text)
     }
 }
 
-pub fn reply_to(chat_message: impl TryInto<i64>, text: &str) -> SharedFnResult<bool> {
+pub fn reply_to(chat_message: impl TryInto<u64>, text: &str) -> SharedFnResult<bool> {
     let Ok(client_id) = chat_message.try_into() else {
         return Ok(false)
     };

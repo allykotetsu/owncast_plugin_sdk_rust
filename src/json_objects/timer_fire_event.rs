@@ -2,7 +2,6 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct StreamTitleChange {
-    pub from: String,
-    pub to: String
+pub struct TimerFireEvent {
+    pub(crate) id: u64
 }

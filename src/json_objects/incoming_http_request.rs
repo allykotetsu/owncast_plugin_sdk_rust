@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::json_objects::method::Method;
 use crate::json_objects::user::User;
 
-#[derive(Deserialize, FromBytes)]
+#[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct IncomingHttpRequest {

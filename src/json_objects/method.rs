@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use serde::Deserialize;
 
-#[derive(Eq, Hash, PartialEq, Clone, Deserialize)]
+#[derive(Eq, Hash, PartialEq, Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Method {
     Delete,

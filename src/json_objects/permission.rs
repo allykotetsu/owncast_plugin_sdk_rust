@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum Permission {
     #[serde(rename = "chat.send")]
     ChatSend,
@@ -26,7 +26,9 @@ pub enum Permission {
     #[serde(rename = "storage.upload")]
     StorageUpload,
     #[serde(rename = "storage.fs")]
-    StorageFS,
+    StorageFs,
+    #[serde(rename = "storage.sql")]
+    StorageSql,
 
     #[serde(rename = "network.fetch")]
     NetworkFetch,
@@ -50,6 +52,9 @@ pub enum Permission {
     #[serde(rename = "notifications.send")]
     NotificationsSend,
 
+
+    #[serde(rename = "fediverse.inbound")]
+    FediverseInbound,
     #[serde(rename = "fediverse.post")]
     FediversePost,
 
