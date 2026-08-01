@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use extism_pdk::{Json, SharedFnResult};
+use extism_pdk::{Json, Memory, SharedFnResult};
 use crate::host::{owncast_fs_read, owncast_fs_write, owncast_fs_list, owncast_fs_delete, owncast_fs_exists};
 
 pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
@@ -42,7 +42,8 @@ pub fn delete(path: &str) -> SharedFnResult<()> {
 }
 
 pub fn exists(path: &str) -> SharedFnResult<bool> {
+    let path = Memory::from_bytes(path.as_bytes())?;
     unsafe {
-        owncast_fs_exists(path).map(|i| i != 0)
+        Ok(owncast_fs_exists(path.offset()) != 0)
     }
 }

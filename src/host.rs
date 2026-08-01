@@ -4,7 +4,6 @@ use serde::Serialize;
 use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
-use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::emote::Emote;
 use crate::json_objects::auth_result::AuthResult;
 use crate::json_objects::federation_info::FederationInfo;
@@ -26,21 +25,17 @@ use crate::json_objects::video_config::VideoConfig;
 use crate::json_objects::video_config_update::VideoConfigUpdate;
 
 #[host_fn]
-extern "ExtismHost" {
+unsafe extern "ExtismHost" {
     // Chat
     pub(crate) fn owncast_send_chat(textPtr: &str);
     pub(crate) fn owncast_send_chat_action(textPtr: &str);
     pub(crate) fn owncast_send_chat_system(bodyPtr: &str);
-    pub(crate) fn owncast_send_chat_to(clientId: i64, textPtr: &str); // TODO
-    pub(crate) fn owncast_chat_history(limit: i64) -> Json<Vec<ChatMessage>>; // TODO
     pub(crate) fn owncast_delete_message(idPtr: &str);
-    pub(crate) fn owncast_kick_client(clientId: i64); // TODO
     pub(crate) fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
 
     // Users
     pub(crate) fn owncast_users_list() -> Json<Vec<User>>;
     pub(crate) fn owncast_user_get(idPtr: &str) -> Option<User>;
-    pub(crate) fn owncast_user_set_enabled(idPtr: &str, enabled: i64, reasonPtr: &str); // TODO
     pub(crate) fn owncast_ban_ip(ipPtr: &str);
     pub(crate) fn owncast_users_register(reqPtr: &UserRegisterRequest) -> UserRegisterResult;
 
@@ -58,7 +53,6 @@ extern "ExtismHost" {
     pub(crate) fn owncast_fs_write(pathPtr: &str, dataPtr: &[u8]) -> FsResult;
     pub(crate) fn owncast_fs_list(dirPtr: &str) -> Json<Vec<String>>;
     pub(crate) fn owncast_fs_delete(pathPtr: &str) -> FsResult;
-    pub(crate) fn owncast_fs_exists(pathPtr: &str) -> i64; // TODO
 
     // Fediverse
     pub(crate) fn owncast_fediverse_post(textPtr: &str) -> Option<UploadResult>;
@@ -106,6 +100,17 @@ extern "ExtismHost" {
 
 #[link(wasm_import_module = "extism:host/user")]
 unsafe extern "C" {
+    // Chat
+    pub(crate) fn owncast_chat_history(limit: i64) -> u64;
+    pub(crate) fn owncast_send_chat_to(clientId: i64, textPtr: u64);
+    pub(crate) fn owncast_kick_client(clientId: i64);
+
+    // Users
+    pub(crate) fn owncast_user_set_enabled(idPtr: u64, enabled: i64, reasonPtr: u64);
+
+    // FS
+    pub(crate) fn owncast_fs_exists(pathPtr: u64) -> i64;
+
     // Timer
     pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
     pub(crate) fn owncast_timer_clear(id: i64);

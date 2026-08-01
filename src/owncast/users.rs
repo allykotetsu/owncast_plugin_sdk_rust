@@ -1,6 +1,6 @@
 use std::net::Ipv4Addr;
 use anyhow::anyhow;
-use extism_pdk::{Json, SharedFnResult};
+use extism_pdk::{Json, Memory, SharedFnResult};
 use crate::host::{owncast_users_list, owncast_user_get, owncast_ban_ip, owncast_user_set_enabled, owncast_users_register};
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
@@ -18,8 +18,10 @@ pub fn get(id: &str) -> SharedFnResult<Option<User>> {
 }
 
 pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> SharedFnResult<()> {
+    let id = Memory::from_bytes(id.as_bytes())?;
+    let reason = Memory::from_bytes(reason.unwrap_or("").as_bytes())?;
     unsafe {
-        owncast_user_set_enabled(id, enabled as i64, reason.unwrap_or(""))
+        Ok(owncast_user_set_enabled(id.offset(), enabled as i64, reason.offset()))
     }
 }
 
