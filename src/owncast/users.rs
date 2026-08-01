@@ -19,7 +19,7 @@ pub fn get(id: &str) -> SharedFnResult<Option<User>> {
 
 pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> SharedFnResult<()> {
     unsafe {
-        owncast_user_set_enabled(id, enabled, reason.unwrap_or(""))
+        owncast_user_set_enabled(id, enabled as i64, reason.unwrap_or(""))
     }
 }
 

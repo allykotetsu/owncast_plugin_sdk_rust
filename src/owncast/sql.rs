@@ -1,22 +1,20 @@
 use extism_pdk::SharedFnResult;
 use crate::host::{owncast_sql_exec, owncast_sql_query};
-use crate::json_objects::sql_exec_result::SqlExecResult;
-use crate::json_objects::sql_query_result::SqlQueryResult;
+use crate::json_objects::partial_sql_exec_result::PartialSqlExecResult;
+use crate::json_objects::partial_sql_query_result::PartialSqlQueryResult;
 use crate::json_objects::sql_request::SqlRequest;
 use crate::json_objects::sql_row::SqlRow;
 use crate::json_objects::sql_value::SqlValue;
 
-// TODO move out error and remove OK
-pub fn exec(sql: &str, params: &Vec<SqlValue>) -> SharedFnResult<SqlExecResult> {
+pub fn exec(sql: &str, params: &Vec<SqlValue>) -> SharedFnResult<PartialSqlExecResult> {
     unsafe {
-        owncast_sql_exec(&SqlRequest::from((sql, params.clone(), None)))
+        owncast_sql_exec(&SqlRequest::from((sql, params.clone(), None)))?.try_into()
     }
 }
 
-// TODO move out error and remove OK
-fn do_query(sql: &str, params: &Vec<SqlValue>, max_rows: Option<i64>) -> SharedFnResult<SqlQueryResult> {
+fn do_query(sql: &str, params: &Vec<SqlValue>, max_rows: Option<i64>) -> SharedFnResult<PartialSqlQueryResult> {
     unsafe {
-        owncast_sql_query(&SqlRequest::from((sql, params.clone(), max_rows)))
+        owncast_sql_query(&SqlRequest::from((sql, params.clone(), max_rows)))?.try_into()
     }
 }
 

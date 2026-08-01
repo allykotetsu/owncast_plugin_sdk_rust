@@ -8,12 +8,12 @@ use crate::json_objects::user::User;
 pub struct ChatMessage {
     pub id: String,
     pub user: Option<User>,
-    pub client_id: Option<u64>,
+    pub client_id: Option<i64>,
     pub body: String,
     pub timestamp: String
 }
 
-impl TryFrom<&ChatMessage> for u64 {
+impl TryFrom<&ChatMessage> for i64 {
     type Error = ();
 
     fn try_from(ChatMessage { client_id, .. } : &ChatMessage) -> Result<Self, Self::Error> {

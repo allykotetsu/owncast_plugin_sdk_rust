@@ -493,7 +493,7 @@ impl PluginBuilder {
     /// });
     /// ```
     pub fn on<T: DeserializeOwned + 'static>(&mut self, ns: &str, event: &str, f: EventFunctionVoid<T>) {
-        self.on_.push((format!("{ns}:{event}"), Box::new(move |mut plugin_state, payload| {
+        self.on_.push((format!("{ns}.{event}"), Box::new(move |mut plugin_state, payload| {
             let value: serde_json::Value = serde_json::from_str(payload)?;
             let deserialized: T = serde_json::from_value(value)?;
             f(&mut plugin_state, &deserialized);

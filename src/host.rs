@@ -31,16 +31,16 @@ extern "ExtismHost" {
     pub(crate) fn owncast_send_chat(textPtr: &str);
     pub(crate) fn owncast_send_chat_action(textPtr: &str);
     pub(crate) fn owncast_send_chat_system(bodyPtr: &str);
-    pub(crate) fn owncast_send_chat_to(clientId: u64, textPtr: &str);
-    pub(crate) fn owncast_chat_history(limit: i64) -> Json<Vec<ChatMessage>>;
+    pub(crate) fn owncast_send_chat_to(clientId: i64, textPtr: &str); // TODO
+    pub(crate) fn owncast_chat_history(limit: i64) -> Json<Vec<ChatMessage>>; // TODO
     pub(crate) fn owncast_delete_message(idPtr: &str);
-    pub(crate) fn owncast_kick_client(clientId: i64);
+    pub(crate) fn owncast_kick_client(clientId: i64); // TODO
     pub(crate) fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
 
     // Users
     pub(crate) fn owncast_users_list() -> Json<Vec<User>>;
     pub(crate) fn owncast_user_get(idPtr: &str) -> Option<User>;
-    pub(crate) fn owncast_user_set_enabled(idPtr: &str, enabled: bool, reasonPtr: &str);
+    pub(crate) fn owncast_user_set_enabled(idPtr: &str, enabled: i64, reasonPtr: &str); // TODO
     pub(crate) fn owncast_ban_ip(ipPtr: &str);
     pub(crate) fn owncast_users_register(reqPtr: &UserRegisterRequest) -> UserRegisterResult;
 
@@ -50,8 +50,8 @@ extern "ExtismHost" {
 
     // Storage
     pub(crate) fn owncast_storage_upload(namePtr: &str, dataPtr: &[u8]) -> Option<UploadResult>;
-    pub(crate) fn owncast_sql_exec(requestPtr: &SqlRequest) -> SqlExecResult; // TODO
-    pub(crate) fn owncast_sql_query(requestPtr: &SqlRequest) -> SqlQueryResult; // TODO
+    pub(crate) fn owncast_sql_exec(requestPtr: &SqlRequest) -> SqlExecResult;
+    pub(crate) fn owncast_sql_query(requestPtr: &SqlRequest) -> SqlQueryResult;
 
     // FS
     pub(crate) fn owncast_fs_read(pathPtr: &str) -> Option<Vec<u8>>;
@@ -88,10 +88,6 @@ extern "ExtismHost" {
     // SSE
     pub(crate) fn owncast_sse_send(channelPtr: &str, eventPtr: &str, dataPtr: &Json<impl Serialize>);
 
-    // Timer
-    pub(crate) fn owncast_timer_set(id: u64, delayMs: i64, repeat: i64) -> i64; // TODO
-    pub(crate) fn owncast_timer_clear(id: u64); // TODO
-
     // Stream
     pub(crate) fn owncast_stream_current() -> Option<StreamInfo>;
     pub(crate) fn owncast_stream_broadcaster() -> Option<StreamBroadcaster>;
@@ -105,5 +101,12 @@ extern "ExtismHost" {
 
     // Video Config
     pub(crate) fn owncast_video_config_read() -> VideoConfig;
-    pub(crate) fn owncast_video_config_write(configPtr: &VideoConfigUpdate) -> AuthResult;
+    pub(crate) fn owncast_video_config_write(configPtr: &VideoConfigUpdate) -> FsResult;
+}
+
+#[link(wasm_import_module = "extism:host/user")]
+unsafe extern "C" {
+    // Timer
+    pub(crate) fn owncast_timer_set(id: i64, delayMs: i64, repeat: i64) -> i64;
+    pub(crate) fn owncast_timer_clear(id: i64);
 }
