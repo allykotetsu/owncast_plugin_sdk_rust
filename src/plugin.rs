@@ -35,6 +35,9 @@ pub struct Plugin {
     // Manifest
     pub(crate) manifest: Manifest,
 
+    // Init
+    pub(crate) on_init: Option<fn(&mut PluginState)>,
+
     // Events
     pub(crate) on_chat_message: Vec<EventFunctionVoid<ChatMessage>>,
     pub(crate) on_chat_user_joined: Vec<EventFunctionVoid<User>>,
@@ -64,8 +67,6 @@ pub struct Plugin {
     // Filter
     pub(crate) filter_chat_message: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
 
-    // TODO put EventFunction around the other things as well.
-
     // HTTP
     pub(crate) on_http_request: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
 
@@ -91,6 +92,12 @@ pub struct Plugin {
 impl Plugin {
     pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
+    }
+
+    pub fn dispatch_init(&self, plugin_state: &mut PluginState) {
+        if let Some(on_init) = self.on_init {
+            on_init(plugin_state);
+        }
     }
 
     pub fn get_manifest(&self) -> Manifest {

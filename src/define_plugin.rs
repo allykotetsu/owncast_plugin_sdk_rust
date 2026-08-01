@@ -37,6 +37,9 @@ macro_rules! define_plugin {
         // Exported functions.
         #[extism_pdk::plugin_fn]
         pub fn register() -> extism_pdk::FnResult<Manifest> {
+            unsafe {
+                PLUGIN.as_ref().map_err(clone)?.dispatch_init(&mut *PLUGIN_STATE);
+            }
             Ok(PLUGIN.as_ref().map_err(clone)?.get_manifest())
         }
 

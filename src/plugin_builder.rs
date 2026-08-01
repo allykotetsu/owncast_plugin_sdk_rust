@@ -37,6 +37,9 @@ use crate::prelude::MissingManifest;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
+    // Init
+    on_init_: Option<fn(&mut PluginState)>,
+
     // Events
     on_chat_message_: Vec<EventFunctionVoid<ChatMessage>>,
     on_chat_user_joined_: Vec<EventFunctionVoid<User>>,
@@ -91,6 +94,8 @@ pub struct PluginBuilder {
 impl PluginBuilder {
     pub fn new() -> Self {
         Self {
+            on_init_: None,
+
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
             on_chat_user_parted_: vec![],
@@ -126,6 +131,31 @@ impl PluginBuilder {
             on_page_scripts_: None,
 
             commands_: HashMap::new()
+        }
+    }
+
+    /// Creates a hook for when the plugin is registered.
+    ///
+    /// # Errors
+    ///
+    /// Errors if this function has already been called.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// define_plugin!(|mut plugin_builder| {
+    ///     plugin_builder.on_init(|_| {
+    ///         run!(owncast::chat::send("Plugin initialized!"));
+    ///     })?;
+    ///     Ok(plugin_builder)
+    /// });
+    /// ```
+    pub fn on_init(&mut self, f: fn(&mut PluginState)) -> Result<(), Duplicate> {
+        if self.on_init_.is_some() {
+            Err(Duplicate("on_init".to_string()))
+        } else {
+            self.on_init_ = Some(f);
+            Ok(())
         }
     }
 
@@ -550,7 +580,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_tab_content(&mut self, tab: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
-            Err(Duplicate(format!("A tab content handler already exists for {tab}.")))
+            Err(Duplicate(tab.to_string()))
         } else {
             Ok(())
         }
@@ -574,7 +604,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_page_content(&mut self, page: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
         if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
-            Err(Duplicate(format!("A page content handler already exists for {page}.")))
+            Err(Duplicate(page.to_string()))
         } else {
             Ok(())
         }
@@ -598,7 +628,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_page_styles(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
         if self.on_page_styles_.is_some() {
-            Err(Duplicate("Can only set on_page_styles once.".to_string()))
+            Err(Duplicate("on_page_styles".to_string()))
         } else {
             self.on_page_styles_ = Some(f);
             Ok(())
@@ -623,7 +653,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_page_scripts(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
         if self.on_page_scripts_.is_some() {
-            Err(Duplicate("Can only set on_page_scripts once.".to_string()))
+            Err(Duplicate("on_page_scripts".to_string()))
         } else {
             self.on_page_scripts_ = Some(f);
             Ok(())
@@ -654,7 +684,7 @@ impl PluginBuilder {
     /// ```
     pub fn on_auth_check(&mut self, f: EventFunction<User, AuthCheckResult>) -> Result<(), Duplicate> {
         if self.on_auth_check_.is_some() {
-            Err(Duplicate("Can only set on_auth_check once.".to_string()))
+            Err(Duplicate("on_auth_check".to_string()))
         } else {
             self.on_auth_check_ = Some(f);
             Ok(())
@@ -721,6 +751,8 @@ impl TryInto<Plugin> for PluginBuilder {
 
         Ok(Plugin {
             manifest: Manifest::from((serde_json::from_str(&manifest)?, subscriptions, commands)),
+
+            on_init: self.on_init_,
 
             on_chat_message: self.on_chat_message_,
             on_chat_user_joined: self.on_chat_user_joined_,
