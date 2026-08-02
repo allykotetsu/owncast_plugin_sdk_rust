@@ -12,7 +12,7 @@ const REGEXES: LazyLock<Vec<(&str, Regex)>> = LazyLock::new(|| {
 });
 
 define_plugin!(|mut plugin_builder| {
-    plugin_builder.filter_chat_message(None, |chat_message| {
+    plugin_builder.filter_chat_message(None, |_, chat_message| {
         let mut body = chat_message.body.clone();
         let mut modified = false;
 
