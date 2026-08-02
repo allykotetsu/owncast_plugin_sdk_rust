@@ -25,6 +25,11 @@ use crate::json_objects::video_config_update::VideoConfigUpdate;
 
 #[host_fn]
 unsafe extern "ExtismHost" {
+    // Logging
+    pub(crate) fn owncast_log_info(message_ptr: &str);
+    pub(crate) fn owncast_log_warning(message_ptr: &str);
+    pub(crate) fn owncast_log_error(message_ptr: &str);
+
     // Chat
     pub(crate) fn owncast_send_chat(text: &str);
     pub(crate) fn owncast_send_chat_action(text: &str);
