@@ -20,7 +20,6 @@ pub mod prelude {
     pub use crate::errors::missing_manifest::MissingManifest;
     pub use crate::plugin_builder::PluginBuilder;
     pub use crate::plugin_state::PluginState;
-    pub use crate::run::debug;
     pub use crate::json_objects::auth_check_request::AuthCheckRequest;
     pub use crate::json_objects::auth_check_result::AuthCheckResult;
     pub use crate::json_objects::content_request::ContentRequest;
