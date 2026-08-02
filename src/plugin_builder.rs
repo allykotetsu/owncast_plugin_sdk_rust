@@ -16,6 +16,7 @@ use crate::json_objects::command_info::CommandInfo;
 use crate::json_objects::event_type::EventType;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
+use crate::json_objects::fediverse_quote::FediverseQuote;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter::Filter;
 use crate::json_objects::filter_result::FilterResult;
@@ -60,7 +61,7 @@ pub struct PluginBuilder {
     on_fediverse_follow_: Vec<EventFunctionVoid<FediverseEngagement>>,
     on_fediverse_like_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
     on_fediverse_repost_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
-    on_fediverse_quote_: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    on_fediverse_quote_: Vec<EventFunctionVoid<FediverseQuote>>,
     on_fediverse_mention_: Vec<EventFunctionVoid<FediverseInboundPost>>,
     on_fediverse_reply_: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
@@ -406,14 +407,13 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
-    /// TODO include said quote
-    ///         owncast_send_chat(&format!("{name} quoted that stream went live!"));
+    ///     plugin_builder.on_fediverse_repost(|_, FediverseQuote { actor: FediverseActor { name, .. }, content_text, .. }| {
+    ///         owncast_send_chat(&format!("{name} quoted, saying {content_text}!"));
     ///     });
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on_fediverse_quote(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
+    pub fn on_fediverse_quote(&mut self, f: EventFunctionVoid<FediverseQuote>) {
         self.on_fediverse_quote_.push(f);
     }
 

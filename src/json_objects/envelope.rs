@@ -7,6 +7,7 @@ use crate::json_objects::chat_user_rename::ChatUserRename;
 use crate::json_objects::command_event::CommandEvent;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
+use crate::json_objects::fediverse_quote::FediverseQuote;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::timer_fire_event::TimerFireEvent;
 use crate::json_objects::sse_connection_event::SseConnectionEvent;
@@ -60,7 +61,7 @@ pub enum Envelope {
     #[serde(rename = "fediverse.repost")]
     FediverseRepost(FediverseTargetedEngagement),
     #[serde(rename = "fediverse.quote")]
-    FediverseQuote(FediverseTargetedEngagement),
+    FediverseQuote(FediverseQuote),
     #[serde(rename = "fediverse.mention")]
     FediverseMention(FediverseInboundPost),
     #[serde(rename = "fediverse.reply")]

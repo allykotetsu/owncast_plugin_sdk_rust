@@ -16,7 +16,7 @@ use crate::json_objects::sql_query_result::SqlQueryResult;
 use crate::json_objects::sql_request::SqlRequest;
 use crate::json_objects::stream_broadcaster::StreamBroadcaster;
 use crate::json_objects::stream_info::StreamInfo;
-use crate::json_objects::upload_result::UploadResult;
+use crate::json_objects::url::Url;
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
 use crate::json_objects::user_register_result::UserRegisterResult;
@@ -48,7 +48,7 @@ unsafe extern "ExtismHost" {
     pub(crate) fn owncast_auth_end_session(); // TODO
 
     // Storage
-    pub(crate) fn owncast_storage_upload(name: &str, data: &[u8]) -> Option<UploadResult>;
+    pub(crate) fn owncast_storage_upload(name: &str, data: &[u8]) -> Option<Url>;
     pub(crate) fn owncast_sql_exec(request: &SqlRequest) -> SqlExecResult;
     pub(crate) fn owncast_sql_query(request: &SqlRequest) -> SqlQueryResult;
 
@@ -59,7 +59,7 @@ unsafe extern "ExtismHost" {
     pub(crate) fn owncast_fs_delete(path: &str) -> HostFnResult;
 
     // Fediverse
-    pub(crate) fn owncast_fediverse_post(text: &str) -> Option<UploadResult>;
+    pub(crate) fn owncast_fediverse_post(text: &str) -> Option<Url>;
 
     // Notifications
     pub(crate) fn owncast_notify_discord(text: &str);

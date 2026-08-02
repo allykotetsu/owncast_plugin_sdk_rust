@@ -13,6 +13,7 @@ use crate::json_objects::content_request::ContentRequest;
 use crate::json_objects::envelope::Envelope;
 use crate::json_objects::fediverse_engagement::FediverseEngagement;
 use crate::json_objects::fediverse_inbound_post::FediverseInboundPost;
+use crate::json_objects::fediverse_quote::FediverseQuote;
 use crate::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
 use crate::json_objects::filter_result::FilterResult;
 use crate::json_objects::timer_fire_event::TimerFireEvent;
@@ -58,7 +59,7 @@ pub struct Plugin {
     pub(crate) on_fediverse_follow: Vec<EventFunctionVoid<FediverseEngagement>>,
     pub(crate) on_fediverse_like: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
     pub(crate) on_fediverse_repost: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
-    pub(crate) on_fediverse_quote: Vec<EventFunctionVoid<FediverseTargetedEngagement>>,
+    pub(crate) on_fediverse_quote: Vec<EventFunctionVoid<FediverseQuote>>,
     pub(crate) on_fediverse_mention: Vec<EventFunctionVoid<FediverseInboundPost>>,
     pub(crate) on_fediverse_reply: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
