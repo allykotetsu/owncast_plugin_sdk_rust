@@ -10,3 +10,27 @@ pub enum AuthCheckResult {
     Refresh { ttl: Option<u64> },
     Deny { reason: String }
 }
+
+impl AuthCheckResult {
+    pub fn ok() -> AuthCheckResult {
+        AuthCheckResult::Ok
+    }
+
+    pub fn refresh() -> AuthCheckResult {
+        AuthCheckResult::Refresh {
+            ttl: None
+        }
+    }
+
+    pub fn refresh_ttl(ttl: u64) -> AuthCheckResult {
+        AuthCheckResult::Refresh {
+            ttl: Some(ttl)
+        }
+    }
+
+    pub fn deny(reason: &str) -> AuthCheckResult {
+        AuthCheckResult::Deny {
+            reason: reason.to_string()
+        }
+    }
+}
