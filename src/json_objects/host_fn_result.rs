@@ -4,7 +4,6 @@ use serde::Deserialize;
 #[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
-pub struct FsResult {
-    pub ok: bool,
+pub struct HostFnResult {
     pub error: Option<String>
 }

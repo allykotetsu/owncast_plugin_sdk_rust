@@ -5,10 +5,9 @@ use crate::json_objects::action_button::ActionButton;
 use crate::json_objects::browser_push_payload::BrowserPushPayload;
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::emote::Emote;
-use crate::json_objects::auth_result::AuthResult;
 use crate::json_objects::federation_info::FederationInfo;
 use crate::json_objects::fediverse_payload::FediversePayload;
-use crate::json_objects::fs_result::FsResult;
+use crate::json_objects::host_fn_result::HostFnResult;
 use crate::json_objects::grant_session_request::GrantSessionRequest;
 use crate::json_objects::server_info::ServerInfo;
 use crate::json_objects::social_handle::SocialHandle;
@@ -40,7 +39,7 @@ unsafe extern "ExtismHost" {
     pub(crate) fn owncast_users_register(req: &UserRegisterRequest) -> UserRegisterResult;
 
     // Auth
-    pub(crate) fn owncast_auth_grant_session(req: &GrantSessionRequest) -> AuthResult; // TODO
+    pub(crate) fn owncast_auth_grant_session(req: &GrantSessionRequest) -> HostFnResult; // TODO
     pub(crate) fn owncast_auth_end_session(); // TODO
 
     // Storage
@@ -50,9 +49,9 @@ unsafe extern "ExtismHost" {
 
     // FS
     pub(crate) fn owncast_fs_read(path: &str) -> Option<Vec<u8>>;
-    pub(crate) fn owncast_fs_write(path: &str, data: &[u8]) -> FsResult;
+    pub(crate) fn owncast_fs_write(path: &str, data: &[u8]) -> HostFnResult;
     pub(crate) fn owncast_fs_list(dir: &str) -> Json<Vec<String>>;
-    pub(crate) fn owncast_fs_delete(path: &str) -> FsResult;
+    pub(crate) fn owncast_fs_delete(path: &str) -> HostFnResult;
 
     // Fediverse
     pub(crate) fn owncast_fediverse_post(text: &str) -> Option<UploadResult>;
@@ -95,7 +94,7 @@ unsafe extern "ExtismHost" {
 
     // Video Config
     pub(crate) fn owncast_video_config_read() -> VideoConfig;
-    pub(crate) fn owncast_video_config_write(config: &VideoConfigUpdate) -> FsResult;
+    pub(crate) fn owncast_video_config_write(config: &VideoConfigUpdate) -> HostFnResult;
 }
 
 #[link(wasm_import_module = "extism:host/user")]

@@ -5,7 +5,6 @@ use serde::Deserialize;
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct SqlExecResult {
-    pub ok: bool,
     pub error: Option<String>,
     pub rows_affected: i64,
     pub last_insert_id: i64
