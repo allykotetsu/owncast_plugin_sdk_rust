@@ -61,26 +61,3 @@ pub enum Permission {
     #[serde(rename = "ui.modify")]
     UiModify
 }
-
-/*/// # Examples
-/// ```
-/// #[permitted(Permission::ChatSend)]
-/// fn do_thing(_: &str) -> bool;
-/// ```
-///
-/// expands to
-/// ```
-/// fn do_thing_(_: &str) -> bool;
-///
-/// pub fn do_thing(arg_0: &str) -> Result<bool, PermissionsError> {
-///     if PLUGIN.permitted(Permission::ChatSend) {
-///         Ok(do_thing_(arg_0))
-///     } else {
-///         Err(PermissionsError)
-///     }
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn permitted(attr: TokenStream, item: TokenStream) -> TokenStream {
-    todo!()
-}*/

@@ -33,13 +33,17 @@ To create a plugin, use the `define_plugin!` macro. It takes a function pointer 
 
 You must use `define_plugin!` outside of function scope, as the macro expands to create a `const PLUGIN` variable, and global functions. The functions are Extism exports that return data through the `PLUGIN` variable.
 
-To add functionality to your plugin, call the `PluginBuilder`'s functions. The following example is a simple chat echo bot, stripped down to just the macro and its contents.
+To add functionality to your plugin, call the `PluginBuilder`'s functions. The following example is a simple chat echo bot.
 ```rust
+use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
+use owncast_plugin_sdk_rust::prelude::*;
+use owncast_plugin_sdk_rust::{owncast, run};
+
 define_plugin!(|mut plugin_builder| {
     // When a message is sent in the Owncast chat, run some code.
-    plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+    plugin_builder.on_chat_message(_, |ChatMessage { body, .. }| {
         // Send a chat message.
-        owncast_send_chat(&format!("echo {body}"));
+        run!(owncast::chat::send(&format!("echo {body}")));
     });
     // If there have been no errors thus far, then return an Ok.
     Ok(plugin_builder)
@@ -50,9 +54,9 @@ To learn how to add more functionality to your plugin, please read the [Wiki](ht
 ## Building
 When your plugin is ready to build, do the following:
 1. Run `cargo build --target wasm32-unknown-unknown --release` in the terminal.
-2. Move it into a directory that contains a `plugin.manifest.json` file.
+2. Move it into a directory that contains a `plugin.manifest.json` file, and optionally an `assets` directory and a `public` directory.
 3. Rename the built `*.wasm` file to `plugin.wasm`.
-4. Run `zip -q "<slug>.ocpkg" plugin.wasm plugin.manifest.json`, where `<slug>` is the unique identifier for your plugin.
+4. Run `zip -q "<slug>.ocpkg" plugin.wasm plugin.manifest.json assets assets/* public public/*`, where `<slug>` is the unique identifier for your plugin.
 
 # Using the plugin.
 Now that your plugin is built, let's load it into Owncast.

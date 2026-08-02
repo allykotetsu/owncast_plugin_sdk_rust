@@ -1,6 +1,6 @@
 use crate::command::command_definition::CommandDefinition;
 use crate::command::command_context::CommandContext;
-use crate::event_function::{EventFunctionVoid};
+use crate::plugin::event_function::{EventFunctionVoid};
 use crate::json_objects::command_info::CommandInfo;
 
 /// A struct for building a chat command.

@@ -1,4 +1,4 @@
-use std::error::Error;
+/*use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone)]
@@ -10,4 +10,4 @@ impl Display for Forbidden {
     }
 }
 
-impl Error for Forbidden {}
+impl Error for Forbidden {}*/

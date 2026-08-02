@@ -3,7 +3,7 @@ use extism_pdk::error;
 use serde_json::Error;
 use crate::command::command_context::CommandContext;
 use crate::command::command_definition::CommandDefinition;
-use crate::event_function::{EventFunction, EventFunctionVoid};
+use crate::plugin::event_function::{EventFunction, EventFunctionVoid};
 use crate::json_objects::auth_check_request::AuthCheckRequest;
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
@@ -29,7 +29,7 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::json_objects::permission::Permission;
-use crate::plugin_state::PluginState;
+use crate::plugin::plugin_state::PluginState;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
 pub struct Plugin {

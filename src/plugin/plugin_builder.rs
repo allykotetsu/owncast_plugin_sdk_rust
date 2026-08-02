@@ -7,7 +7,7 @@ use crate::command::command_builder::CommandBuilder;
 use crate::command::command_definition::CommandDefinition;
 use crate::errors::duplicate::Duplicate;
 use crate::errors::out_of_bounds::OutOfBounds;
-use crate::event_function::{EventFunction, EventFunctionVoid};
+use crate::plugin::event_function::{EventFunction, EventFunctionVoid};
 use crate::json_objects::auth_check_result::AuthCheckResult;
 use crate::json_objects::chat_message::ChatMessage;
 use crate::json_objects::chat_message_moderation::ChatMessageModeration;
@@ -32,8 +32,8 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::subscriptions::Subscriptions;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
-use crate::plugin::Plugin;
-use crate::plugin_state::PluginState;
+use crate::plugin::plugin::Plugin;
+use crate::plugin::plugin_state::PluginState;
 use crate::prelude::MissingManifest;
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
@@ -166,7 +166,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_message(|ChatMessage { body, .. }| {
+    ///     plugin_builder.on_chat_message(|_, ChatMessage { body, .. }| {
     ///         owncast_send_chat(&format!("echo {body}"));
     ///     });
     ///     Ok(plugin_builder)
@@ -182,7 +182,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_joined(|ChatUser { display_name, .. }| {
+    ///     plugin_builder.on_chat_user_joined(|_, ChatUser { display_name, .. }| {
     ///         owncast_send_chat(&format!("Welcome, {display_name}!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -198,7 +198,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_parted(|ChatUser { display_name, .. }| {
+    ///     plugin_builder.on_chat_user_parted(|_, ChatUser { display_name, .. }| {
     ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -214,7 +214,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_renamed(|ChatUserRename { user: User { display_name, .. }, previous_name }| {
+    ///     plugin_builder.on_chat_user_renamed(|_, ChatUserRename { user: User { display_name, .. }, previous_name }| {
     ///         owncast_send_chat(&format!("{previous_name} is now {display_name}."));
     ///     });
     ///     Ok(plugin_builder)
@@ -230,7 +230,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_message_moderated(|ChatMessageModeration { message_id, visible, .. }| {
+    ///     plugin_builder.on_message_moderated(|_, ChatMessageModeration { message_id, visible, .. }| {
     ///         owncast_send_chat(&format!("A moderator changed {message_id} to {visible}!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -246,7 +246,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_stream_started(|StreamStarted { title, .. }| {
+    ///     plugin_builder.on_stream_started(|_, StreamStarted { title, .. }| {
     ///         owncast_send_chat(&format!("Stream {title} is starting!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -262,7 +262,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_stream_stopped(|StreamStopped { stopped_at }| {
+    ///     plugin_builder.on_stream_stopped(|_, StreamStopped { stopped_at }| {
     ///         owncast_send_chat(&format!("Stream stopped at {stopped_at}!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -278,7 +278,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_stream_title_changed(|StreamTitleChange { from, to }| {
+    ///     plugin_builder.on_stream_title_changed(|_, StreamTitleChange { from, to }| {
     ///         owncast_send_chat(&format!("Stream title changed from {from} to {to}."));
     ///     });
     ///     Ok(plugin_builder)
@@ -294,7 +294,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_sse_connect(|SSEConnectionEvent { connection_id, .. }| {
+    ///     plugin_builder.on_sse_connect(|_, SSEConnectionEvent { connection_id, .. }| {
     ///         owncast_send_chat(&format!("Connected to {connection_id}."));
     ///     });
     ///     Ok(plugin_builder)
@@ -310,7 +310,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_sse_disconnect(|SSEConnectionEvent { connection_id, .. }| {
+    ///     plugin_builder.on_sse_disconnect(|_, SSEConnectionEvent { connection_id, .. }| {
     ///         owncast_send_chat(&format!("Disconnected from {connection_id}."));
     ///     });
     ///     Ok(plugin_builder)
@@ -326,7 +326,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_tick(|TickEvent { now }| {
+    ///     plugin_builder.on_tick(|_, TickEvent { now }| {
     ///         owncast_send_chat(&format!("The time is now {now}"));
     ///     });
     ///     Ok(plugin_builder)
@@ -342,7 +342,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse(|hash_map| {
+    ///     plugin_builder.on_fediverse(|_, hash_map| {
     ///             TODO
     ///         owncast_send_chat(&format!("The time is now {now}"));
     ///     });
@@ -359,7 +359,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_follow(|FediverseEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///     plugin_builder.on_fediverse_follow(|_, FediverseEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} followed stream!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -375,7 +375,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_like(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///     plugin_builder.on_fediverse_like(|_, FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} liked that stream went live!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -391,7 +391,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_repost(|FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
+    ///     plugin_builder.on_fediverse_repost(|_, FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
     ///         owncast_send_chat(&format!("{name} reposted that stream went live!"));
     ///     });
     ///     Ok(plugin_builder)
@@ -423,7 +423,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
+    ///     plugin_builder.on_fediverse_repost(|_, FediverseInboundPost { content_text, .. }| {
     ///         owncast_send_chat(&format!("Someone had this to say about stream: {content_text}"));
     ///     });
     ///     Ok(plugin_builder)
@@ -439,7 +439,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_fediverse_repost(|FediverseInboundPost { content_text, .. }| {
+    ///     plugin_builder.on_fediverse_repost(|_, FediverseInboundPost { content_text, .. }| {
     ///         owncast_send_chat(&format!("Someone had this to say in reply to stream: {content_text}"));
     ///     });
     ///     Ok(plugin_builder)
@@ -459,7 +459,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.filter_chat_message(None, |ChatMessage { body, .. }| {
+    ///     plugin_builder.filter_chat_message(None, |_, ChatMessage { body, .. }| {
     ///         if body.contains("bad word") {
     ///             FilterResult::Drop {
     ///                 payload: "No bad words allowed!".to_string()
@@ -492,7 +492,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_http_request(Method::Get, "/echo", |IncomingHttpRequest { body, .. }| {
+    ///     plugin_builder.on_http_request(Method::Get, "/echo", |_, IncomingHttpRequest { body, .. }| {
     ///         OutgoingHttpResponse::text_plain(200, &format!("echo {body}"))
     ///     })?;
     ///     Ok(plugin_builder)
@@ -542,7 +542,7 @@ impl PluginBuilder {
     /// ```
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.commands("!", false, vec![
-    ///         CommandBuilder::new("update", |ctx| {
+    ///         CommandBuilder::new("update", |_, ctx| {
     ///             ctx.reply("we've been live a while!");
     ///         })
     ///         .with_aliases(&["time", "livetime"])
@@ -572,7 +572,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_tab_content("store", |ContentRequest { user, .. }| {
+    ///     plugin_builder.on_tab_content("store", |_, ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
     ///     Ok(plugin_builder)
@@ -596,7 +596,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_page_content("store", |ContentRequest { user, .. }| {
+    ///     plugin_builder.on_page_content("store", |_, ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
     ///     Ok(plugin_builder)
@@ -620,7 +620,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_page_styles(|| {
+    ///     plugin_builder.on_page_styles(|_| {
     ///         "* { font-size: 24pt; }".to_string()
     ///     })?;
     ///     Ok(plugin_builder)
@@ -645,7 +645,7 @@ impl PluginBuilder {
     ///
     /// ```
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_page_scripts(|| {
+    ///     plugin_builder.on_page_scripts(|_| {
     ///         "alert('Welcome to stream!');".to_string()
     ///     })?;
     ///     Ok(plugin_builder)
@@ -742,10 +742,6 @@ impl TryInto<Plugin> for PluginBuilder {
 
         let subscriptions = Subscriptions { notify, filter };
         let commands: Vec<CommandInfo> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
-
-        // IMPORTANT: Currently the external Manifest cannot be read. This is likely a bug on the host's behalf.
-        // In the meantime we are going to do a hardcoded workaround for debugging purposes.
-        // But once that bug is fixed we will revert to the commented out code below:
 
         let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 

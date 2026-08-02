@@ -1,5 +1,5 @@
 use crate::command::command_context::CommandContext;
-use crate::event_function::EventFunctionVoid;
+use crate::plugin::event_function::EventFunctionVoid;
 use crate::json_objects::command_info::CommandInfo;
 
 pub(crate) struct CommandDefinition {
