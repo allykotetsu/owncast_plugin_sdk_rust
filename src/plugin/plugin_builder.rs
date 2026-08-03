@@ -65,7 +65,7 @@ pub struct PluginBuilder {
     on_fediverse_mention_: Vec<EventFunctionVoid<FediverseInboundPost>>,
     on_fediverse_reply_: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
-    on_: Vec<(String, Box<dyn Fn(&mut PluginState, &str) -> Result<(), JsonError>>)>,
+    on_: HashMap<String, Vec<Box<dyn Fn(&mut PluginState, &str) -> Result<(), JsonError>>>>,
 
     // Filter
     filter_chat_message_: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
@@ -115,7 +115,7 @@ impl PluginBuilder {
             on_fediverse_quote_: vec![],
             on_fediverse_mention_: vec![],
             on_fediverse_reply_: vec![],
-            on_: vec![],
+            on_: HashMap::new(),
 
             filter_chat_message_: vec![],
 
@@ -516,19 +516,19 @@ impl PluginBuilder {
     /// }
     ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on("another-plugin", "something", |_, CustomEventPayload { data }| {
+    ///     plugin_builder.on("my-event", |_, CustomEventPayload { data }| {
     ///         owncast_send_chat(format!("Received {data}."));
     ///     });
     ///     Ok(plugin_builder)
     /// });
     /// ```
-    pub fn on<T: DeserializeOwned + 'static>(&mut self, ns: &str, event: &str, f: EventFunctionVoid<T>) {
-        self.on_.push((format!("{ns}.{event}"), Box::new(move |mut plugin_state, payload| {
+    pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: EventFunctionVoid<T>) {
+        self.on_.entry(event.to_string()).or_insert(vec![]).push(Box::new(move |mut plugin_state, payload| {
             let value: serde_json::Value = serde_json::from_str(payload)?;
             let deserialized: T = serde_json::from_value(value)?;
             f(&mut plugin_state, &deserialized);
             Ok(())
-        })));
+        }));
     }
 
     /// Registers commands. The callback function is a reference since aliased commands run the same callback.
@@ -739,6 +739,7 @@ impl TryInto<Plugin> for PluginBuilder {
                 priority
             });
         }
+        let filter_chat_message_: Vec<EventFunction<ChatMessage, FilterResult>> = filter_chat_message_.iter().map(|(_, b)| *b).collect();
 
         let subscriptions = Subscriptions { notify, filter };
         let commands: Vec<CommandInfo> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();

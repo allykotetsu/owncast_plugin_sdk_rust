@@ -12,3 +12,24 @@ pub struct FediversePayload {
     pub image: Option<String>,
     pub link: Option<String>
 }
+
+impl FediversePayload {
+    pub fn new(payload_type: FediversePayloadType, body: &str) -> Self {
+        Self {
+            payload_type,
+            body: body.to_string(),
+            image: None,
+            link: None,
+        }
+    }
+
+    pub fn with_image(mut self, image: &str) -> Self {
+        self.image = Some(image.to_string());
+        self
+    }
+
+    pub fn with_link(mut self, link: &str) -> Self {
+        self.link = Some(link.to_string());
+        self
+    }
+}

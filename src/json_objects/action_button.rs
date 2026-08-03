@@ -53,7 +53,7 @@ impl ActionButton {
         self
     }
 
-    pub fn opens_externally(mut self) -> Self {
+    pub fn with_open_externally(mut self) -> Self {
         self.open_externally = Some(true);
         self
     }

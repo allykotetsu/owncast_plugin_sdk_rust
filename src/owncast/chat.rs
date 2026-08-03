@@ -51,9 +51,9 @@ pub fn delete_message(message_id: &str) -> SharedFnResult<()> {
     }
 }
 
-pub fn kick(client_id: i64) -> SharedFnResult<()> {
+pub fn kick(client_id: i64) {
     unsafe {
-        Ok(owncast_kick_client(client_id))
+        owncast_kick_client(client_id)
     }
 }
 

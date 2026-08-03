@@ -9,11 +9,30 @@ pub struct HttpRequestOpts {
 }
 
 impl HttpRequestOpts {
-    pub(crate) fn empty() -> Self {
+    pub fn new() -> Self {
         Self {
             method: None,
             body: None,
             headers: None
         }
+    }
+
+    pub fn with_method(mut self, method: Method) -> Self {
+        self.method = Some(method);
+        self
+    }
+
+    pub fn with_header(mut self, key: &str, value: &str) -> Self {
+        if let Some(ref mut headers) = self.headers {
+            headers.insert(key.to_string(), value.to_string());
+        } else {
+            self.headers = Some(HashMap::from([(key.to_string(), value.to_string())]));
+        }
+        self
+    }
+
+    pub fn with_body(mut self, body: &str) -> Self {
+        self.body = Some(body.to_string());
+        self
     }
 }

@@ -9,6 +9,20 @@ pub struct GrantSessionRequest {
     pub ttl: Option<i64>
 }
 
+impl GrantSessionRequest {
+    pub fn new(user_id: &str) -> Self {
+        Self {
+            user_id: user_id.to_string(),
+            ttl: None,
+        }
+    }
+
+    pub fn with_ttl(mut self, ttl: i64) -> Self {
+        self.ttl = Some(ttl);
+        self
+    }
+}
+
 impl From<&str> for GrantSessionRequest {
     fn from(s: &str) -> Self {
         GrantSessionRequest {

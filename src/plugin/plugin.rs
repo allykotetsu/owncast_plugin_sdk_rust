@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use extism_pdk::error;
 use serde_json::Error;
 use crate::command::command_context::CommandContext;
 use crate::command::command_definition::CommandDefinition;
@@ -30,6 +29,8 @@ use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::json_objects::permission::Permission;
 use crate::plugin::plugin_state::PluginState;
+use crate::{owncast, run};
+use crate::json_objects::status::Status;
 
 /// The actual plugin object. This should be immutable and only touched by the library. Contains functions for reading plugin data that is used by the WASM export functions.
 pub struct Plugin {
@@ -63,10 +64,10 @@ pub struct Plugin {
     pub(crate) on_fediverse_mention: Vec<EventFunctionVoid<FediverseInboundPost>>,
     pub(crate) on_fediverse_reply: Vec<EventFunctionVoid<FediverseInboundPost>>,
 
-    pub(crate) on: Vec<(String, Box<dyn Fn(&mut PluginState, &str) -> Result<(), Error>>)>,
+    pub(crate) on: HashMap<String, Vec<Box<dyn Fn(&mut PluginState, &str) -> Result<(), Error>>>>,
 
     // Filter
-    pub(crate) filter_chat_message: Vec<(u8, EventFunction<ChatMessage, FilterResult>)>,
+    pub(crate) filter_chat_message: Vec<EventFunction<ChatMessage, FilterResult>>,
 
     // HTTP
     pub(crate) on_http_request: HashMap<(Method, String), EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>>,
@@ -184,10 +185,10 @@ impl Plugin {
             }
 
             Envelope::Custom { event_type, payload } => {
-                for (other_name, func) in &self.on {
-                    if event_type == *other_name {
-                        if let Err(err) = func(plugin_state, payload.as_str()) {
-                            error!("{err}");
+                if let Some(events) = self.on.get(&event_type) {
+                    for event in events {
+                        if let Err(err) = event(plugin_state, &payload) {
+                            run!(owncast::log::error(&err.to_string()));
                         }
                     }
                 }
@@ -198,7 +199,7 @@ impl Plugin {
     pub fn dispatch_filter(&self, plugin_state: &mut PluginState, mut msg: ChatMessage) -> FilterResult {
         let mut changed = false;
 
-        for (_, filter_chat_message) in &self.filter_chat_message {
+        for filter_chat_message in &self.filter_chat_message {
             match filter_chat_message(plugin_state, &msg) {
                 FilterResult::Pass => {
                     continue;
@@ -223,12 +224,12 @@ impl Plugin {
     pub fn dispatch_http_request(&self, plugin_state: &mut PluginState, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if self.on_http_request.is_empty() {
             // If plugin does not listen for HTTP requests, then return 404.
-            OutgoingHttpResponse::new(404)
+            OutgoingHttpResponse::new(Status::NotFound)
         } else {
             if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
                 func(plugin_state, &incoming_http_request.into()).clean_clone()
             } else {
-                OutgoingHttpResponse::new(200)
+                OutgoingHttpResponse::new(Status::Ok)
             }
         }
     }

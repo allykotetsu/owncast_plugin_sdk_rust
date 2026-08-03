@@ -1,6 +1,7 @@
 use extism_pdk::{ToBytes, Json};
 use std::collections::HashMap;
 use serde::Serialize;
+use crate::json_objects::status::Status;
 
 const CONTENT_TYPE: &str = "content-type";
 
@@ -8,13 +9,13 @@ const CONTENT_TYPE: &str = "content-type";
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct OutgoingHttpResponse {
-    pub status: Option<u16>,
+    pub status: Option<Status>,
     pub headers: Option<HashMap<String, String>>,
     pub body: Option<String>
 }
 
 impl OutgoingHttpResponse {
-    pub fn new(status: u16) -> Self {
+    pub fn new(status: Status) -> Self {
         Self {
             status: Some(status),
             headers: None,
@@ -22,7 +23,7 @@ impl OutgoingHttpResponse {
         }
     }
 
-    pub fn text_html(status: u16, body: &str) -> Self {
+    pub fn text_html(status: Status, body: &str) -> Self {
         Self {
             status: Some(status),
             headers: Some(HashMap::from([
@@ -32,7 +33,7 @@ impl OutgoingHttpResponse {
         }
     }
 
-    pub fn text_plain(status: u16, body: &str) -> Self {
+    pub fn text_plain(status: Status, body: &str) -> Self {
         Self {
             status: Some(status),
             headers: Some(HashMap::from([
@@ -42,7 +43,7 @@ impl OutgoingHttpResponse {
         }
     }
 
-    pub fn application_json(status: u16, body: &str) -> Self {
+    pub fn application_json(status: Status, body: &str) -> Self {
         Self {
             status: Some(status),
             headers: Some(HashMap::from([
@@ -52,7 +53,7 @@ impl OutgoingHttpResponse {
         }
     }
 
-    pub fn application_x_www_form_urlencoded(status: u16, body: &str) -> Self {
+    pub fn application_x_www_form_urlencoded(status: Status, body: &str) -> Self {
         Self {
             status: Some(status),
             headers: Some(HashMap::from([
@@ -77,7 +78,7 @@ impl OutgoingHttpResponse {
 
     pub(crate) fn clean_clone(&self) -> Self {
         OutgoingHttpResponse {
-            status: Some(self.status.unwrap_or(200)),
+            status: Some(self.status.clone().unwrap_or(Status::Ok)),
             headers: self.headers.clone(),
             body: self.body.clone()
         }

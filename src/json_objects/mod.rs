@@ -67,3 +67,4 @@ pub mod sql_request;
 pub mod partial_sql_exec_result;
 pub mod partial_sql_query_result;
 pub mod fediverse_quote;
+pub mod status;
