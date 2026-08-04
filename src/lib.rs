@@ -13,7 +13,7 @@ pub mod prelude {
     pub use crate::errors::bad_event_type::BadEventType;
     pub use crate::errors::dbg::Dbg;
     pub use crate::errors::missing_manifest::MissingManifest;
-    pub use crate::helpers::clone;
+    pub use crate::helpers::clone_error;
     pub use crate::json_objects::auth_check_request::AuthCheckRequest;
     pub use crate::json_objects::auth_check_result::AuthCheckResult;
     pub use crate::json_objects::content_request::ContentRequest;

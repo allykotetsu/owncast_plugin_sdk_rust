@@ -137,6 +137,8 @@ impl PluginBuilder {
 
     /// Creates a hook for when the plugin is registered.
     ///
+    /// * `f` - The function to run when the plugin is registered.
+    ///
     /// # Errors
     ///
     /// Errors if this function has already been called.
@@ -144,6 +146,9 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_init(|_| {
     ///         run!(owncast::chat::send("Plugin initialized!"));

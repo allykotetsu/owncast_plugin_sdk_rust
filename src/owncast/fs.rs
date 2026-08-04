@@ -42,8 +42,8 @@ pub fn delete(path: &str) -> SharedFnResult<()> {
 }
 
 pub fn exists(path: &str) -> SharedFnResult<bool> {
-    let path = Memory::from_bytes(path.as_bytes())?;
+    let path = Memory::from_bytes(path.as_bytes())?.offset();
     unsafe {
-        Ok(owncast_fs_exists(path.offset()) != 0)
+        Ok(owncast_fs_exists(path) != 0)
     }
 }

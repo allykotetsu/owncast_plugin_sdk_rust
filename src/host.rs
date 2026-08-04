@@ -34,13 +34,13 @@ unsafe extern "ExtismHost" {
     pub(crate) fn owncast_send_chat(text: &str);
     pub(crate) fn owncast_send_chat_action(text: &str);
     pub(crate) fn owncast_send_chat_system(body: &str);
-    pub(crate) fn owncast_delete_message(id: &str);
+    pub(crate) fn owncast_delete_message(id: &str) -> HostFnResult;
     pub(crate) fn owncast_chat_clients() -> Json<Vec<ChatClient>>;
 
     // Users
     pub(crate) fn owncast_users_list() -> Json<Vec<User>>;
     pub(crate) fn owncast_user_get(id: &str) -> Option<User>;
-    pub(crate) fn owncast_ban_ip(ip: &str);
+    pub(crate) fn owncast_ban_ip(ip: &str) -> HostFnResult;
     pub(crate) fn owncast_users_register(req: &UserRegisterRequest) -> UserRegisterResult;
 
     // Auth
@@ -68,7 +68,7 @@ unsafe extern "ExtismHost" {
 
     // KV
     pub(crate) fn owncast_kv_get(key: &str) -> Option<String>;
-    pub(crate) fn owncast_kv_set(key: &str, val: &str);
+    pub(crate) fn owncast_kv_set(key: &str, val: &str) -> HostFnResult;
 
     // Config
     pub(crate) fn owncast_config_get<T: DeserializeOwned>(key: &str) -> Option<Json<T>>;
@@ -80,8 +80,8 @@ unsafe extern "ExtismHost" {
     pub(crate) fn owncast_emit_event(event_type: &str, payload: &Json<impl Serialize>);
 
     // Actions
-    pub(crate) fn owncast_add_actions(actions: &Json<Vec<ActionButton>>);
-    pub(crate) fn owncast_clear_actions();
+    pub(crate) fn owncast_add_actions(actions: &Json<Vec<ActionButton>>) -> HostFnResult;
+    pub(crate) fn owncast_clear_actions() -> HostFnResult;
 
     // SSE
     pub(crate) fn owncast_sse_send(channel: &str, event: &str, data: &Json<impl Serialize>); // TODO
@@ -107,10 +107,10 @@ unsafe extern "C" {
     // Chat
     pub(crate) fn owncast_chat_history(limit: i64) -> u64;
     pub(crate) fn owncast_send_chat_to(client_id: i64, text_ptr: u64);
-    pub(crate) fn owncast_kick_client(client_id: i64);
+    pub(crate) fn owncast_kick_client(client_id: i64) -> u64;
 
     // Users
-    pub(crate) fn owncast_user_set_enabled(id_ptr: u64, enabled: i64, reason_ptr: u64);
+    pub(crate) fn owncast_user_set_enabled(id_ptr: u64, enabled: i64, reason_ptr: u64) -> u64;
 
     // FS
     pub(crate) fn owncast_fs_exists(path_ptr: u64) -> i64;

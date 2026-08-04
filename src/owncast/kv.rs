@@ -3,6 +3,7 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 use crate::errors::key_not_found::KeyNotFound;
 use crate::host::{owncast_kv_get, owncast_kv_set};
+use crate::json_objects::host_fn_result::HostFnResult;
 
 pub fn get(key: &str) -> SharedFnResult<Option<String>> {
     unsafe {
@@ -10,7 +11,7 @@ pub fn get(key: &str) -> SharedFnResult<Option<String>> {
     }
 }
 
-pub fn set<'a>(key: &str, value: impl Into<&'a str>) -> SharedFnResult<()> {
+pub fn set<'a>(key: &str, value: impl Into<&'a str>) -> SharedFnResult<HostFnResult> {
     unsafe {
         owncast_kv_set(key, &value.into())
     }
@@ -23,6 +24,6 @@ pub fn get_json<T: DeserializeOwned>(key: &str) -> SharedFnResult<Option<T>> {
     Ok(Some(serde_json::from_str(&value)?))
 }
 
-pub fn set_json(key: &str, value: impl Serialize) -> SharedFnResult<()> {
+pub fn set_json(key: &str, value: impl Serialize) -> SharedFnResult<HostFnResult> {
     set(key, serde_json::to_string(&value)?.as_str())
 }
