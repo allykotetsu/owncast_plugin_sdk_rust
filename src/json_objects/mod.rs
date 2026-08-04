@@ -42,7 +42,7 @@ pub mod permission;
 pub mod method;
 pub mod grant_session_request;
 pub mod url;
-pub mod host_fn_result;
+pub mod action_result;
 pub mod browser_push_payload;
 pub mod fediverse_payload;
 pub(crate) mod timer_fire_event;

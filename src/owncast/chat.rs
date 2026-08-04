@@ -1,9 +1,10 @@
+use anyhow::anyhow;
 use extism_pdk::{Json, Memory, SharedFnResult};
 use crate::errors::mem_not_found::MemNotFound;
 use crate::host::{owncast_send_chat, owncast_send_chat_action, owncast_send_chat_system, owncast_send_chat_to, owncast_chat_history, owncast_delete_message, owncast_kick_client, owncast_chat_clients};
 use crate::json_objects::chat_client::ChatClient;
 use crate::json_objects::chat_message::ChatMessage;
-use crate::json_objects::host_fn_result::HostFnResult;
+use crate::json_objects::action_result::ActionResult;
 
 pub fn send(text: &str) -> SharedFnResult<()> {
     unsafe {
@@ -46,18 +47,28 @@ pub fn history(limit: Option<i64>) -> SharedFnResult<Vec<ChatMessage>> {
     Ok(v)
 }
 
-pub fn delete_message(message_id: &str) -> SharedFnResult<HostFnResult> {
+pub fn delete_message(message_id: &str) -> SharedFnResult<()> {
     unsafe {
-        owncast_delete_message(message_id)
+        if let Some(err) = owncast_delete_message(message_id)?.error {
+            Err(anyhow!(err))
+        } else {
+            Ok(())
+        }
     }
 }
 
-pub fn kick(client_id: i64) -> SharedFnResult<HostFnResult> {
+pub fn kick(client_id: i64) -> SharedFnResult<()> {
     let offset = unsafe {
         owncast_kick_client(client_id)
     };
     let memory = Memory::find(offset).ok_or(MemNotFound)?;
-    memory.to()
+    let action_result: ActionResult = memory.to()?;
+
+    if let Some(err) = action_result.error {
+        Err(anyhow!(err))
+    } else {
+        Ok(())
+    }
 }
 
 pub fn clients() -> SharedFnResult<Vec<ChatClient>> {

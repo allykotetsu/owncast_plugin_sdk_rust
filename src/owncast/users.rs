@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use extism_pdk::{Json, Memory, SharedFnResult};
 use crate::errors::mem_not_found::MemNotFound;
 use crate::host::{owncast_users_list, owncast_user_get, owncast_ban_ip, owncast_user_set_enabled, owncast_users_register};
-use crate::json_objects::host_fn_result::HostFnResult;
+use crate::json_objects::action_result::ActionResult;
 use crate::json_objects::user::User;
 use crate::json_objects::user_register_request::UserRegisterRequest;
 
@@ -19,19 +19,30 @@ pub fn get(id: &str) -> SharedFnResult<Option<User>> {
     }
 }
 
-pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> SharedFnResult<HostFnResult> {
+pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> SharedFnResult<()> {
     let id = Memory::new(&id)?.offset();
     let reason = Memory::new(&reason.unwrap_or(""))?.offset();
+
     let offset = unsafe {
         owncast_user_set_enabled(id, enabled as i64, reason)
     };
     let memory = Memory::find(offset).ok_or(MemNotFound)?;
-    memory.to()
+    let action_result: ActionResult = memory.to()?;
+
+    if let Some(err) = action_result.error {
+        Err(anyhow!(err))
+    } else {
+        Ok(())
+    }
 }
 
-pub fn ban_ip(ip: &Ipv4Addr) -> SharedFnResult<HostFnResult> {
+pub fn ban_ip(ip: &Ipv4Addr) -> SharedFnResult<()> {
     unsafe {
-        owncast_ban_ip(&ip.to_string())
+        if let Some(err) = owncast_ban_ip(&ip.to_string())?.error {
+            Err(anyhow!(err))
+        } else {
+            Ok(())
+        }
     }
 }
 
