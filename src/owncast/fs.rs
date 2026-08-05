@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use extism_pdk::{Json, Memory, SharedFnResult};
 use crate::host::{owncast_fs_read, owncast_fs_write, owncast_fs_list, owncast_fs_delete, owncast_fs_exists};
 
@@ -9,41 +8,38 @@ pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
 }
 
 pub fn read_text(path: &str) -> SharedFnResult<Option<String>> {
-    let Some(vecu8) = read(path)? else {
-        return Ok(None)
-    };
-    Ok(Some(String::from_utf8(vecu8)?))
+    Ok(match read(path)? {
+        Some(value) => Some(String::from_utf8(value)?),
+        None => None
+    })
 }
 
 pub fn write(path: &str, data: impl Into<Vec<u8>>) -> SharedFnResult<()> {
-    let res = unsafe {
-        owncast_fs_write(path, &data.into())?
+    let data = &data.into();
+    let action_result = unsafe {
+        owncast_fs_write(path, data)
     };
-    match res.error {
-        Some(error) => Err(anyhow!(error)),
-        None => Ok(())
-    }
+    action_result?.try_into()
 }
 
 pub fn list(dir: &str) -> SharedFnResult<Vec<String>> {
-    unsafe {
-        owncast_fs_list(dir).map(|Json(inner)| inner)
-    }
+    let res = unsafe {
+        owncast_fs_list(dir)
+    };
+    res.map(|Json(inner)| inner)
 }
 
 pub fn delete(path: &str) -> SharedFnResult<()> {
-    let res = unsafe {
-        owncast_fs_delete(path)?
+    let action_result = unsafe {
+        owncast_fs_delete(path)
     };
-    match res.error {
-        Some(error) => Err(anyhow!(error)),
-        None => Ok(())
-    }
+    action_result?.try_into()
 }
 
 pub fn exists(path: &str) -> SharedFnResult<bool> {
     let path = Memory::from_bytes(path.as_bytes())?.offset();
-    unsafe {
-        Ok(owncast_fs_exists(path) != 0)
-    }
+    let res = unsafe {
+        owncast_fs_exists(path)
+    };
+    Ok(res != 0)
 }

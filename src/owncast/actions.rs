@@ -1,7 +1,6 @@
 use extism_pdk::{Json, SharedFnResult};
 use crate::host::{owncast_add_actions, owncast_clear_actions};
 use crate::json_objects::action_button::ActionButton;
-use crate::json_objects::action_result::ActionResult;
 
 /// Adds action buttons to the front page. Takes either a single `ActionButton` or an array.
 ///
@@ -20,10 +19,12 @@ use crate::json_objects::action_result::ActionResult;
 ///     run!(owncast::actions::add(ActionButton::html("Click me!", "<p>Thanks for clicking on me!</p>")));
 /// }
 /// ```
-pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<ActionResult> {
-    unsafe {
-        owncast_add_actions(&Json(actions.into()))
-    }
+pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<()> {
+    let actions = &Json(actions.into());
+    let action_result = unsafe {
+        owncast_add_actions(actions)
+    };
+    action_result?.try_into()
 }
 
 /// Clears runtime-set action buttons on the front page.
@@ -43,8 +44,9 @@ pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<ActionResult
 ///     run!(owncast::actions::clear());
 /// }
 /// ```
-pub fn clear() -> SharedFnResult<ActionResult> {
-    unsafe {
+pub fn clear() -> SharedFnResult<()> {
+    let action_result = unsafe {
         owncast_clear_actions()
-    }
+    };
+    action_result?.try_into()
 }

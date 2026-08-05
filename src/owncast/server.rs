@@ -12,15 +12,17 @@ pub fn info() -> SharedFnResult<ServerInfo> {
 }
 
 pub fn socials() -> SharedFnResult<Vec<SocialHandle>> {
-    unsafe {
-        owncast_server_socials().map(|Json(inner)| inner)
-    }
+    let res = unsafe {
+        owncast_server_socials()
+    };
+    res.map(|Json(inner)| inner)
 }
 
 pub fn emotes() -> SharedFnResult<Vec<Emote>> {
-    unsafe {
-        owncast_server_emotes().map(|Json(inner)| inner)
-    }
+    let res = unsafe {
+        owncast_server_emotes()
+    };
+    res.map(|Json(inner)| inner)
 }
 
 pub fn federation() -> SharedFnResult<FederationInfo> {
@@ -30,7 +32,8 @@ pub fn federation() -> SharedFnResult<FederationInfo> {
 }
 
 pub fn tags() -> SharedFnResult<Vec<String>> {
-    unsafe {
-        owncast_server_tags().map(|Json(inner)| inner)
-    }
+    let res = unsafe {
+        owncast_server_tags()
+    };
+    res.map(|Json(inner)| inner)
 }

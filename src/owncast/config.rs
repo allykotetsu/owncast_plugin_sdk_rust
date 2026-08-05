@@ -23,10 +23,8 @@ use crate::host::owncast_config_get;
 /// }
 /// ```
 pub fn get<T: DeserializeOwned>(key: &str) -> SharedFnResult<Option<T>> {
-    unsafe {
-        Ok(match owncast_config_get(key)? {
-            Some(Json(value)) => value,
-            None => None
-        })
-    }
+    let res = unsafe {
+        owncast_config_get(key)
+    };
+    Ok(res?.map(|Json(inner)| inner))
 }

@@ -10,8 +10,9 @@ pub fn discord(text: &str) -> SharedFnResult<()> {
 }
 
 pub fn browser_push(payload: impl Into<BrowserPushPayload>) -> SharedFnResult<()> {
+    let payload = &payload.into();
     unsafe {
-        owncast_notify_browser_push(&payload.into())
+        owncast_notify_browser_push(payload)
     }
 }
 

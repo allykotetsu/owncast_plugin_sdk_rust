@@ -4,13 +4,14 @@ use crate::json_objects::stream_broadcaster::StreamBroadcaster;
 use crate::json_objects::stream_info::StreamInfo;
 
 pub fn current() -> SharedFnResult<StreamInfo> {
-    unsafe {
-        Ok(owncast_stream_current()?.unwrap_or(StreamInfo::offline()))
-    }
+    let res = unsafe {
+        owncast_stream_current()
+    };
+    Ok(res?.unwrap_or(StreamInfo::offline()))
 }
 
 pub fn broadcaster() -> SharedFnResult<Option<StreamBroadcaster>> {
     unsafe {
-        Ok(owncast_stream_broadcaster()?)
+        owncast_stream_broadcaster()
     }
 }
