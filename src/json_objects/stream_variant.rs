@@ -9,19 +9,19 @@ pub struct StreamVariant {
     pub height: i64,
     pub framerate: i64,
     pub video_bitrate: i64,
-    pub audio_bitrate: i64,
+    pub cpu_usage_level: i64,
     pub is_passthrough: bool
 }
 
 impl StreamVariant {
-    pub fn new(width: i64, height: i64, framerate: i64, bitrate: i64, is_passthrough: bool) -> Self {
+    pub fn new(width: i64, height: i64, framerate: i64, video_bitrate: i64, cpu_usage_level: i64, is_passthrough: bool) -> Self {
         Self {
             width,
             height,
             framerate,
-            video_bitrate: bitrate,
-            audio_bitrate: bitrate,
-            is_passthrough,
+            video_bitrate,
+            cpu_usage_level,
+            is_passthrough
         }
     }
 }

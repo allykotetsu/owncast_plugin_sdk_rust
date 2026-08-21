@@ -1,5 +1,6 @@
 use extism_pdk::{FromBytes, Json};
 use serde::Deserialize;
+use crate::json_objects::autoplay_mode::AutoplayMode;
 use crate::json_objects::stream_variant::StreamVariant;
 
 #[derive(Deserialize, FromBytes, Clone, Debug)]
@@ -8,5 +9,6 @@ use crate::json_objects::stream_variant::StreamVariant;
 pub struct VideoConfig {
     pub latency_level: i64,
     pub codec: String,
+    pub autoplay: AutoplayMode,
     pub variants: Vec<StreamVariant>
 }
