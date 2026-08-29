@@ -40,3 +40,9 @@ impl From<String> for SqlValue {
         Self::String(s)
     }
 }
+
+impl From<SqlValue> for Vec<SqlValue> {
+    fn from(sql_value: SqlValue) -> Self {
+        vec![sql_value]
+    }
+}
