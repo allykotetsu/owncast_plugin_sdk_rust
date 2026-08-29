@@ -11,3 +11,15 @@ pub struct ServerInfo {
     pub welcome_message: Option<String>,
     pub version: Option<String>
 }
+
+impl ServerInfo {
+    pub fn none() -> Self {
+        ServerInfo {
+            name: None,
+            url: None,
+            summary: None,
+            welcome_message: None,
+            version: None,
+        }
+    }
+}
