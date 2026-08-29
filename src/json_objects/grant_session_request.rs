@@ -31,3 +31,12 @@ impl From<&str> for GrantSessionRequest {
         }
     }
 }
+
+impl From<String> for GrantSessionRequest {
+    fn from(s: String) -> Self {
+        GrantSessionRequest {
+            user_id: s,
+            ttl: None
+        }
+    }
+}
