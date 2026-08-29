@@ -26,6 +26,22 @@ macro_rules! run {
     };
 }
 
+#[macro_export]
+macro_rules! sql_params {
+    () => (
+        vec![]
+    );
+    ($($x:expr),+ $(,)?) => (
+        {
+            let mut temp_vec: Vec<owncast_plugin_sdk_rust::json_objects::sql_value::SqlValue> = Vec::new();
+            $(
+                temp_vec.push(owncast_plugin_sdk_rust::json_objects::sql_value::SqlValue::from($x));
+            )*
+            temp_vec
+        }
+    );
+}
+
 /// Clone a WithReturnCode<Error> error.
 pub fn clone_error(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Error> {
     WithReturnCode(anyhow::anyhow!("{}", t), *u)
