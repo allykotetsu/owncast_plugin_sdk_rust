@@ -4,6 +4,7 @@ use serde::Serialize;
 use crate::json_objects::status::Status;
 
 const CONTENT_TYPE: &str = "content-type";
+const LOCATION: &str = "Location";
 
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -19,6 +20,16 @@ impl OutgoingHttpResponse {
         Self {
             status: Some(status),
             headers: None,
+            body: None
+        }
+    }
+
+    pub fn redirect_found(url: &str) -> Self {
+        Self {
+            status: Some(Status::Found),
+            headers: Some(HashMap::from([
+                (LOCATION.to_string(), url.to_string())
+            ])),
             body: None
         }
     }
