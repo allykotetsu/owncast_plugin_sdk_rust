@@ -70,3 +70,4 @@ pub mod fediverse_quote;
 pub mod status;
 pub mod video_codec;
 pub mod autoplay_mode;
+pub mod count;
