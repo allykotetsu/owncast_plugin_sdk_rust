@@ -14,7 +14,7 @@ pub struct StreamInfo {
 }
 
 impl StreamInfo {
-    pub(crate) fn offline() -> Self {
+    pub fn offline() -> Self {
         StreamInfo {
             online: false,
             title: None,
