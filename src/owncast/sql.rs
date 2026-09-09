@@ -1,4 +1,6 @@
 use extism_pdk::SharedFnResult;
+use serde::de::DeserializeOwned;
+use serde_json::Error;
 use crate::host::{owncast_sql_exec, owncast_sql_query};
 use crate::json_objects::partial_sql_exec_result::PartialSqlExecResult;
 use crate::json_objects::partial_sql_query_result::PartialSqlQueryResult;
@@ -22,11 +24,18 @@ fn do_query(sql: &str, params: Vec<SqlValue>, max_rows: Option<i64>) -> SharedFn
     res?.try_into()
 }
 
-pub fn query(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Vec<SqlRow>> {
-    do_query(sql, params.into(), None)?.try_into()
+pub fn query<T: DeserializeOwned>(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Vec<Result<T, Error>>> {
+    let rows: Vec<SqlRow> = do_query(sql, params.into(), None)?.try_into()?;
+
+    let rows = rows.iter()
+        .map(|sql_row| Ok(serde_json::from_value(serde_json::to_value(sql_row)?)?))
+        .collect::<Vec<Result<T, Error>>>();
+
+    Ok(rows.try_into()?)
 }
 
-pub fn query_row(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Option<SqlRow>> {
+pub fn query_row<T: DeserializeOwned>(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Option<Result<T, Error>>> {
     let rows: Vec<SqlRow> = do_query(sql, params.into(), Some(1))?.try_into()?;
-    Ok(rows.get(0).cloned())
+
+    Ok(rows.get(0).map(|sql_row| Ok(serde_json::from_value(serde_json::to_value(sql_row)?)?)))
 }
