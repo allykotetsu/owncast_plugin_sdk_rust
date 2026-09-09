@@ -173,7 +173,6 @@ impl Plugin {
                     (command_definition.run)(plugin_state, &CommandContext {
                         user: payload.message.user.clone(),
                         msg: payload.message,
-                        command: payload.command,
                         invoked_as: payload.invoked_as,
                         args: payload.args,
                         arg_string: payload.arg_string,

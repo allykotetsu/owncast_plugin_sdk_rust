@@ -6,7 +6,6 @@ use crate::{owncast, run};
 pub struct CommandContext {
     pub msg: ChatMessage,
     pub user: Option<User>,
-    pub command: String,
     pub invoked_as: String,
     pub args: Vec<String>,
     pub arg_string: String
