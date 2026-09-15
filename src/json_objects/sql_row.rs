@@ -13,6 +13,7 @@ impl TryFrom<PartialSqlQueryResult> for Vec<SqlRow> {
             let collection: HashMap<String, SqlValue> = partial_sql_query_result.columns.iter().map(|column| {
                 // Find the index in the columns array of the given column.
                 let i = partial_sql_query_result.columns.iter().position(|k| k == column)?;
+
                 // Return a tuple of the SQL column name and the SqlValue at the given index.
                 Some((column.clone(), values.get(i)?.clone()))
             }).filter_map(|pair| pair).collect();
@@ -20,5 +21,14 @@ impl TryFrom<PartialSqlQueryResult> for Vec<SqlRow> {
         }).collect();
 
         Ok(collection)
+    }
+}
+
+impl TryFrom<PartialSqlQueryResult> for Option<SqlRow> {
+    type Error = Error;
+
+    fn try_from(partial_sql_query_result: PartialSqlQueryResult) -> Result<Self, Self::Error> {
+        let sql_rows: Vec<SqlRow> = partial_sql_query_result.try_into()?;
+        Ok(sql_rows.get(0).cloned())
     }
 }

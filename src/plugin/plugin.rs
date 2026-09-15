@@ -27,7 +27,6 @@ use crate::json_objects::stream_stopped::StreamStopped;
 use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
-use crate::json_objects::permission::Permission;
 use crate::plugin::plugin_state::PluginState;
 use crate::{owncast, run};
 use crate::json_objects::status::Status;
@@ -92,9 +91,9 @@ pub struct Plugin {
 }
 
 impl Plugin {
-    pub fn is_permitted(&self, permission: Permission) -> bool {
+    /*pub fn is_permitted(&self, permission: Permission) -> bool {
         self.manifest.permissions.contains(&permission)
-    }
+    }*/
 
     pub fn dispatch_init(&self, plugin_state: &mut PluginState) {
         if let Some(on_init) = self.on_init {
@@ -107,6 +106,7 @@ impl Plugin {
     }
 
     pub fn dispatch_event(&self, plugin_state: &mut PluginState, event: Envelope) {
+        // Match the event envelope provided and pass the payload to the registered event hooks.
         match event {
             Envelope::ChatMessageReceived(payload) => {
                 for func in &self.on_chat_message { func(plugin_state, &payload); }
@@ -169,6 +169,7 @@ impl Plugin {
             }
 
             Envelope::ChatCommand(payload) => {
+                // If the command provided exists in the commands hashmap, then activate its run function and construct a CommandContext object.
                 if let Some(command_definition) = self.commands.get(&payload.command) {
                     (command_definition.run)(plugin_state, &CommandContext {
                         user: payload.message.user.clone(),
@@ -185,7 +186,9 @@ impl Plugin {
 
             Envelope::Custom { event_type, payload } => {
                 if let Some(events) = self.on.get(&event_type) {
+                    // If event hook supplied exists in hashmap, then iterate through the callbacks.
                     for event in events {
+                        // If event callback has a deserialization error then log to Owncast.
                         if let Err(err) = event(plugin_state, &payload) {
                             run!(owncast::log::error(&err.to_string()));
                         }
@@ -199,11 +202,13 @@ impl Plugin {
         let mut changed = false;
 
         for filter_chat_message in &self.filter_chat_message {
+            // Iterate through filters and match their FilterResults.
             match filter_chat_message(plugin_state, &msg) {
                 FilterResult::Pass => {
                     continue;
                 }
                 FilterResult::Modify { payload } => {
+                    // If modified, then mark the filter as having changed the message, and update the payload.
                     changed = true;
                     msg = payload;
                 }
@@ -220,16 +225,15 @@ impl Plugin {
         }
     }
 
+    // TODO allow bad request for when path exists but method is wrong
+    // TODO allow matching paths with variables like /account/:username
     pub fn dispatch_http_request(&self, plugin_state: &mut PluginState, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
-        if self.on_http_request.is_empty() {
-            // If plugin does not listen for HTTP requests, then return 404.
-            OutgoingHttpResponse::new(Status::NotFound)
+        if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
+            // If method and path combination exists then defer to the function.
+            func(plugin_state, &incoming_http_request.into()).clean_clone()
         } else {
-            if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {
-                func(plugin_state, &incoming_http_request.into()).clean_clone()
-            } else {
-                OutgoingHttpResponse::new(Status::Ok)
-            }
+            // If method and path combination doesn't exist then return 404.
+            OutgoingHttpResponse::new(Status::NotFound)
         }
     }
 

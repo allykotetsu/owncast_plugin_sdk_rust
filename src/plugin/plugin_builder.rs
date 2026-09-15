@@ -39,7 +39,11 @@ use crate::prelude::MissingManifest;
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
     // Init
+    // on_pre_init_: Option<fn(&mut Manifest)>,
     on_init_: Option<fn(&mut PluginState)>,
+
+    // Dependencies
+    // dependencies_: HashMap<String, PluginVersion>,
 
     // Events
     on_chat_message_: Vec<EventFunctionVoid<ChatMessage>>,
@@ -95,7 +99,10 @@ pub struct PluginBuilder {
 impl PluginBuilder {
     pub fn new() -> Self {
         Self {
+            // on_pre_init_: None,
             on_init_: None,
+
+            // dependencies_: HashMap::new(),
 
             on_chat_message_: vec![],
             on_chat_user_joined_: vec![],
@@ -135,6 +142,18 @@ impl PluginBuilder {
         }
     }
 
+    // TODO document
+    /*pub fn on_pre_init(&mut self, f: fn(&mut Subscriptions)) -> Result<(), Duplicate> {
+        // If on_pre_init was already called, then error.
+        if self.on_pre_init_.is_some() {
+            Err(Duplicate("on_pre_init".to_string()))
+        } else {
+            // If it wasn't, then create the callback and return OK.
+            self.on_pre_init_ = Some(f);
+            Ok(())
+        }
+    }*/
+
     /// Creates a hook for when the plugin is registered.
     ///
     /// * `f` - The function to run when the plugin is registered.
@@ -155,27 +174,53 @@ impl PluginBuilder {
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_init(&mut self, f: fn(&mut PluginState)) -> Result<(), Duplicate> {
+        // If on_init was already called, then error.
         if self.on_init_.is_some() {
             Err(Duplicate("on_init".to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             self.on_init_ = Some(f);
             Ok(())
         }
     }
+
+    // TODO document
+    /*pub fn dependency<T: TryInto<PluginVersion>>(&mut self, slug: &str, plugin_version: T) -> Result<(), Error>
+    where T: TryInto<PluginVersion, Error = Error>
+    {
+        // If on_page_content was already called, then error.
+        if let Some(_) = self.dependencies_.insert(slug.to_string(), plugin_version.try_into()?) {
+            Err(Duplicate(slug.to_string()).into())
+        } else {
+            // If it wasn't, then create the callback and return OK.
+            Ok(())
+        }
+    }*/
+
+    // TODO add pre-init for modifying manifest
+    // TODO add dependency function
 
     /// Creates an event hook for when a chat message is sent.
     ///
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_message(|_, ChatMessage { body, .. }| {
-    ///         owncast_send_chat(&format!("echo {body}"));
+    ///         run!(owncast::chat::send(&format!("echo {body}")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_chat_message(&mut self, f: EventFunctionVoid<ChatMessage>) {
         self.on_chat_message_.push(f);
@@ -186,12 +231,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::user::User;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_joined(|_, ChatUser { display_name, .. }| {
-    ///         owncast_send_chat(&format!("Welcome, {display_name}!"));
+    ///     plugin_builder.on_chat_user_joined(|_, User { display_name, .. }| {
+    ///         run!(owncast::chat::send(&format!("Welcome, {display_name}!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_chat_user_joined(&mut self, f: EventFunctionVoid<User>) {
         self.on_chat_user_joined_.push(f);
@@ -202,12 +253,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::user::User;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_chat_user_parted(|_, ChatUser { display_name, .. }| {
-    ///         owncast_send_chat(&format!("Goodbye, {display_name}!"));
+    ///     plugin_builder.on_chat_user_parted(|_, User { display_name, .. }| {
+    ///         run!(owncast::chat::send(&format!("Goodbye, {display_name}!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_chat_user_parted(&mut self, f: EventFunctionVoid<User>) {
         self.on_chat_user_parted_.push(f);
@@ -218,12 +275,19 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::chat_user_rename::ChatUserRename;
+    /// use owncast_plugin_sdk_rust::json_objects::user::User;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_chat_user_renamed(|_, ChatUserRename { user: User { display_name, .. }, previous_name }| {
-    ///         owncast_send_chat(&format!("{previous_name} is now {display_name}."));
+    ///         run!(owncast::chat::send(&format!("{previous_name} is now {display_name}.")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_chat_user_renamed(&mut self, f: EventFunctionVoid<ChatUserRename>) {
         self.on_chat_user_renamed_.push(f);
@@ -234,12 +298,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::chat_message_moderation::ChatMessageModeration;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_message_moderated(|_, ChatMessageModeration { message_id, visible, .. }| {
-    ///         owncast_send_chat(&format!("A moderator changed {message_id} to {visible}!"));
+    ///         run!(owncast::chat::send(&format!("A moderator changed {message_id} to {visible}!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_message_moderated(&mut self, f: EventFunctionVoid<ChatMessageModeration>) {
         self.on_message_moderated_.push(f);
@@ -250,12 +320,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::stream_started::StreamStarted;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_started(|_, StreamStarted { title, .. }| {
-    ///         owncast_send_chat(&format!("Stream {title} is starting!"));
+    ///         run!(owncast::chat::send(&format!("Stream {title} is starting!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_stream_started(&mut self, f: EventFunctionVoid<StreamStarted>) {
         self.on_stream_started_.push(f);
@@ -266,12 +342,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::stream_stopped::StreamStopped;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_stopped(|_, StreamStopped { stopped_at }| {
-    ///         owncast_send_chat(&format!("Stream stopped at {stopped_at}!"));
+    ///         run!(owncast::chat::send(&format!("Stream stopped at {stopped_at}!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_stream_stopped(&mut self, f: EventFunctionVoid<StreamStopped>) {
         self.on_stream_stopped_.push(f);
@@ -282,12 +364,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::stream_title_change::StreamTitleChange;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_stream_title_changed(|_, StreamTitleChange { from, to }| {
-    ///         owncast_send_chat(&format!("Stream title changed from {from} to {to}."));
+    ///         run!(owncast::chat::send(&format!("Stream title changed from {from} to {to}.")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_stream_title_changed(&mut self, f: EventFunctionVoid<StreamTitleChange>) {
         self.on_stream_title_changed_.push(f);
@@ -298,12 +386,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::sse_connection_event::SseConnectionEvent;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_sse_connect(|_, SSEConnectionEvent { connection_id, .. }| {
-    ///         owncast_send_chat(&format!("Connected to {connection_id}."));
+    ///     plugin_builder.on_sse_connect(|_, SseConnectionEvent { connection_id, .. }| {
+    ///         run!(owncast::chat::send(&format!("Connected to {connection_id}.")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_sse_connect(&mut self, f: EventFunctionVoid<SseConnectionEvent>) {
         self.on_sse_connect_.push(f);
@@ -314,12 +408,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::sse_connection_event::SseConnectionEvent;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_sse_disconnect(|_, SSEConnectionEvent { connection_id, .. }| {
-    ///         owncast_send_chat(&format!("Disconnected from {connection_id}."));
+    ///     plugin_builder.on_sse_disconnect(|_, SseConnectionEvent { connection_id, .. }| {
+    ///         run!(owncast::chat::send(&format!("Disconnected from {connection_id}.")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_sse_disconnect(&mut self, f: EventFunctionVoid<SseConnectionEvent>) {
         self.on_sse_disconnect_.push(f);
@@ -330,22 +430,32 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::tick_event::TickEvent;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_tick(|_, TickEvent { now }| {
-    ///         owncast_send_chat(&format!("The time is now {now}"));
+    ///         run!(owncast::chat::send(&format!("The time is now {now}")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_tick(&mut self, f: EventFunctionVoid<TickEvent>) {
         self.on_tick_.push(f);
     }
 
+    // TODO
     /// Creates an event hook for when any incoming ActivityPub object is received.
     ///
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse(|_, hash_map| {
     ///             TODO
@@ -353,6 +463,8 @@ impl PluginBuilder {
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse(&mut self, f: EventFunctionVoid<HashMap<String, String>>) {
         self.on_fediverse_.push(f);
@@ -363,12 +475,19 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_actor::FediverseActor;
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_engagement::FediverseEngagement;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_follow(|_, FediverseEngagement { actor: FediverseActor { name, .. }, .. }| {
-    ///         owncast_send_chat(&format!("{name} followed stream!"));
+    ///         run!(owncast::chat::send(&format!("{name} followed stream!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_follow(&mut self, f: EventFunctionVoid<FediverseEngagement>) {
         self.on_fediverse_follow_.push(f);
@@ -379,12 +498,19 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_actor::FediverseActor;
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_like(|_, FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
-    ///         owncast_send_chat(&format!("{name} liked that stream went live!"));
+    ///         run!(owncast::chat::send(&format!("{name} liked that stream went live!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_like(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
         self.on_fediverse_like_.push(f);
@@ -395,12 +521,19 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_actor::FediverseActor;
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_targeted_engagement::FediverseTargetedEngagement;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|_, FediverseTargetedEngagement { actor: FediverseActor { name, .. }, .. }| {
-    ///         owncast_send_chat(&format!("{name} reposted that stream went live!"));
+    ///         run!(owncast::chat::send(&format!("{name} reposted that stream went live!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_repost(&mut self, f: EventFunctionVoid<FediverseTargetedEngagement>) {
         self.on_fediverse_repost_.push(f);
@@ -411,12 +544,19 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_actor::FediverseActor;
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_quote::FediverseQuote;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|_, FediverseQuote { actor: FediverseActor { name, .. }, content_text, .. }| {
-    ///         owncast_send_chat(&format!("{name} quoted, saying {content_text}!"));
+    ///         run!(owncast::chat::send(&format!("{name} quoted, saying {content_text}!")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_quote(&mut self, f: EventFunctionVoid<FediverseQuote>) {
         self.on_fediverse_quote_.push(f);
@@ -427,12 +567,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_inbound_post::FediverseInboundPost;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|_, FediverseInboundPost { content_text, .. }| {
-    ///         owncast_send_chat(&format!("Someone had this to say about stream: {content_text}"));
+    ///         run!(owncast::chat::send(&format!("Someone had this to say about stream: {content_text}")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_mention(&mut self, f: EventFunctionVoid<FediverseInboundPost>) {
         self.on_fediverse_mention_.push(f);
@@ -443,12 +589,18 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::json_objects::fediverse_inbound_post::FediverseInboundPost;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_fediverse_repost(|_, FediverseInboundPost { content_text, .. }| {
-    ///         owncast_send_chat(&format!("Someone had this to say in reply to stream: {content_text}"));
+    ///         run!(owncast::chat::send(&format!("Someone had this to say in reply to stream: {content_text}")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_fediverse_reply(&mut self, f: EventFunctionVoid<FediverseInboundPost>) {
         self.on_fediverse_reply_.push(f);
@@ -463,25 +615,32 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.filter_chat_message(None, |_, ChatMessage { body, .. }| {
     ///         if body.contains("bad word") {
-    ///             FilterResult::Drop {
-    ///                 payload: "No bad words allowed!".to_string()
-    ///             }
+    ///             FilterResult::drop("No bad words allowed!")
     ///         } else {
     ///             FilterResult::Pass
     ///         }
     ///     })?;
+    ///
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn filter_chat_message(&mut self, priority: Option<u8>, f: EventFunction<ChatMessage, FilterResult>) -> Result<(), OutOfBounds<u8>> {
-        // TODO if possible then put a compile-time restraint on priority.
+        // If priority isn't supplied, then default to 100.
         let priority = priority.unwrap_or(100);
+
+        // If priority is out of bounds, then error.
         if priority >= 101 {
             Err(OutOfBounds(0, 101, priority))
         } else {
+            // If priority it in bounds, then create the callback and return OK.
             self.filter_chat_message_.push((priority, f));
             Ok(())
         }
@@ -496,17 +655,27 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::json_objects::method::Method;
+    /// use owncast_plugin_sdk_rust::json_objects::incoming_http_request::IncomingHttpRequest;
+    /// use owncast_plugin_sdk_rust::json_objects::status::Status;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_http_request(Method::Get, "/echo", |_, IncomingHttpRequest { body, .. }| {
-    ///         OutgoingHttpResponse::text_plain(200, &format!("echo {body}"))
+    ///         OutgoingHttpResponse::text_plain(Status::Ok, &format!("echo {body}"))
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_http_request(&mut self, method: Method, path: &str, f: EventFunction<PartialIncomingHttpRequest, OutgoingHttpResponse>) -> Result<(), Duplicate> {
+        // If an HTTP request already exists for the given HTTP method and endpoint path, then error.
         if let Some(_) = self.on_http_request_.insert((method.clone(), path.to_string()), f) {
             return Err(Duplicate(format!("{method} {path}")));
         }
+
+        // If not then return OK after insertion.
         Ok(())
     }
 
@@ -515,6 +684,10 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use serde::Deserialize;
+    /// use owncast_plugin_sdk_rust::{owncast, run};
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// #[derive(Deserialize)]
     /// pub(crate) struct CustomEventPayload {
     ///     pub(crate) data: String
@@ -522,16 +695,27 @@ impl PluginBuilder {
     ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on("my-event", |_, CustomEventPayload { data }| {
-    ///         owncast_send_chat(format!("Received {data}."));
+    ///         run!(owncast::chat::send(&format!("Received {data}.")));
     ///     });
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on<T: DeserializeOwned + 'static>(&mut self, event: &str, f: EventFunctionVoid<T>) {
+        // If hashmap doesn't have an entry for the event name, then create one and initialize it with an empty array.
+        // Push the Box of the callback onto the array.
         self.on_.entry(event.to_string()).or_insert(vec![]).push(Box::new(move |mut plugin_state, payload| {
+            // Take the payload string and attempt to convert it into a JSON value.
             let value: serde_json::Value = serde_json::from_str(payload)?;
+
+            // Attempt to deserialize the JSON value into the type T provided to this function.
             let deserialized: T = serde_json::from_value(value)?;
+
+            // Call the provided function with the deserialized struct.
             f(&mut plugin_state, &deserialized);
+
+            // Return OK if there were no errors with serialization.
             Ok(())
         }));
     }
@@ -545,9 +729,12 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::command::command_builder::CommandBuilder;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.commands("!", false, vec![
-    ///         CommandBuilder::new("update", |_, ctx| {
+    ///         CommandBuilder::new("uptime", |_, ctx| {
     ///             ctx.reply("we've been live a while!");
     ///         })
     ///         .with_aliases(&["time", "livetime"])
@@ -555,15 +742,23 @@ impl PluginBuilder {
     ///     ])?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn commands(&mut self, prefix: &str, case_sensitive: bool, command_builders: Vec<CommandBuilder>) -> Result<(), Duplicate> {
         for command_builder in command_builders {
+            // Iterate through command builders supplied and build them with the same prefix and case sensitivity.
             let command_data = command_builder.build(prefix.to_string(), case_sensitive);
+
+            // Take the name of the command and insert it into the commands hashmap.
             let name = command_data.command.name.clone();
             if let Some(_) = self.commands_.insert(name.clone(), command_data) {
+                // If a command with the same name and prefix already exists, then error.
                 return Err(Duplicate(name));
             }
         }
+
+        // Return okay if there were no duplicate commands.
         Ok(())
     }
 
@@ -576,17 +771,24 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::json_objects::content_request::ContentRequest;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_tab_content("store", |_, ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_tab_content(&mut self, tab: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
+        // If on_tab_content was already called, then error.
         if let Some(_) = self.on_tab_content_.insert(tab.to_string(), f) {
             Err(Duplicate(tab.to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             Ok(())
         }
     }
@@ -600,17 +802,24 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::json_objects::content_request::ContentRequest;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_content("store", |_, ContentRequest { user, .. }| {
     ///         format!("<p>Hello {user}!</p>")
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_page_content(&mut self, page: &str, f: EventFunction<Option<User>, String>) -> Result<(), Duplicate> {
+        // If on_page_content was already called, then error.
         if let Some(_) = self.on_page_content_.insert(page.to_string(), f) {
             Err(Duplicate(page.to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             Ok(())
         }
     }
@@ -624,17 +833,23 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_styles(|_| {
     ///         "* { font-size: 24pt; }".to_string()
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_page_styles(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
+        // If on_page_styles was already called, then error.
         if self.on_page_styles_.is_some() {
             Err(Duplicate("on_page_styles".to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             self.on_page_styles_ = Some(f);
             Ok(())
         }
@@ -649,17 +864,23 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_page_scripts(|_| {
     ///         "alert('Welcome to stream!');".to_string()
     ///     })?;
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_page_scripts(&mut self, f: fn(&mut PluginState) -> String) -> Result<(), Duplicate> {
+        // If on_page_scripts was already called, then error.
         if self.on_page_scripts_.is_some() {
             Err(Duplicate("on_page_scripts".to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             self.on_page_scripts_ = Some(f);
             Ok(())
         }
@@ -674,23 +895,30 @@ impl PluginBuilder {
     /// # Examples
     ///
     /// ```
+    /// use owncast_plugin_sdk_rust::json_objects::user::User;
+    /// use owncast_plugin_sdk_rust::json_objects::auth_check_result::AuthCheckResult;
+    /// use owncast_plugin_sdk_rust::prelude::*;
+    ///
     /// define_plugin!(|mut plugin_builder| {
     ///     plugin_builder.on_auth_check(|_, User { display_name, .. }| {
     ///         if display_name.as_str() == "Authorized user" {
-    ///             AuthCheckResult::Ok()
+    ///             AuthCheckResult::Ok
     ///         } else {
-    ///             AuthCheckResult::Deny {
-    ///                 reason: "You are not authorized!".to_string()
-    ///             }
+    ///             AuthCheckResult::deny("You are not authorized!")
     ///         }
     ///     })?;
+    ///
     ///     Ok(plugin_builder)
     /// });
+    ///
+    /// fn main() {}
     /// ```
     pub fn on_auth_check(&mut self, f: EventFunction<User, AuthCheckResult>) -> Result<(), Duplicate> {
+        // If on_auth_check was already called, then error.
         if self.on_auth_check_.is_some() {
             Err(Duplicate("on_auth_check".to_string()))
         } else {
+            // If it wasn't, then create the callback and return OK.
             self.on_auth_check_ = Some(f);
             Ok(())
         }
@@ -701,12 +929,13 @@ impl TryInto<Plugin> for PluginBuilder {
     type Error = WithReturnCode<ExtismError>;
 
     fn try_into(self) -> Result<Plugin, Self::Error> {
+        // Copy the list of chat filters and sort them by their priority.
         let mut filter_chat_message_ = self.filter_chat_message_;
         filter_chat_message_.sort_by(|(a, _), (b, _)| {
             b.cmp(&a)
         });
 
-        // Construct notifications.
+        // For each event type that exists, add them to the manifest.
         let mut notify = vec![];
 
         if !self.on_chat_message_.is_empty() { notify.push(Notify { event: EventType::ChatMessageReceived }); }
@@ -736,7 +965,7 @@ impl TryInto<Plugin> for PluginBuilder {
             notify.push(Notify { event: EventType::Custom(name.clone()) });
         }
 
-        // Construct filter.
+        // If filters exist, then add them to manifest.
         let mut filter = vec![];
         if let Some(&(priority, _)) = filter_chat_message_.first() {
             filter.push(Filter {
@@ -749,6 +978,7 @@ impl TryInto<Plugin> for PluginBuilder {
         let subscriptions = Subscriptions { notify, filter };
         let commands: Vec<CommandInfo> = self.commands_.values().map(|CommandDefinition { command, .. }| command.clone()).collect();
 
+        // Read manifest from Extism config.
         let manifest = config::get("manifest")?.ok_or(MissingManifest)?;
 
         Ok(Plugin {

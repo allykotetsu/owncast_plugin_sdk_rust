@@ -25,17 +25,22 @@ fn do_query(sql: &str, params: Vec<SqlValue>, max_rows: Option<i64>) -> SharedFn
 }
 
 pub fn query<T: DeserializeOwned>(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Vec<Result<T, Error>>> {
+    // Take SQL query results and convert them into a Vec<SqlRow>.
     let rows: Vec<SqlRow> = do_query(sql, params.into(), None)?.try_into()?;
 
+    // Take each row and attempt to deserialize it into type T.
     let rows = rows.iter()
         .map(|sql_row| Ok(serde_json::from_value(serde_json::to_value(sql_row)?)?))
         .collect::<Vec<Result<T, Error>>>();
 
-    Ok(rows.try_into()?)
+    // If there have been no errors thus far, then return OK.
+    Ok(rows)
 }
 
 pub fn query_row<T: DeserializeOwned>(sql: &str, params: impl Into<Vec<SqlValue>>) -> SharedFnResult<Option<Result<T, Error>>> {
-    let rows: Vec<SqlRow> = do_query(sql, params.into(), Some(1))?.try_into()?;
+    // Take the SQL query results and convert them into an Option<SqlRow>.
+    let row: Option<SqlRow> = do_query(sql, params.into(), Some(1))?.try_into()?;
 
-    Ok(rows.get(0).map(|sql_row| Ok(serde_json::from_value(serde_json::to_value(sql_row)?)?)))
+    // Deserialize the contained SqlRow into type T, and return OK if no errors.
+    Ok(row.map(|sql_row| Ok(serde_json::from_value(serde_json::to_value(sql_row)?)?)))
 }

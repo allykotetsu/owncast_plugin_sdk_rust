@@ -4,6 +4,8 @@ use crate::json_objects::action_button::ActionButton;
 
 /// Adds action buttons to the front page. Takes either a single `ActionButton` or an array.
 ///
+/// Requires the `ui.modify` permission.
+///
 /// # Errors
 ///
 /// Errors if there is an issue setting memory in Extism.
@@ -11,11 +13,11 @@ use crate::json_objects::action_button::ActionButton;
 /// # Examples
 ///
 /// ```
-/// use std::error::Error;
+/// use owncast_plugin_sdk_rust::run;
 /// use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
-/// use owncast_plugin_sdk_rust::{owncast, helpers};
+/// use owncast_plugin_sdk_rust::owncast;
 ///
-/// fn foo() {
+/// fn main() {
 ///     run!(owncast::actions::add(ActionButton::html("Click me!", "<p>Thanks for clicking on me!</p>")));
 /// }
 /// ```
@@ -29,6 +31,8 @@ pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<()> {
 
 /// Clears runtime-set action buttons on the front page.
 ///
+/// Requires the `ui.modify` permission.
+///
 /// # Errors
 ///
 /// Errors if there is an issue setting memory in Extism.
@@ -36,9 +40,9 @@ pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<()> {
 /// # Examples
 ///
 /// ```
-/// use std::error::Error;
+/// use owncast_plugin_sdk_rust::run;
 /// use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
-/// use owncast_plugin_sdk_rust::{owncast, helpers};
+/// use owncast_plugin_sdk_rust::owncast;
 ///
 /// fn foo() {
 ///     run!(owncast::actions::clear());

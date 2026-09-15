@@ -20,15 +20,21 @@ pub fn get(id: &str) -> SharedFnResult<Option<User>> {
 }
 
 pub fn set_enabled(id: &str, enabled: bool, reason: Option<&str>) -> SharedFnResult<()> {
+    // Convert ID to Extism memory offset, enabled to integer, and reason to Extism memory offset.
     let id = Memory::new(&id)?.offset();
     let enabled = enabled as i64;
     let reason = Memory::new(&reason.unwrap_or(""))?.offset();
 
+    // Find the memory offset of the result of owncast_user_set_enabled.
     let offset = unsafe {
         owncast_user_set_enabled(id, enabled, reason)
     };
     let memory = Memory::find(offset).ok_or(MemNotFound)?;
+
+    // Convert the value in memory to the ActionResult type.
     let action_result: ActionResult = memory.to()?;
+
+    // If ActionResult contains an error, then return error, otherwise OK.
     action_result.try_into()
 }
 
