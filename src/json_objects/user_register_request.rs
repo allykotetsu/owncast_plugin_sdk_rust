@@ -1,15 +1,27 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
+/// An object representing a request to register a new [`User`].
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct UserRegisterRequest {
+    /// The per-plugin unique ID tied to the [`User`]. This is different from their formal user ID, which is Owncast determined and is globally unique.
     pub auth_id: String,
+
+    /// The display name the registered [`User`] should have.
     pub display_name: Option<String>,
+
+    /// The scopes the registered [`User`] should have.
     pub scopes: Option<Vec<String>>,
+
+    /// A URL to an external profile that the [`User`] owns.
     pub profile_url: Option<String>,
+
+    /// The fediverse handle the the [`User`] owns.
     pub handle: Option<String>,
+
+    /// Whether to display the [`User`]'s profile URL and handle publicly.
     pub public: Option<bool>,
 }
 

@@ -2,14 +2,22 @@ use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 use crate::json_objects::fediverse_payload_type::FediversePayloadType;
 
+/// An object representing a announcement send to chat when an interaction to a post is made on the fediverse.
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct FediversePayload {
+    /// The type of fediverse activity being displayed.
     #[serde(rename = "type")]
     pub payload_type: FediversePayloadType,
+
+    /// The body of the announcement.
     pub body: String,
+
+    /// The image to display with the announcement.
     pub image: Option<String>,
+
+    /// What to link to with the announcement.
     pub link: Option<String>
 }
 

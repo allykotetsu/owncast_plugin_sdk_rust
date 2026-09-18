@@ -1,6 +1,7 @@
 use serde::Deserialize;
 use crate::json_objects::chat_message::ChatMessage;
 
+/// [`Envelope::ChatCommand`] event payload.
 #[derive(Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CommandEvent {

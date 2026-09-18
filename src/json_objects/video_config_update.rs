@@ -4,13 +4,21 @@ use crate::json_objects::autoplay_mode::AutoplayMode;
 use crate::json_objects::stream_variant::StreamVariant;
 use crate::json_objects::video_codec::VideoCodec;
 
+/// An object containing data used to update Owncast's video config.
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct VideoConfigUpdate {
+    /// The latency level Owncast should have.
     pub latency_level: Option<i64>,
+
+    /// The [`VideoCodec`] Owncast should use.
     pub codec: Option<VideoCodec>,
+
+    /// What autoplay mode Owncast should use.
     pub autoplay: Option<AutoplayMode>,
+
+    /// The stream variants Owncast should have.
     pub variants: Option<Vec<StreamVariant>>
 }
 

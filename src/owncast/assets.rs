@@ -10,15 +10,15 @@ use crate::host::owncast_asset_read;
 /// # Examples
 ///
 /// ```
-/// use std::error::Error;
-/// use owncast_plugin_sdk_rust::owncast;
+/// # use std::error::Error;
+/// # use owncast_plugin_sdk_rust::owncast;
 ///
-/// fn main() -> Result<(), Box<dyn Error>> {
-///     let data = owncast::actions::read("data.json")?;
-///     let data = String::from_utf8(data)?;
-///     println!(&format!("{data}"));
-///     Ok(())
-/// }
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let data = owncast::actions::read("data.json")?;
+/// let data = String::from_utf8(data)?;
+/// println!(&format!("{data}"));
+/// #     Ok(())
+/// # }
 /// ```
 pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
     unsafe {
@@ -35,14 +35,14 @@ pub fn read(path: &str) -> SharedFnResult<Option<Vec<u8>>> {
 /// # Examples
 ///
 /// ```
-/// use std::error::Error;
-/// use owncast_plugin_sdk_rust::owncast;
+/// # use std::error::Error;
+/// # use owncast_plugin_sdk_rust::owncast;
 ///
-/// fn main() -> Result<(), Box<dyn Error>> {
-///     let data = owncast::actions::read_text("data.json")?;
-///     println!(&format!("{data}"));
-///     Ok(())
-/// }
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// let data = owncast::actions::read_text("data.json")?;
+/// println!(&format!("{data}"));
+/// #     Ok(())
+/// # }
 /// ```
 pub fn read_text(path: &str) -> SharedFnResult<Option<String>> {
     Ok(match read(path)? {

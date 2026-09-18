@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
+/// An error for when the plugin author registers one thing multiple times.
 #[derive(Debug, Clone)]
 pub struct Duplicate(pub(crate) String);
 

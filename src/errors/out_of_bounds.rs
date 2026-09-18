@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter};
 
+/// An error for when an argument being passed is outside of the bounds it should be within.
 #[derive(Debug, Clone)]
 pub struct OutOfBounds<T: Debug + Display>(pub T, pub T, pub T);
 

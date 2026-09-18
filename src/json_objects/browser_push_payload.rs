@@ -1,12 +1,18 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
+/// An object representing a notification sent through the browser.
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
 pub struct BrowserPushPayload {
+    /// The title of the [`BrowserPushPayload`].
     pub title: String,
+
+    /// The body of the [`BrowserPushPayload`].
     pub body: Option<String>,
+
+    /// The URL of the [`BrowserPushPayload`].
     pub url: Option<String>
 }
 

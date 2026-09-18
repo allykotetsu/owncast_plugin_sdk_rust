@@ -13,13 +13,13 @@ use crate::json_objects::action_button::ActionButton;
 /// # Examples
 ///
 /// ```
-/// use owncast_plugin_sdk_rust::run;
-/// use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
-/// use owncast_plugin_sdk_rust::owncast;
+/// # use owncast_plugin_sdk_rust::run;
+/// # use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
+/// # use owncast_plugin_sdk_rust::owncast;
 ///
-/// fn main() {
-///     run!(owncast::actions::add(ActionButton::html("Click me!", "<p>Thanks for clicking on me!</p>")));
-/// }
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// owncast::actions::add(ActionButton::html("Click me!", "<p>Thanks for clicking on me!</p>"))?;
+/// # }
 /// ```
 pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<()> {
     let actions = &Json(actions.into());
@@ -40,13 +40,13 @@ pub fn add(actions: impl Into<Vec<ActionButton>>) -> SharedFnResult<()> {
 /// # Examples
 ///
 /// ```
-/// use owncast_plugin_sdk_rust::run;
-/// use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
-/// use owncast_plugin_sdk_rust::owncast;
+/// # use owncast_plugin_sdk_rust::run;
+/// # use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
+/// # use owncast_plugin_sdk_rust::owncast;
 ///
-/// fn foo() {
-///     run!(owncast::actions::clear());
-/// }
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// owncast::actions::clear()?;
+/// # }
 /// ```
 pub fn clear() -> SharedFnResult<()> {
     let action_result = unsafe {

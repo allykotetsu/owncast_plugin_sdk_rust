@@ -3,10 +3,9 @@ use crate::json_objects::sql_query_result::SqlQueryResult;
 use crate::json_objects::sql_value::SqlValue;
 
 #[derive(Clone, Debug)]
-pub struct PartialSqlQueryResult {
-    pub columns: Vec<String>,
-    pub rows: Vec<Vec<SqlValue>>,
-    pub truncated: Option<bool>
+pub(crate) struct PartialSqlQueryResult {
+    pub(crate) columns: Vec<String>,
+    pub(crate) rows: Vec<Vec<SqlValue>>
 }
 
 impl TryFrom<SqlQueryResult> for PartialSqlQueryResult {
@@ -18,8 +17,7 @@ impl TryFrom<SqlQueryResult> for PartialSqlQueryResult {
         } else {
             Ok(Self {
                 columns: sql_query_result.columns,
-                rows: sql_query_result.rows,
-                truncated: sql_query_result.truncated,
+                rows: sql_query_result.rows
             })
         }
     }

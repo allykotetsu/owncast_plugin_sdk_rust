@@ -1,10 +1,16 @@
 use std::collections::HashMap;
 use crate::json_objects::method::Method;
 
+/// The options passed to an HTTP request.
 #[derive(Clone, Debug)]
 pub struct HttpRequestOpts {
+    /// The [`Method`] being used for the HTTP request.
     pub method: Option<Method>,
-    pub headers: Option<HashMap<String, String>>,
+
+    /// A hashmap of headers to use for the HTTP request.
+    pub headers: HashMap<String, String>,
+
+    /// The body of the HTTP request.
     pub body: Option<String>
 }
 
@@ -13,7 +19,7 @@ impl HttpRequestOpts {
         Self {
             method: None,
             body: None,
-            headers: None
+            headers: HashMap::new()
         }
     }
 
@@ -23,11 +29,7 @@ impl HttpRequestOpts {
     }
 
     pub fn with_header(mut self, key: &str, value: &str) -> Self {
-        if let Some(ref mut headers) = self.headers {
-            headers.insert(key.to_string(), value.to_string());
-        } else {
-            self.headers = Some(HashMap::from([(key.to_string(), value.to_string())]));
-        }
+        self.headers.insert(key.to_string(), value.to_string());
         self
     }
 

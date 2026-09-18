@@ -11,9 +11,9 @@
 /// # Examples
 ///
 /// ```
-/// use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
-/// use owncast_plugin_sdk_rust::prelude::*;
-/// use owncast_plugin_sdk_rust::{owncast, run};
+/// # use owncast_plugin_sdk_rust::json_objects::chat_message::ChatMessage;
+/// # use owncast_plugin_sdk_rust::prelude::*;
+/// # use owncast_plugin_sdk_rust::{owncast, run};
 ///
 /// define_plugin!(|mut plugin_builder| {
 ///     plugin_builder.on_chat_message(|_, ChatMessage { body, .. }| {
@@ -22,7 +22,7 @@
 ///     Ok(plugin_builder)
 /// });
 ///
-/// fn main() {}
+/// # fn main() {}
 /// ```
 #[macro_export]
 macro_rules! define_plugin {

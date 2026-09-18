@@ -225,7 +225,7 @@ impl Plugin {
         }
     }
 
-    // TODO allow bad request for when path exists but method is wrong
+    // TODO allow method not allowed for when path exists but method is wrong
     // TODO allow matching paths with variables like /account/:username
     pub fn dispatch_http_request(&self, plugin_state: &mut PluginState, incoming_http_request: IncomingHttpRequest) -> OutgoingHttpResponse {
         if let Some(func) = self.on_http_request.get(&(incoming_http_request.method.clone(), incoming_http_request.path.clone())) {

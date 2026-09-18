@@ -1,6 +1,7 @@
 use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 
+/// A video codec.
 #[derive(Serialize, ToBytes, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 #[encoding(Json)]

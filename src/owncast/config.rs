@@ -12,15 +12,15 @@ use crate::host::owncast_config_get;
 /// # Examples
 ///
 /// ```
-/// use std::error::Error;
-/// use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
-/// use owncast_plugin_sdk_rust::{owncast, helpers};
+/// # use std::error::Error;
+/// # use owncast_plugin_sdk_rust::json_objects::action_button::ActionButton;
+/// # use owncast_plugin_sdk_rust::{owncast, run};
 ///
-/// fn foo() {
-///     if let Ok(Some(foo)) = owncast::config::get("foo") {
-///         run!(owncast::chat::send(foo));
-///     }
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// if let Some(foo) = owncast::config::get("foo")? {
+///     owncast::chat::send(foo)?;
 /// }
+/// # }
 /// ```
 pub fn get<T: DeserializeOwned>(key: &str) -> SharedFnResult<Option<T>> {
     let res = unsafe {

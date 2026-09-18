@@ -1,14 +1,26 @@
 use std::fmt::{Display, Formatter};
 use serde::Deserialize;
 
+/// The method being used in an HTTP request.
 #[derive(Eq, Hash, PartialEq, Clone, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Method {
+    /// The HTTP request [`Method`] for deleting a resource.
     Delete,
+
+    /// The HTTP request [`Method`] for retrieving a resource.
     Get,
+
+    /// The HTTP request [`Method`] for retrieving header information for a resource.
     Head,
+
+    /// The HTTP request [`Method`] for updating a resource.
     Patch,
+
+    /// The HTTP request [`Method`] for creating a resource.
     Post,
+
+    /// The HTTP request [`Method`] for overwriting a resource.
     Put,
 }
 

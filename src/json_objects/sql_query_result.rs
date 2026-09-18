@@ -5,9 +5,9 @@ use crate::json_objects::sql_value::SqlValue;
 #[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
-pub struct SqlQueryResult {
-    pub error: Option<String>,
-    pub columns: Vec<String>,
-    pub rows: Vec<Vec<SqlValue>>,
-    pub truncated: Option<bool>
+pub(crate) struct SqlQueryResult {
+    pub(crate) error: Option<String>,
+    pub(crate) columns: Vec<String>,
+    pub(crate) rows: Vec<Vec<SqlValue>>,
+    pub(crate) truncated: Option<bool>
 }

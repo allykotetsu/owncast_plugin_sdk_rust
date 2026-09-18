@@ -1,9 +1,13 @@
 use anyhow::{anyhow, Error};
 use crate::json_objects::sql_exec_result::SqlExecResult;
 
+/// The response to an Ok [`owncast::sql::exec`].
 #[derive(Clone, Debug)]
 pub struct PartialSqlExecResult {
+    /// How many rows were modified because of the SQL execution.
     pub rows_affected: i64,
+
+    /// The ID of the last row inserted because of the SQL execution.
     pub last_insert_id: i64
 }
 

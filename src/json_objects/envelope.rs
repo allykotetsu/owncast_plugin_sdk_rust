@@ -17,66 +17,99 @@ use crate::json_objects::stream_title_change::StreamTitleChange;
 use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 
+/// The event type and payload being sent when an event happens.
 #[derive(FromBytes, Deserialize, Clone, Debug)]
 #[encoding(Json)]
 #[serde(tag = "eventType", content = "payload")]
 pub enum Envelope {
-    // Chat events
+    /// The event [`Envelope`] for when a [`ChatMessage`] is sent.
     #[serde(rename = "chat.message.received")]
     ChatMessageReceived(ChatMessage),
+
+    /// The event [`Envelope`] for when a [`User`] joins stream.
     #[serde(rename = "chat.user.joined")]
     ChatUserJoined(User),
+
+    /// The event [`Envelope`] for when a [`User`] leaves stream.
     #[serde(rename = "chat.user.parted")]
     ChatUserParted(User),
+
+    /// The event [`Envelope`] for when a [`User`] is renamed.
     #[serde(rename = "chat.user.renamed")]
     ChatUserRenamed(ChatUserRename),
+
+    /// The event [`Envelope`] for when a [`ChatMessage`] is moderated.
     #[serde(rename = "chat.message.moderated")]
     ChatMessageModerated(ChatMessageModeration),
 
-    // Stream lifecycle
+    /// The event [`Envelope`] for when the stream starts.
     #[serde(rename = "stream.started")]
     StreamStarted(StreamStarted),
+
+    /// The event [`Envelope`] for when the stream stops.
     #[serde(rename = "stream.stopped")]
     StreamStopped(StreamStopped),
+
+    /// The event [`Envelope`] for when the stream title changes.
     #[serde(rename = "stream.title.changed")]
     StreamTitleChanged(StreamTitleChange),
 
-    // SSE connection lifecycle (who connected to / left a plugin's stream)
+    /// The event [`Envelope`] for when a user connects to SSE.
     #[serde(rename = "sse.connect")]
     SseConnect(SseConnectionEvent),
+
+    /// The event [`Envelope`] for when a user disconnects from SSE.
     #[serde(rename = "sse.disconnect")]
     SseDisconnect(SseConnectionEvent),
 
-    // Once-a-second tick for periodic work (opt in by defining onTick)
+    /// The event [`Envelope`] for once-a-second ticks.
     #[serde(rename = "tick")]
     Tick(TickEvent),
 
-    // Fediverse, engagement (metadata only) + inbound posts (with content)
+    /// The event [`Envelope`] for when any fediverse activity happens.
     #[serde(rename = "fediverse.activity")]
     FediverseActivity(HashMap<String, String>),
+
+    /// The event [`Envelope`] for when a user follow the streamer on the fediverse.
     #[serde(rename = "fediverse.follow")]
     FediverseFollow(FediverseEngagement),
+
+    /// The event [`Envelope`] for when a user likes a fediverse post.
     #[serde(rename = "fediverse.like")]
     FediverseLike(FediverseTargetedEngagement),
+
+    /// The event [`Envelope`] for when a user reposts a fediverse post.
     #[serde(rename = "fediverse.repost")]
     FediverseRepost(FediverseTargetedEngagement),
+
+    /// The event [`Envelope`] for when a user quotes a fediverse post.
     #[serde(rename = "fediverse.quote")]
     FediverseQuote(FediverseQuote),
+
+    /// The event [`Envelope`] for when a user mentions the streamer on the fediverse.
     #[serde(rename = "fediverse.mention")]
     FediverseMention(FediverseInboundPost),
+
+    /// The event [`Envelope`] for when a user replies to a fediverse post.
     #[serde(rename = "fediverse.reply")]
     FediverseReply(FediverseInboundPost),
 
-    // Internal events
+    /// The event [`Envelope`] for when a [`User`] in chat uses a chat command.
     #[serde(rename = "chat.command")]
     ChatCommand(CommandEvent),
+
+    /// The event [`Envelope`] for when Owncast triggers a plugin-set timer.
     #[serde(rename = "timer.fire")]
     TimerFire(TimerFireEvent),
 
+    /// A custom event.
     #[serde(untagged)]
     #[serde(rename_all = "camelCase")]
     Custom {
+        /// The unique name of the [`Envelope::Custom`] event.
         event_type: String,
+
+        /// The payload of the [`Envelope::Custom`] event in String form.
         payload: String
     }
 }

@@ -5,9 +5,9 @@ use serde::Deserialize;
 #[derive(Deserialize, FromBytes, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]
-pub struct UserRegisterResult {
-    pub user_id: Option<String>,
-    pub error: Option<String>
+pub(crate) struct UserRegisterResult {
+    pub(crate) user_id: Option<String>,
+    pub(crate) error: Option<String>
 }
 
 impl TryInto<String> for UserRegisterResult {

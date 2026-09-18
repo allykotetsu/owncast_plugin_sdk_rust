@@ -3,7 +3,7 @@ use anyhow::Error;
 use crate::json_objects::partial_sql_query_result::PartialSqlQueryResult;
 use crate::json_objects::sql_value::SqlValue;
 
-pub type SqlRow = HashMap<String, SqlValue>;
+pub(crate) type SqlRow = HashMap<String, SqlValue>;
 
 impl TryFrom<PartialSqlQueryResult> for Vec<SqlRow> {
     type Error = Error;

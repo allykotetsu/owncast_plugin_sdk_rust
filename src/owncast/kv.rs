@@ -1,8 +1,21 @@
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use extism_pdk::SharedFnResult;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
-use crate::errors::key_not_found::KeyNotFound;
 use crate::host::{owncast_kv_get, owncast_kv_set};
+
+#[derive(Debug, Clone)]
+struct KeyNotFound(String);
+
+impl Display for KeyNotFound {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let KeyNotFound(key) = self;
+        write!(f, "Key {key} could not be found.")
+    }
+}
+
+impl Error for KeyNotFound {}
 
 pub fn get(key: &str) -> SharedFnResult<Option<String>> {
     unsafe {

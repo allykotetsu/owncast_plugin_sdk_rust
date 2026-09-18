@@ -1,4 +1,6 @@
 use std::collections::HashMap;
+use std::error::Error;
+use std::fmt::{Display, Formatter};
 use extism_pdk::{config, WithReturnCode};
 use extism_pdk::Error as ExtismError;
 use serde::de::DeserializeOwned;
@@ -34,7 +36,17 @@ use crate::json_objects::tick_event::TickEvent;
 use crate::json_objects::user::User;
 use crate::plugin::plugin::Plugin;
 use crate::plugin::plugin_state::PluginState;
-use crate::prelude::MissingManifest;
+
+#[derive(Debug, Clone)]
+struct MissingManifest;
+
+impl Display for MissingManifest {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Manifest could not be found.")
+    }
+}
+
+impl Error for MissingManifest {}
 
 /// The plugin builder that the plugin author uses to add functionality to the plugin. Plugin authors should not instantiate this type on their own (see [`define_plugin!`]).
 pub struct PluginBuilder {
@@ -97,6 +109,7 @@ pub struct PluginBuilder {
 }
 
 impl PluginBuilder {
+    /// For constructing a new PluginBuilder. Do not manually instantiate this struct.
     pub fn new() -> Self {
         Self {
             // on_pre_init_: None,
@@ -661,7 +674,7 @@ impl PluginBuilder {
     /// use owncast_plugin_sdk_rust::prelude::*;
     ///
     /// define_plugin!(|mut plugin_builder| {
-    ///     plugin_builder.on_http_request(Method::Get, "/echo", |_, IncomingHttpRequest { body, .. }| {
+    ///     plugin_builder.on_http_request(Method::Get, "/echo", |_, PartialIncomingHttpRequest { body, .. }| {
     ///         OutgoingHttpResponse::text_plain(Status::Ok, &format!("echo {body}"))
     ///     })?;
     ///     Ok(plugin_builder)

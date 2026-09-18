@@ -9,10 +9,8 @@ pub fn fetch(url: &str, opts: Option<HttpRequestOpts>) -> SharedFnResult<HttpRes
     if let Some(method) = opts.method {
         http_request = http_request.with_method(method);
     }
-    if let Some(headers) = opts.headers {
-        for (key, value) in headers {
-            http_request = http_request.with_header(key, value);
-        }
+    for (key, value) in opts.headers {
+        http_request = http_request.with_header(key, value);
     }
     http::request(&http_request, opts.body).map(|x| Ok(HttpResponse::try_from(x)?))?
 }

@@ -1,14 +1,28 @@
 use serde::{Deserialize, Serialize};
 
+/// An action button.
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionButton {
+    /// The displayed title of the [`ActionButton`].
     pub title: String,
+
+    /// The URL that the [`ActionButton`] embeds.
     pub url: Option<String>,
+
+    /// The HTML that the [`ActionButton`] embeds.
     pub html: Option<String>,
+
+    /// The icon that the [`ActionButton`] displays.
     pub icon: Option<String>,
+
+    /// The color of the [`ActionButton`].
     pub color: Option<String>,
+
+    /// The description of the [`ActionButton`].
     pub description: Option<String>,
+
+    /// Whether the [`ActionButton`] opens in a new tab instead of being embedded.
     pub open_externally: Option<bool>
 }
 

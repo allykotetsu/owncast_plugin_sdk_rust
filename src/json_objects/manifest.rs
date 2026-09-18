@@ -14,6 +14,7 @@ use crate::json_objects::tab::Tab;
 use crate::partial_manifest::PartialManifest;
 use crate::json_objects::permission::Permission;
 
+/// The complete Manifest, made up of the `plugin.manifest.json`, the [`Subscriptions`], and the [`CommandInfo`]s
 #[derive(Serialize, Clone, Debug, ToBytes)]
 #[serde(rename_all = "camelCase")]
 #[encoding(Json)]

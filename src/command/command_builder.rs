@@ -15,7 +15,6 @@ pub struct CommandBuilder {
 }
 
 impl CommandBuilder {
-    /// Create a new Command, must have a name and a function for what happens when the command is run.
     pub fn new(name: &str, run: EventFunctionVoid<CommandContext>) -> Self {
         Self {
             name_: name.to_string(),
@@ -28,7 +27,6 @@ impl CommandBuilder {
         }
     }
 
-    /// If the command has a cooldown, then how long is it.
     pub fn with_cooldown(mut self, cooldown: i64) -> Self {
         self.cooldown_ms_ = Some(cooldown);
         self
@@ -44,7 +42,6 @@ impl CommandBuilder {
         self
     }
 
-    /// Aliases this command uses.
     pub fn with_aliases(mut self, aliases: &[&str]) -> Self {
         let mut v = vec![];
         for alias in aliases {

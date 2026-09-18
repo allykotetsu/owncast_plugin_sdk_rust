@@ -2,14 +2,26 @@ use extism_pdk::{ToBytes, Json};
 use serde::Serialize;
 use crate::json_objects::chat_message::ChatMessage;
 
+/// The result of a filter on a chat message.
 #[derive(ToBytes, Serialize, Clone, Debug)]
 #[encoding(Json)]
 #[serde(tag = "action")]
 #[serde(rename_all = "camelCase")]
 pub enum FilterResult {
+    /// The filter lets the message pass unchanged.
     Pass,
-    Modify { payload: ChatMessage },
-    Drop { reason: String }
+
+    /// The filter modifies the message.
+    Modify {
+        /// The chat message data to replace the one being filtered.
+        payload: ChatMessage
+    },
+
+    /// The filter prevents the message from being sent.
+    Drop {
+        /// The reason why a message was filtered out.
+        reason: String
+    }
 }
 
 impl FilterResult {
@@ -17,7 +29,6 @@ impl FilterResult {
         FilterResult::Pass
     }
 
-    /// Construct a FilterResult::Modify from the original, unaltered chat message, and the new body.
     pub fn modify(chat_message: &ChatMessage, body: &str) -> Self {
         FilterResult::Modify {
             payload: ChatMessage {

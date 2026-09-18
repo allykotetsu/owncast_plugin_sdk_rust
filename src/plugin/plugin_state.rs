@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+/// The mutable plugin state.
 pub struct PluginState {
     pub(crate) timers: HashMap<i64, (fn() -> (), bool)>
 }

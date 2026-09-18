@@ -9,11 +9,11 @@ use extism_pdk::WithReturnCode;
 /// # Examples
 ///
 /// ```
-/// use owncast_plugin_sdk_rust::{owncast, helpers};
+/// # use owncast_plugin_sdk_rust::{owncast, run};
 ///
-/// fn foo() {
-///     run!(owncast::chat::send("Hi everyone!"));
-/// }
+/// # fn foo() {
+/// run!(owncast::chat::send("Hi everyone!"));
+/// # }
 /// ```
 #[macro_export]
 macro_rules! run {
@@ -42,23 +42,18 @@ macro_rules! sql_params {
     );
 }
 
-/// Clone a WithReturnCode<Error> error.
+/// Clone a [`WithReturnCode<Error>`] error.
 pub fn clone_error(WithReturnCode(t, u): &WithReturnCode<Error>) -> WithReturnCode<Error> {
     WithReturnCode(anyhow::anyhow!("{}", t), *u)
 }
 
 /// Attempts to convert a string into an IPv4 Address.
 ///
-/// * `ip` - What fallible function to run.
+/// * `ip` - What possible IP address to convert.
 ///
 /// # Examples
 ///
 /// ```
-/// use owncast_plugin_sdk_rust::{owncast, helpers};
-///
-/// fn foo() {
-///     run!(owncast::chat::send("Hi everyone!"));
-/// }
 /// ```
 pub fn string_to_ipv4(ip: &Option<String>) -> Option<Ipv4Addr> {
     let ip = ip.clone()?;
